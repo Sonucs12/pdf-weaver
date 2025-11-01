@@ -12,25 +12,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, FileText, Download, Loader2, RefreshCw, ChevronRight } from 'lucide-react';
-import { Logo } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { PDFDocument } from 'pdf-lib';
-import { ThemeToggle } from '@/components/theme-toggle';
-import Link from 'next/link';
 
 type Step = 'upload' | 'select-page' | 'processing' | 'edit';
-
-const AppHeader = () => (
-  <header className="py-4 px-4 md:px-8 border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-    <div className="flex items-center justify-between">
-      <Link href="/" className="flex items-center gap-3">
-        <Logo className="h-7 w-7 text-primary" />
-        <h1 className="text-xl font-headline font-bold text-foreground">PDF Weaver</h1>
-      </Link>
-      <ThemeToggle />
-    </div>
-  </header>
-);
 
 const MarkdownPreview = ({ markdown }: { markdown: string }) => (
   <div className="prose dark:prose-invert max-w-none p-4 border rounded-md bg-background/50 h-full overflow-y-auto">
@@ -328,11 +313,8 @@ export default function PdfWeaverPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <AppHeader />
-      <main className="flex-grow flex items-center justify-center p-4 md:p-8 transition-opacity duration-500">
-        {renderContent()}
-      </main>
+    <div className="flex-grow flex items-center justify-center p-4 md:p-8 transition-opacity duration-500">
+      {renderContent()}
     </div>
   );
 }

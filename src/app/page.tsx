@@ -14,14 +14,18 @@ import { Upload, FileText, Download, Loader2, RefreshCw, ChevronRight } from 'lu
 import { Logo } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { PDFDocument } from 'pdf-lib';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 type Step = 'upload' | 'select-page' | 'processing' | 'edit';
 
 const AppHeader = () => (
   <header className="py-4 px-4 md:px-8 border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-    <div className="flex items-center gap-3">
-      <Logo className="h-7 w-7 text-primary" />
-      <h1 className="text-xl font-headline font-bold text-foreground">PDF Weaver</h1>
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <Logo className="h-7 w-7 text-primary" />
+        <h1 className="text-xl font-headline font-bold text-foreground">PDF Weaver</h1>
+      </div>
+      <ThemeToggle />
     </div>
   </header>
 );

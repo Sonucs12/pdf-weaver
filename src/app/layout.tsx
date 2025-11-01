@@ -2,10 +2,18 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
+import { siteConfig } from '@/lib/metadata';
 
 export const metadata: Metadata = {
-  title: 'PDF Weaver',
-  description: 'Convert any PDF into structured, editable text.',
+  title: {
+    default: siteConfig.name,
+    template: `%s | ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  // Add more metadata here
+  // icons: {
+  //   icon: "/favicon.ico",
+  // },
 };
 
 export default function RootLayout({

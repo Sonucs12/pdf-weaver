@@ -30,21 +30,69 @@ export default function PdfWeaverPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [pdfDataUri, setPdfDataUri] = useState<string | null>(null);
   const [pageCount, setPageCount] = useState(0);
-  const [selectedPage, setSelectedPage] = useState(1);
+  const [pageRange, setPageRange] = useState('1');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const processPdf = useCallback(async (pageToProcess?: number) => {
+  const parsePageRange = (range: string, max: number): number[] | null => {
+    if (!range.trim()) return null;
+
+    const parts = range.split('-').map(s => s.trim());
+    
+    if (parts.length === 1) {
+      const page = parseInt(parts[0], 10);
+      if (isNaN(page) || page < 1 || page > max) return null;
+      return [page];
+    }
+    
+    if (parts.length === 2) {
+      const start = parseInt(parts[0], 10);
+      const end = parseInt(parts[1], 10);
+      if (isNaN(start) || isNaN(end) || start < 1 || end > max || start > end) return null;
+      
+      const pages: number[] = [];
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      return pages;
+    }
+
+    return null;
+  };
+
+  const processPdf = useCallback(async (rangeToProcess?: string) => {
     if (!pdfDataUri) return;
 
     setStep('processing');
     try {
-      const { extractedText } = await extractTextFromPdf({ pdfDataUri, pageNumber: pageToProcess });
-      if (!extractedText) {
-        throw new Error('Failed to extract text from the PDF.');
+      let pages: number[] | null = [1];
+      if (pageCount > 1) {
+          if (!rangeToProcess) {
+              await processPdf('1');
+              return;
+          }
+          pages = parsePageRange(rangeToProcess, pageCount);
+
+          if (!pages) {
+            throw new Error('Invalid page range specified.');
+          }
+      } else {
+        pages = [1];
+      }
+      
+      let allExtractedText = '';
+      for (const pageNum of pages) {
+        const { extractedText } = await extractTextFromPdf({ pdfDataUri, pageNumber: pageNum });
+        if (extractedText) {
+          allExtractedText += extractedText + '\n\n';
+        }
       }
 
-      const { formattedText } = await formatContent({ text: extractedText });
+      if (!allExtractedText) {
+        throw new Error('Failed to extract any text from the selected page(s).');
+      }
+
+      const { formattedText } = await formatContent({ text: allExtractedText });
 
       setEditedText(formattedText);
       setStep('edit');
@@ -57,7 +105,7 @@ export default function PdfWeaverPage() {
       });
       handleReset();
     }
-  }, [pdfDataUri, toast]);
+  }, [pdfDataUri, toast, pageCount]);
 
   const handleFileSelect = useCallback(async (file: File | null) => {
     if (!file) return;
@@ -85,6 +133,7 @@ export default function PdfWeaverPage() {
         setPageCount(count);
 
         if (count > 1) {
+          setPageRange(`1-${count}`);
           setStep('select-page');
         } else {
           await processPdf();
@@ -146,7 +195,7 @@ export default function PdfWeaverPage() {
     setFileName('');
     setPdfDataUri(null);
     setPageCount(0);
-    setSelectedPage(1);
+    setPageRange('1');
   };
 
   const renderContent = () => {
@@ -191,27 +240,24 @@ export default function PdfWeaverPage() {
         return (
           <Card className="w-full max-w-md text-center shadow-lg">
             <CardHeader>
-              <CardTitle className="font-headline text-3xl">Select a Page</CardTitle>
+              <CardTitle className="font-headline text-3xl">Select Page(s)</CardTitle>
               <CardDescription>
-                Your PDF has {pageCount} pages. Which page would you like to process?
+                Your PDF has {pageCount} pages. Enter a page or range (e.g., 1-5).
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
               <Input
-                type="number"
-                value={selectedPage}
-                onChange={(e) => {
-                  const page = parseInt(e.target.value, 10);
-                  if (page > 0 && page <= pageCount) {
-                    setSelectedPage(page);
-                  }
-                }}
-                min={1}
-                max={pageCount}
+                type="text"
+                value={pageRange}
+                onChange={(e) => setPageRange(e.target.value)}
+                placeholder="e.g., 5 or 2-7"
                 className="text-center text-lg"
               />
-              <Button onClick={() => processPdf(selectedPage)}>
-                Process Page {selectedPage} <ChevronRight className="ml-2 h-4 w-4" />
+              <Button 
+                onClick={() => processPdf(pageRange)}
+                disabled={!parsePageRange(pageRange, pageCount)}
+              >
+                Process Pages <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </CardContent>
           </Card>

@@ -17,6 +17,7 @@ const ExtractTextFromPdfInputSchema = z.object({
     .describe(
       "A PDF file as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
+  pageNumber: z.number().optional().describe('The page number to extract text from.'),
 });
 export type ExtractTextFromPdfInput = z.infer<typeof ExtractTextFromPdfInputSchema>;
 
@@ -38,6 +39,10 @@ const extractTextPrompt = ai.definePrompt({
 
   Your goal is to accurately extract the text content, including headings, paragraphs, lists, and other formatting elements, from the given PDF data.
   The PDF is provided as a data URI. Use your advanced OCR and text extraction capabilities to achieve the best possible result.
+
+  {{#if pageNumber}}
+  Please only extract text from page {{pageNumber}}.
+  {{/if}}
 
   Here is the PDF data:
   {{media url=pdfDataUri}}

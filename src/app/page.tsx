@@ -5,12 +5,14 @@ import { extractTextFromPdf, formatContent } from '@/ai/flows';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, FileText, Download, Loader2, RefreshCw } from 'lucide-react';
+import { Upload, FileText, Download, Loader2, RefreshCw, ChevronRight } from 'lucide-react';
 import { Logo } from '@/components/icons';
 import { cn } from '@/lib/utils';
+import { PDFDocument } from 'pdf-lib';
 
-type Step = 'upload' | 'processing' | 'edit';
+type Step = 'upload' | 'select-page' | 'processing' | 'edit';
 
 const AppHeader = () => (
   <header className="py-4 px-4 md:px-8 border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
@@ -23,11 +25,39 @@ const AppHeader = () => (
 
 export default function PdfWeaverPage() {
   const [step, setStep] = useState<Step>('upload');
-  const [editedText, setEditedText] =useState('');
+  const [editedText, setEditedText] = useState('');
   const [fileName, setFileName] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+  const [pdfDataUri, setPdfDataUri] = useState<string | null>(null);
+  const [pageCount, setPageCount] = useState(0);
+  const [selectedPage, setSelectedPage] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const processPdf = useCallback(async (pageToProcess?: number) => {
+    if (!pdfDataUri) return;
+
+    setStep('processing');
+    try {
+      const { extractedText } = await extractTextFromPdf({ pdfDataUri, pageNumber: pageToProcess });
+      if (!extractedText) {
+        throw new Error('Failed to extract text from the PDF.');
+      }
+
+      const { formattedText } = await formatContent({ text: extractedText });
+
+      setEditedText(formattedText);
+      setStep('edit');
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        title: 'Processing Failed',
+        description: error instanceof Error ? error.message : 'An unknown error occurred.',
+      });
+      handleReset();
+    }
+  }, [pdfDataUri, toast]);
 
   const handleFileSelect = useCallback(async (file: File | null) => {
     if (!file) return;
@@ -41,38 +71,43 @@ export default function PdfWeaverPage() {
       return;
     }
 
-    setStep('processing');
     setFileName(file.name);
 
-    try {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = async () => {
-        const pdfDataUri = reader.result as string;
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+      const dataUri = reader.result as string;
+      setPdfDataUri(dataUri);
 
-        const { extractedText } = await extractTextFromPdf({ pdfDataUri });
-        if (!extractedText) {
-          throw new Error('Failed to extract text from the PDF.');
+      try {
+        const pdfDoc = await PDFDocument.load(dataUri);
+        const count = pdfDoc.getPageCount();
+        setPageCount(count);
+
+        if (count > 1) {
+          setStep('select-page');
+        } else {
+          await processPdf();
         }
-
-        const { formattedText } = await formatContent({ text: extractedText });
-
-        setEditedText(formattedText);
-        setStep('edit');
-      };
-      reader.onerror = () => {
-        throw new Error('Failed to read the file.');
-      };
-    } catch (error) {
-      console.error(error);
+      } catch (error) {
+        console.error(error);
+        toast({
+          variant: 'destructive',
+          title: 'PDF Loading Failed',
+          description: 'Could not read the PDF file to determine page count.',
+        });
+        handleReset();
+      }
+    };
+    reader.onerror = () => {
       toast({
         variant: 'destructive',
-        title: 'Processing Failed',
-        description: error instanceof Error ? error.message : 'An unknown error occurred.',
+        title: 'File Read Error',
+        description: 'Failed to read the file.',
       });
-      setStep('upload');
-    }
-  }, [toast]);
+      handleReset();
+    };
+  }, [toast, processPdf]);
 
   const handleDragEvents = (e: DragEvent<HTMLDivElement>, isEntering: boolean) => {
     e.preventDefault();
@@ -109,6 +144,9 @@ export default function PdfWeaverPage() {
     setStep('upload');
     setEditedText('');
     setFileName('');
+    setPdfDataUri(null);
+    setPageCount(0);
+    setSelectedPage(1);
   };
 
   const renderContent = () => {
@@ -146,6 +184,35 @@ export default function PdfWeaverPage() {
                   onChange={handleInputChange}
                 />
               </div>
+            </CardContent>
+          </Card>
+        );
+      case 'select-page':
+        return (
+          <Card className="w-full max-w-md text-center shadow-lg">
+            <CardHeader>
+              <CardTitle className="font-headline text-3xl">Select a Page</CardTitle>
+              <CardDescription>
+                Your PDF has {pageCount} pages. Which page would you like to process?
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <Input
+                type="number"
+                value={selectedPage}
+                onChange={(e) => {
+                  const page = parseInt(e.target.value, 10);
+                  if (page > 0 && page <= pageCount) {
+                    setSelectedPage(page);
+                  }
+                }}
+                min={1}
+                max={pageCount}
+                className="text-center text-lg"
+              />
+              <Button onClick={() => processPdf(selectedPage)}>
+                Process Page {selectedPage} <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
             </CardContent>
           </Card>
         );

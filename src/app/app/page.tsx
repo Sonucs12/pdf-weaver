@@ -313,7 +313,7 @@ export default function PdfWeaverPage() {
   };
 
   return (
-    <div className="flex-grow flex items-center justify-center p-4 md:p-8 transition-opacity duration-500">
+    <div className="flex-grow flex mb-8 items-center justify-center p-4 md:p-8 transition-opacity duration-500">
       {renderContent()}
     </div>
   );

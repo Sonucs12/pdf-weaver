@@ -4,4 +4,9 @@
 runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
+  cpu: 2
   maxInstances: 1
+  # Pass the GEMINI_API_KEY secret to the production environment
+  secrets:
+    - secret: GEMINI_API_KEY
+      environmentVariable: GEMINI_API_KEY

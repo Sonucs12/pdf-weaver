@@ -1,12 +1,15 @@
 'use client';
 
 import { useState, useCallback, useRef, type ChangeEvent, type DragEvent } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { extractTextFromPdf, formatContent } from '@/ai/flows';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, FileText, Download, Loader2, RefreshCw, ChevronRight } from 'lucide-react';
 import { Logo } from '@/components/icons';
 import { cn } from '@/lib/utils';
@@ -21,6 +24,12 @@ const AppHeader = () => (
       <h1 className="text-xl font-headline font-bold text-foreground">PDF Weaver</h1>
     </div>
   </header>
+);
+
+const MarkdownPreview = ({ markdown }: { markdown: string }) => (
+  <div className="prose dark:prose-invert max-w-none p-4 border rounded-md bg-background/50 h-full overflow-y-auto">
+    <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
+  </div>
 );
 
 export default function PdfWeaverPage() {
@@ -65,10 +74,10 @@ export default function PdfWeaverPage() {
 
     setStep('processing');
     try {
-      let pages: number[] | null = [1];
+      let pages: number[] | null;
       if (pageCount > 1) {
           if (!rangeToProcess) {
-              await processPdf('1');
+              await processPdf('1'); // Should not happen with current logic, but as a fallback.
               return;
           }
           pages = parsePageRange(rangeToProcess, pageCount);
@@ -88,7 +97,7 @@ export default function PdfWeaverPage() {
         }
       }
 
-      if (!allExtractedText) {
+      if (!allExtractedText.trim()) {
         throw new Error('Failed to extract any text from the selected page(s).');
       }
 
@@ -120,6 +129,7 @@ export default function PdfWeaverPage() {
     }
 
     setFileName(file.name);
+    setStep('processing'); // Show loading state early
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -136,7 +146,8 @@ export default function PdfWeaverPage() {
           setPageRange(`1-${count}`);
           setStep('select-page');
         } else {
-          await processPdf();
+          // Pass page range explicitly for single page PDFs too
+          await processPdf('1');
         }
       } catch (error) {
         console.error(error);
@@ -178,11 +189,11 @@ export default function PdfWeaverPage() {
   };
   
   const handleDownload = () => {
-    const blob = new Blob([editedText], { type: 'text/plain' });
+    const blob = new Blob([editedText], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${fileName.replace(/\.pdf$/i, '')}.txt`;
+    a.download = `${fileName.replace(/\.pdf$/i, '')}.md`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -196,6 +207,9 @@ export default function PdfWeaverPage() {
     setPdfDataUri(null);
     setPageCount(0);
     setPageRange('1');
+    if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+    }
   };
 
   const renderContent = () => {
@@ -282,15 +296,26 @@ export default function PdfWeaverPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" onClick={handleReset}><RefreshCw className="mr-2 h-4 w-4" />Start Over</Button>
-                <Button onClick={handleDownload}><Download className="mr-2 h-4 w-4" />Download .txt</Button>
+                <Button onClick={handleDownload}><Download className="mr-2 h-4 w-4" />Download .md</Button>
               </div>
             </div>
-            <Textarea
-              value={editedText}
-              onChange={(e) => setEditedText(e.target.value)}
-              placeholder="Your formatted text will appear here..."
-              className="flex-grow w-full h-full resize-none text-base leading-relaxed shadow-lg"
-            />
+            <Tabs defaultValue="write" className="flex-grow flex flex-col">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="write">Write</TabsTrigger>
+                <TabsTrigger value="preview">Preview</TabsTrigger>
+              </TabsList>
+              <TabsContent value="write" className="flex-grow mt-2">
+                <Textarea
+                  value={editedText}
+                  onChange={(e) => setEditedText(e.target.value)}
+                  placeholder="Your formatted text will appear here..."
+                  className="flex-grow w-full h-full resize-none text-base leading-relaxed shadow-lg"
+                />
+              </TabsContent>
+              <TabsContent value="preview" className="flex-grow mt-2">
+                <MarkdownPreview markdown={editedText} />
+              </TabsContent>
+            </Tabs>
           </div>
         );
     }

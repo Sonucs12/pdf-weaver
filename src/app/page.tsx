@@ -17,7 +17,7 @@ export default function LandingPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="py-20 md:py-32 text-center bg-card/50 flex-grow flex items-center justify-center">
+      <section className="py-20 md:py-32 text-center bg-background flex-grow flex items-center justify-center">
         <div className="container mx-auto px-4 max-w-4xl">
           <h2 className="text-4xl md:text-6xl font-headline font-bold mb-4">
             Unlock Your PDFs. Instantly.
@@ -67,7 +67,7 @@ export default function LandingPage() {
       </section>
       
       {/* Features Section */}
-      <section className="py-20 md:py-24 bg-card/50">
+        <section className="py-20 md:py-24 bg-background">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-headline font-bold">Packed with Powerful Features</h2>

@@ -5,7 +5,10 @@ import { usePdfProcessor } from '@/hooks/use-pdf-processor';
 import { UploadStep } from '@/components/pdf-weaver/upload-step';
 import { SelectPageStep } from '@/components/pdf-weaver/select-page-step';
 import { ProcessingStep } from '@/components/pdf-weaver/processing-step';
-import { EditStep } from '@/components/pdf-weaver/edit-step';
+import dynamic from 'next/dynamic';
+const EditStep = dynamic(() => import('@/components/pdf-weaver/edit-step').then(m => m.EditStep), {
+  ssr: false,
+});
 
 export default function ExtractTextPage() {
   const {

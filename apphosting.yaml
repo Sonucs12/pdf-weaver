@@ -6,7 +6,12 @@ runConfig:
   # more instances in response to increased traffic.
   cpu: 2
   maxInstances: 1
-  # Pass the GEMINI_API_KEY secret to the production environment
+  # Pass secrets to the production environment
   secrets:
     - secret: GEMINI_API_KEY
       environmentVariable: GEMINI_API_KEY
+    - secret: NEXT_PUBLIC_SUPABASE_URL
+      environmentVariable: NEXT_PUBLIC_SUPABASE_URL
+    - secret: SUPABASE_SERVICE_KEY
+      environmentVariable: SUPABASE_SERVICE_KEY
+

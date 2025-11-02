@@ -4,7 +4,7 @@
 import { useState, useCallback, useRef, type ChangeEvent, type DragEvent } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { extractTextFromPdf, formatContent } from '@/ai/flows';
+import { extractTextFromPdfSupabase, formatContent } from '@/ai/flows';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +14,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, FileText, Download, Loader2, RefreshCw, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PDFDocument } from 'pdf-lib';
+import * as pdfjsLib from 'pdfjs-dist';
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase client
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+
+// Set worker source for pdfjs
+if (typeof window !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+}
 
 type Step = 'upload' | 'select-page' | 'processing' | 'edit';
 
@@ -62,39 +72,80 @@ export default function PdfWeaverPage() {
 
   const processPdf = useCallback(async (rangeToProcess?: string) => {
     if (!pdfDataUri) return;
-
+  
     setStep('processing');
     try {
-      let pages: number[] | null;
-      if (pageCount > 1) {
-          if (!rangeToProcess) {
-              await processPdf('1'); // Should not happen with current logic, but as a fallback.
-              return;
-          }
-          pages = parsePageRange(rangeToProcess, pageCount);
-
-          if (!pages) {
-            throw new Error('Invalid page range specified.');
-          }
-      } else {
-        pages = [1];
+      const pagesToProcess = parsePageRange(rangeToProcess || '1', pageCount);
+      if (!pagesToProcess) {
+        throw new Error('Invalid page range provided.');
       }
-      
+  
+      const loadingTask = pdfjsLib.getDocument(pdfDataUri);
+      const pdf = await loadingTask.promise;
+  
       let allExtractedText = '';
-      for (const pageNum of pages) {
-        const res = await extractTextFromPdf({ pdfDataUri, pageNumber: pageNum });
-        if (res?.extractedText?.trim()) {
-          allExtractedText += `\n\n${res.extractedText}`;
+  
+      for (const pageNum of pagesToProcess) {
+        const page = await pdf.getPage(pageNum);
+        const viewport = page.getViewport({ scale: 2.0 });
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+  
+        if (!context) {
+          throw new Error('Could not get canvas context');
         }
-        await new Promise(r => setTimeout(r, 400));
-      }
+  
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport,
+        };
+  
+        await page.render(renderContext).promise;
+  
+        const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
+        if (!blob) {
+          toast({
+            variant: 'destructive',
+            title: 'Image Conversion Failed',
+            description: `Could not convert page ${pageNum} to an image.`,
+          });
+          continue;
+        }
 
+        const filePath = `pages/${Date.now()}-${pageNum}.png`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('pdf-pages')
+          .upload(filePath, blob);
+
+        if (uploadError) {
+          throw new Error(`Supabase upload failed: ${uploadError.message}`);
+        }
+
+        const { data: publicUrlData } = supabase.storage.from('pdf-pages').getPublicUrl(uploadData.path);
+
+        if (!publicUrlData?.publicUrl) {
+          throw new Error('Could not get public URL for the uploaded image.');
+        }
+
+        const result = await extractTextFromPdfSupabase({
+          imageUrl: publicUrlData.publicUrl,
+          pageNumber: pageNum,
+          path: uploadData.path,
+        });
+
+        if (result?.extractedText?.trim()) {
+            allExtractedText += `\n\n${result.extractedText}`;
+        }
+      }
+  
       if (!allExtractedText.trim()) {
         throw new Error('Failed to extract any text from the selected page(s).');
       }
-
+  
       const { formattedText } = await formatContent({ text: allExtractedText.slice(0, 20000) });
-
+  
       setEditedText(formattedText);
       setStep('edit');
     } catch (error) {
@@ -138,7 +189,6 @@ export default function PdfWeaverPage() {
           setPageRange(`1-${count}`);
           setStep('select-page');
         } else {
-          // Pass page range explicitly for single page PDFs too
           await processPdf('1');
         }
       } catch (error) {
@@ -319,3 +369,5 @@ export default function PdfWeaverPage() {
     </div>
   );
 }
+
+    

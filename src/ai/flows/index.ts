@@ -1,6 +1,6 @@
 'use server';
 
-import { extractTextFromPdf } from './intelligent-text-extraction';
+import { extractTextFromPdfSupabase } from './extractWithSupabase';
 import { formatContent } from './automatic-content-formatting';
 
-export { extractTextFromPdf, formatContent };
+export { extractTextFromPdfSupabase, formatContent };

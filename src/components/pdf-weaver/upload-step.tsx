@@ -32,7 +32,7 @@ export function UploadStep({
 
   return (
     <Card 
-      className="w-full max-w-lg text-center shadow-lg transition-all duration-300"
+      className="w-full  text-center shadow-lg transition-all duration-300"
       onDragEnter={onDragEnter}
       onDragLeave={onDragLeave}
       onDragOver={onDragOver}

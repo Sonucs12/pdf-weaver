@@ -26,7 +26,7 @@ export function EditStep({
   progressMessage,
 }: EditStepProps) {
   return (
-    <div className="w-full max-w-4xl h-[75vh] flex flex-col">
+    <div className="w-full flex flex-col">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
         <div className="flex items-center gap-2 text-sm">
           <FileText className="h-5 w-5 text-muted-foreground" />

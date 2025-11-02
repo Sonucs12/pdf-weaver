@@ -31,7 +31,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased flex flex-col min-h-screen">
+      <body className="font-body antialiased flex flex-col">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -39,7 +39,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Header />
-          <main className="flex-grow flex mb-4 flex-col">{children}</main>
+          <main className="flex-grow flex flex-col">{children}</main>
          
           <Toaster />
         </ThemeProvider>

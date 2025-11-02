@@ -22,7 +22,7 @@ export function SelectPageStep({
   const isValid = parsePageRange(pageRange, pageCount) !== null;
 
   return (
-    <Card className="w-full max-w-md text-center shadow-lg">
+    <Card className="w-full text-center shadow-lg">
       <CardHeader>
         <CardTitle className="font-headline text-3xl">Select Page(s)</CardTitle>
         <CardDescription>

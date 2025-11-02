@@ -41,6 +41,7 @@ export default function PdfWeaverPage() {
   const [pdfDataUri, setPdfDataUri] = useState<string | null>(null);
   const [pageCount, setPageCount] = useState(0);
   const [pageRange, setPageRange] = useState('1');
+  const [progressMessage, setProgressMessage] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -74,6 +75,7 @@ export default function PdfWeaverPage() {
     if (!pdfDataUri) return;
   
     setStep('processing');
+    setProgressMessage('Initializing...');
     try {
       const pagesToProcess = parsePageRange(rangeToProcess || '1', pageCount);
       if (!pagesToProcess) {
@@ -84,8 +86,12 @@ export default function PdfWeaverPage() {
       const pdf = await loadingTask.promise;
   
       let allExtractedText = '';
+      const totalPages = pagesToProcess.length;
   
-      for (const pageNum of pagesToProcess) {
+      for (let i = 0; i < totalPages; i++) {
+        const pageNum = pagesToProcess[i];
+        setProgressMessage(`Processing page ${i + 1} of ${totalPages}...`);
+        
         const page = await pdf.getPage(pageNum);
         const viewport = page.getViewport({ scale: 2.0 });
         const canvas = document.createElement('canvas');
@@ -144,6 +150,7 @@ export default function PdfWeaverPage() {
         throw new Error('Failed to extract any text from the selected page(s).');
       }
   
+      setProgressMessage('Formatting content...');
       const { formattedText } = await formatContent({ text: allExtractedText.slice(0, 20000) });
   
       setEditedText(formattedText);
@@ -173,6 +180,7 @@ export default function PdfWeaverPage() {
 
     setFileName(file.name);
     setStep('processing'); // Show loading state early
+    setProgressMessage('Reading PDF file...');
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -249,6 +257,7 @@ export default function PdfWeaverPage() {
     setPdfDataUri(null);
     setPageCount(0);
     setPageRange('1');
+    setProgressMessage('');
     if (fileInputRef.current) {
         fileInputRef.current.value = '';
     }
@@ -324,7 +333,7 @@ export default function PdfWeaverPage() {
             <Loader2 className="h-16 w-16 animate-spin text-primary" />
             <h2 className="text-2xl font-headline font-semibold">Weaving your PDF...</h2>
             <p className="text-muted-foreground max-w-sm">
-              Our AI is working its magic to extract and structure your content. This may take a moment.
+              {progressMessage || 'Our AI is working its magic to extract and structure your content. This may take a moment.'}
             </p>
           </div>
         );
@@ -369,5 +378,3 @@ export default function PdfWeaverPage() {
     </div>
   );
 }
-
-    

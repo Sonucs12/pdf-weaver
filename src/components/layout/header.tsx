@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -11,7 +10,7 @@ import { Button } from '@/components/ui/button';
 
 export const Header = () => {
   const pathname = usePathname();
-  const isAppPage = pathname.startsWith('/app');
+  const isAppPage = pathname.startsWith('/extract-text');
 
   return (
     <header className="py-4 px-4 md:px-8 border-b bg-background/80 backdrop-blur-sm sticky top-0 z-20">
@@ -24,7 +23,7 @@ export const Header = () => {
           <ThemeToggle />
           {!isAppPage && (
             <Button asChild>
-              <Link href="/app">
+              <Link href="/extract-text">
                 Launch App <ArrowRight className="ml-2" />
               </Link>
             </Button>

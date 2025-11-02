@@ -2,9 +2,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
+import { createSupabaseServerClient } from '@/lib/supabase';
 
 const InputSchema = z.object({
   imageUrl: z.string().describe("The public URL of the PDF page image stored in Supabase."),
@@ -45,6 +43,7 @@ const flow = ai.defineFlow(
     outputSchema: OutputSchema,
   },
   async input => {
+    const supabase = createSupabaseServerClient();
     try {
       const { output } = await prompt(input);
       

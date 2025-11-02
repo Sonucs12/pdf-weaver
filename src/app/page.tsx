@@ -26,7 +26,7 @@ export default function LandingPage() {
             {siteConfig.description} Stop re-typing and start weaving your PDF content into editable, structured markdown with the power of AI.
           </p>
           <Button asChild size="lg">
-            <Link href="/app">
+            <Link href="/extract-text">
               Get Started for Free <ArrowRight className="ml-2" />
             </Link>
           </Button>
@@ -116,7 +116,7 @@ export default function LandingPage() {
             Transform your first PDF into structured, usable markdown in less than a minute. No sign-up required.
           </p>
           <Button asChild size="lg">
-            <Link href="/app">
+            <Link href="/extract-text">
               Try PDF Weaver Now <ArrowRight className="ml-2" />
             </Link>
           </Button>

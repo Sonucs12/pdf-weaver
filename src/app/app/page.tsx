@@ -80,13 +80,13 @@ export default function PdfWeaverPage() {
         pages = [1];
       }
       
-      let allExtractedText = '';
-      for (const pageNum of pages) {
-        const { extractedText } = await extractTextFromPdf({ pdfDataUri, pageNumber: pageNum });
-        if (extractedText) {
-          allExtractedText += extractedText + '\n\n';
-        }
-      }
+      const extractionPromises = pages.map(pageNum =>
+        extractTextFromPdf({ pdfDataUri, pageNumber: pageNum })
+      );
+      
+      const extractions = await Promise.all(extractionPromises);
+      const allExtractedText = extractions.map(e => e.extractedText).join('\n\n');
+
 
       if (!allExtractedText.trim()) {
         throw new Error('Failed to extract any text from the selected page(s).');

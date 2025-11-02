@@ -19,6 +19,7 @@ export default function ExtractTextPage() {
     pageCount,
     pageRange,
     progressMessage,
+    isProcessing,
     fileInputRef,
     setEditedText,
     setPageRange,
@@ -84,6 +85,8 @@ export default function ExtractTextPage() {
             onTextChange={setEditedText}
             onDownload={handleDownload}
             onReset={handleReset}
+            isProcessing={isProcessing}
+            progressMessage={progressMessage}
           />
         );
     }

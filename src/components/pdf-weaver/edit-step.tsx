@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, Download, RefreshCw } from 'lucide-react';
+import { FileText, Download, RefreshCw, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,6 +12,8 @@ interface EditStepProps {
   onTextChange: (text: string) => void;
   onDownload: () => void;
   onReset: () => void;
+  isProcessing?: boolean;
+  progressMessage?: string;
 }
 
 export function EditStep({
@@ -20,6 +22,8 @@ export function EditStep({
   onTextChange,
   onDownload,
   onReset,
+  isProcessing = false,
+  progressMessage,
 }: EditStepProps) {
   return (
     <div className="w-full max-w-4xl h-[75vh] flex flex-col">
@@ -29,14 +33,22 @@ export function EditStep({
           <span className="font-medium truncate">{fileName}</span>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={onReset}>
+          <Button variant="outline" onClick={onReset} disabled={isProcessing}>
             <RefreshCw className="mr-2 h-4 w-4" />Start Over
           </Button>
-          <Button onClick={onDownload}>
+          <Button onClick={onDownload} disabled={isProcessing}>
             <Download className="mr-2 h-4 w-4" />Download .md
           </Button>
         </div>
       </div>
+      {isProcessing && (
+        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center gap-3">
+          <Loader2 className="h-5 w-5 animate-spin text-blue-600 dark:text-blue-400" />
+          <p className="text-sm text-blue-900 dark:text-blue-100">
+            {progressMessage || 'Processing pages...'}
+          </p>
+        </div>
+      )}
       <Tabs defaultValue="write" className="flex-grow flex flex-col">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="write">Write</TabsTrigger>

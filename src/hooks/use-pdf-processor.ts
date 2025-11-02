@@ -23,6 +23,7 @@ export function usePdfProcessor() {
   const [pageCount, setPageCount] = useState(0);
   const [pageRange, setPageRange] = useState('1');
   const [progressMessage, setProgressMessage] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -31,6 +32,7 @@ export function usePdfProcessor() {
   
     setStep('processing');
     setProgressMessage('Initializing...');
+    setIsProcessing(true);
     try {
       const pagesToProcess = parsePageRange(rangeToProcess || '1', pageCount);
       if (!pagesToProcess) {
@@ -40,7 +42,7 @@ export function usePdfProcessor() {
       const loadingTask = pdfjsLib.getDocument(pdfDataUri);
       const pdf = await loadingTask.promise;
   
-      let allExtractedText = '';
+      let allFormattedText = '';
       const totalPages = pagesToProcess.length;
   
       for (let i = 0; i < totalPages; i++) {
@@ -91,28 +93,53 @@ export function usePdfProcessor() {
           throw new Error('Could not get public URL for the uploaded image.');
         }
 
+        // Step 1: Extract text from this page (OCR - single AI call)
+        setProgressMessage(`Extracting text from page ${i + 1} of ${totalPages}...`);
         const result = await extractTextFromPdfSupabase({
           imageUrl: publicUrlData.publicUrl,
           pageNumber: pageNum,
           path: uploadData.path,
         });
 
-        if (result?.extractedText?.trim()) {
-            allExtractedText += `\n\n${result.extractedText}`;
+        if (!result?.extractedText?.trim()) {
+          setProgressMessage(`No text found on page ${i + 1}, continuing...`);
+          continue;
+        }
+
+        // Step 2: Format text from this page (Format - single AI call)
+        setProgressMessage(`Formatting page ${i + 1} of ${totalPages}...`);
+        const { formattedText } = await formatContent({ 
+          text: result.extractedText.trim() 
+        });
+
+        // Step 3: Accumulate formatted text and update UI immediately
+        if (formattedText?.trim()) {
+          // Add separator between pages if not the first page
+          const separator = allFormattedText ? '\n\n---\n\n' : '';
+          allFormattedText += separator + formattedText.trim();
+          
+          // Update UI with accumulated formatted text
+          setEditedText(allFormattedText);
+          
+          // Switch to edit step after first page is processed so user can see progress
+          if (i === 0) {
+            setStep('edit');
+          }
+          
+          setProgressMessage(`Page ${i + 1} of ${totalPages} completed. ${i < totalPages - 1 ? 'Processing next page...' : 'All pages processed!'}`);
         }
       }
   
-      if (!allExtractedText.trim()) {
+      if (!allFormattedText.trim()) {
         throw new Error('Failed to extract any text from the selected page(s).');
       }
   
-      setProgressMessage('Formatting content...');
-      const { formattedText } = await formatContent({ text: allExtractedText.slice(0, 20000) });
-  
-      setEditedText(formattedText);
-      setStep('edit');
+      // All pages processed
+      setProgressMessage('All pages processed successfully!');
+      setIsProcessing(false);
     } catch (error) {
       console.error(error);
+      setIsProcessing(false);
       toast({
         variant: 'destructive',
         title: 'Processing Failed',
@@ -199,6 +226,7 @@ export function usePdfProcessor() {
     setPageCount(0);
     setPageRange('1');
     setProgressMessage('');
+    setIsProcessing(false);
     if (fileInputRef.current) {
         fileInputRef.current.value = '';
     }
@@ -213,6 +241,7 @@ export function usePdfProcessor() {
     pageCount,
     pageRange,
     progressMessage,
+    isProcessing,
     fileInputRef,
     
     // Actions

@@ -1,16 +1,17 @@
 'use client';
 
-import { FileText, Download, RefreshCw, Loader2 } from 'lucide-react';
+import { FileText, RefreshCw, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MarkdownPreview } from './markdown-preview';
+import { RichTextEditor } from './rich-text-editor';
 import { CancelButton } from './CancelButton';
+import { ExportMenu } from './ExportMenu';
+
 interface EditStepProps {
   fileName: string;
   editedText: string;
+  editedMarkdown: string;
   onTextChange: (text: string) => void;
-  onDownload: () => void;
   onReset: () => void;
   isProcessing?: boolean;
   progressMessage?: string;
@@ -20,8 +21,8 @@ interface EditStepProps {
 export function EditStep({
   fileName,
   editedText,
+  editedMarkdown,
   onTextChange,
-  onDownload,
   onReset,
   isProcessing = false,
   progressMessage,
@@ -38,9 +39,7 @@ export function EditStep({
           <Button variant="outline" onClick={onReset} disabled={isProcessing}>
             <RefreshCw className="mr-2 h-4 w-4" />Start Over
           </Button>
-          <Button onClick={onDownload} disabled={isProcessing}>
-            <Download className="mr-2 h-4 w-4" />Download .md
-          </Button>
+          <ExportMenu editedText={editedText} editedMarkdown={editedMarkdown} fileName={fileName} isProcessing={isProcessing} />
         </div>
       </div>
       {isProcessing && (
@@ -60,15 +59,17 @@ export function EditStep({
           <TabsTrigger value="preview">Preview</TabsTrigger>
         </TabsList>
         <TabsContent value="write" className="flex-grow mt-2">
-          <Textarea
-            value={editedText}
-            onChange={(e) => onTextChange(e.target.value)}
-            placeholder="Your formatted text will appear here..."
-            className="flex-grow w-full min-h-[300px] overflow-y-auto scrollbar-slim h-full resize-none text-base leading-relaxed shadow-lg"
+          <RichTextEditor
+            content={editedText}
+            onChange={onTextChange}
+            placeholder="Write or edit your content..."
+            className="min-h-[300px]"
           />
         </TabsContent>
         <TabsContent value="preview" className="flex-grow mt-2">
-          <MarkdownPreview markdown={editedText} />
+          <div className="prose dark:prose-invert max-w-none">
+            <div dangerouslySetInnerHTML={{ __html: editedText }} />
+          </div>
         </TabsContent>
       </Tabs>
     

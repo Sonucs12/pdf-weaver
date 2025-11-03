@@ -15,6 +15,7 @@ export default function CreateNewPage() {
   const {
     step,
     editedText,
+    editedMarkdown,
     fileName,
     isDragging,
     pageCount,
@@ -27,7 +28,6 @@ export default function CreateNewPage() {
     processPdf,
     handleFileSelect,
     handleDragEvents,
-    handleDownload,
     handleReset,
     currentProcessingImage,
   currentProcessingPage,
@@ -83,13 +83,13 @@ export default function CreateNewPage() {
         return (
           <div className="space-y-6">
             <ProcessingStep progressMessage={progressMessage} />
-            {currentProcessingImage && (
+            {/* {currentProcessingImage && (
               <LiveImagePreview 
                 currentImage={currentProcessingImage}
                 currentPage={currentProcessingPage}
                 progressMessage={progressMessage}
               />
-            )}
+            )} */}
           </div>
         );
       case 'edit':
@@ -97,8 +97,8 @@ export default function CreateNewPage() {
           <EditStep
             fileName={fileName}
             editedText={editedText}
+            editedMarkdown={editedMarkdown}
             onTextChange={setEditedText}
-            onDownload={handleDownload}
             onReset={handleReset}
             isProcessing={isProcessing}
             progressMessage={progressMessage}
@@ -114,7 +114,7 @@ export default function CreateNewPage() {
         {renderContent()}
       </div>
       
-      {/* Sticky Live Preview at bottom during edit step processing */}
+      {/* Sticky Live Preview at bottom during edit step processing
       {isProcessing && step === 'edit' && currentProcessingImage && (
         <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-background border-t border-border shadow-lg">
           <div className="max-w-6xl mx-auto">
@@ -125,7 +125,7 @@ export default function CreateNewPage() {
             />
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

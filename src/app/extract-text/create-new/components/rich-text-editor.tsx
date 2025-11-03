@@ -16,40 +16,9 @@ export const RichTextEditor = memo(
     const lastContentRef = useRef(content);
 
     useEffect(() => {
-      if (
-        editorRef.current &&
-        content !== editorRef.current.innerHTML &&
-        !isUserTypingRef.current &&
-        content !== lastContentRef.current
-      ) {
-        const selection = window.getSelection();
-        const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
-        const cursorOffset = range ? range.startOffset : 0;
-
-        editorRef.current.innerHTML = content;
+      if (editorRef.current) {
+        editorRef.current.innerHTML = content || '';
         lastContentRef.current = content;
-        
-        if (range && editorRef.current.firstChild) {
-          try {
-            const newRange = document.createRange();
-            newRange.setStart(
-              editorRef.current.firstChild,
-              Math.min(
-                cursorOffset,
-                editorRef.current.firstChild.textContent?.length || 0
-              )
-            );
-            newRange.collapse(true);
-            selection?.removeAllRanges();
-            selection?.addRange(newRange);
-          } catch (e) {
-            const newRange = document.createRange();
-            newRange.selectNodeContents(editorRef.current);
-            newRange.collapse(false);
-            selection?.removeAllRanges();
-            selection?.addRange(newRange);
-          }
-        }
       }
     }, [content]);
 
@@ -78,31 +47,25 @@ export const RichTextEditor = memo(
     const handlePaste = useCallback((e: React.ClipboardEvent<HTMLDivElement>) => {
       e.preventDefault();
       const paste = e.clipboardData.getData('text/html') || e.clipboardData.getData('text/plain');
-      
       if (paste) {
         const selection = window.getSelection();
         if (!selection?.rangeCount) return;
 
         const range = selection.getRangeAt(0);
         range.deleteContents();
-
         // Create a temporary div to parse HTML
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = paste;
-        
         // Insert the parsed HTML while preserving formatting
         const fragment = document.createDocumentFragment();
         Array.from(tempDiv.childNodes).forEach(node => {
           fragment.appendChild(node.cloneNode(true));
         });
-        
         range.insertNode(fragment);
-        
         // Move cursor to end of inserted content
         range.collapse(false);
         selection.removeAllRanges();
         selection.addRange(range);
-
         // Trigger onChange
         if (editorRef.current) {
           onChange(editorRef.current.innerHTML);

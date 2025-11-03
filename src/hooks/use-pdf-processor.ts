@@ -7,6 +7,8 @@ import { extractAndFormatPages } from '@/ai/flows';
 import { parsePageRange } from '@/lib/utils/pdf-utils';
 import type { Step } from '@/app/extract-text/create-new/components/types';
 
+import { markdownToHtml } from '@/hooks/use-markdown-to-html';
+
 if (typeof window !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 }
@@ -31,6 +33,7 @@ const ERROR_PATTERNS = {
 export function usePdfProcessor() {
   const [step, setStep] = useState<Step>('upload');
   const [editedText, setEditedText] = useState('');
+  const [editedMarkdown, setEditedMarkdown] = useState('');
   const [fileName, setFileName] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [pdfDataUri, setPdfDataUri] = useState<string | null>(null);
@@ -222,12 +225,19 @@ export function usePdfProcessor() {
           return;
         }
 
-        for (const result of results) {
-          if (result.success && result.formattedText?.trim()) {
-            const separator = allFormattedText ? '\n\n---\n\n' : '';
-            allFormattedText += separator + result.formattedText.trim();
-            
-            setEditedText(allFormattedText);
+                for (const result of results) {
+
+                  if (result.success && result.formattedText?.trim()) {
+
+                    const separator = allFormattedText ? '\n\n---\n\n' : '';
+
+                    allFormattedText += separator + result.formattedText.trim();
+
+                    setEditedMarkdown(allFormattedText);
+
+                    const html = markdownToHtml(allFormattedText);
+
+                    setEditedText(html);
             if (processedCount === 0) setStep('edit');
             
             processedCount++;
@@ -366,18 +376,6 @@ export function usePdfProcessor() {
     setIsDragging(isEntering);
   }, []);
 
-  const handleDownload = useCallback(() => {
-    const blob = new Blob([editedText], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${fileName.replace(/\.pdf$/i, '')}.md`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, [editedText, fileName]);
-
   const handleReset = useCallback(() => {
     cancelRef.current = false;
     setStep('upload');
@@ -394,6 +392,7 @@ export function usePdfProcessor() {
   return useMemo(() => ({
     step,
     editedText,
+    editedMarkdown,
     fileName,
     isDragging,
     pageCount,
@@ -408,12 +407,11 @@ export function usePdfProcessor() {
     processPdf,
     handleFileSelect,
     handleDragEvents,
-    handleDownload,
     handleReset,
     handleCancelProcessing,
   }), [
-    step, editedText, fileName, isDragging, pageCount, pageRange,
+    step, editedText, editedMarkdown, fileName, isDragging, pageCount, pageRange,
     processingState, isProcessing, processPdf, handleFileSelect,
-    handleDragEvents, handleDownload, handleReset, handleCancelProcessing
+    handleDragEvents, handleReset, handleCancelProcessing
   ]);
 }

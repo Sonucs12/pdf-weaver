@@ -27,6 +27,8 @@
     --grey-background: 0 0% 90%;
     --sidebar-active: 0 10% 10%;
     --sidebar-text: 0 100% 100%;
+    --btn-border: 0 0% 40%;
+
   }
   .dark {
     --background: 222 0% 0%;
@@ -50,6 +52,7 @@
     --ring: 197 76% 53%;
     --grey-background: 217 33% 17%;
     --sidebar-active: 0 0% 85%;
+    --btn-border: 0 0% 30%;
 
     --sidebar-text: 210 0% 0%;
   }

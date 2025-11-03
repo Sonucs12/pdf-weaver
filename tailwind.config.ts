@@ -20,6 +20,7 @@ export default {
         'grey-background': 'hsl(var(--grey-background))',
         'sidebar-active': 'hsl(var(--sidebar-active))',
         'sidebar-text': 'hsl(var(--sidebar-text))',
+        'btn-border': 'hsl(var(--btn-border))',
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',

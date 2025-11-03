@@ -28,20 +28,33 @@ export function DropDownMenu({
 
   useEffect(() => {
     if (!isOpen || !portal) return;
-    const triggerEl = triggerRef.current;
-    if (triggerEl) {
-      const rect = triggerEl.getBoundingClientRect();
-      setMenuStyle({
-        position: "absolute",
-        top: rect.bottom + window.scrollY,
-        left:
-          align === "end"
-            ? rect.right + window.scrollX - 200 // 200px = min-width
-            : rect.left + window.scrollX,
-        minWidth: 200,
-        zIndex: 9999,
-      });
-    }
+    
+    const updatePosition = () => {
+      const triggerEl = triggerRef.current;
+      const menuEl = dropdownRef.current;
+      
+      if (triggerEl) {
+        const rect = triggerEl.getBoundingClientRect();
+        const menuWidth = menuEl?.offsetWidth || 200; 
+        
+        setMenuStyle({
+          position: "fixed", 
+          top: rect.bottom + 8, 
+          left:
+            align === "end"
+              ? rect.right - menuWidth 
+              : rect.left, 
+          minWidth: 200,
+          zIndex: 9999,
+        });
+      }
+    };
+    
+   
+    updatePosition();
+    const timeout = setTimeout(updatePosition, 0);
+    
+    return () => clearTimeout(timeout);
   }, [isOpen, portal, align]);
 
   useEffect(() => {
@@ -58,7 +71,7 @@ export function DropDownMenu({
     };
     document.addEventListener("mousedown", handleClickOutside);
 
-    // Close on scroll/resize if portal
+  
     let removeScrollListeners = () => {};
     if (portal) {
       const handleScrollOrResize = () => setIsOpen(false);
@@ -85,9 +98,9 @@ export function DropDownMenu({
     <div
       ref={dropdownRef}
       className={cn(
-        "absolute z-50 min-w-[200px] rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95",
-        align === "end" ? "right-0" : "left-0",
-        "top-full mt-1"
+        "z-50 min-w-[200px] rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95",
+        !portal && (align === "end" ? "right-0" : "left-0"),
+        !portal && "absolute top-full mt-1"
       )}
       style={portal ? menuStyle : undefined}
     >

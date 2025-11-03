@@ -13,7 +13,6 @@ export function CancelButton({ onCancel, isProcessing }: CancelButtonProps) {
     
       <Button
         variant="destructive"
-        size="lg"
         onClick={onCancel}
        
       >

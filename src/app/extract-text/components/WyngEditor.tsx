@@ -48,7 +48,7 @@ export function WyngEditor({ markdown, onChange, placeholder, className }: WyngE
     <div className="space-y-4">
       <Card className="flex flex-col">
         {editor && (
-          <CardHeader className="sticky top-0  z-50 p-3 border-b bg-card">
+          <CardHeader className="sticky top-0 z-10 p-3 border-b bg-card">
             <TiptapEditorToolbar editor={editor} />
           </CardHeader>
         )}

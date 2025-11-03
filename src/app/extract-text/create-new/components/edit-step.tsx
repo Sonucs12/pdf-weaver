@@ -62,7 +62,6 @@ export function EditStep({
           className="min-h-[300px]"
         />
       </div>
-    
     </div>
   );
 }

@@ -65,11 +65,11 @@ export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing 
     <DropDownMenu
       trigger={
         <Button variant="outline" disabled={isProcessing}>
-         
           Export
         </Button>
       }
       items={menuItems}
+      portal={true}
     />
   );
 }

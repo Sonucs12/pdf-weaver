@@ -1,15 +1,11 @@
-
 "use client";
-
 import { useEffect, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Markdown } from "tiptap-markdown";
 import { TiptapEditorToolbar } from "./TiptapEditorToolbar";
-
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Preview } from "./Preview";
+
 
 const defaultContent = `
 <h2>
@@ -31,7 +27,6 @@ const defaultContent = `
 
 export function Editor() {
   const [markdown, setMarkdown] = useState("");
-
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ 
@@ -71,7 +66,6 @@ export function Editor() {
           <EditorContent editor={editor} />
         </CardContent>
       </Card>
-     
     </div>
   );
 }

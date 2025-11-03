@@ -403,6 +403,7 @@ export function usePdfProcessor() {
     currentProcessingPage: processingState.currentPage,
     fileInputRef,
     setEditedText,
+    setEditedMarkdown,
     setPageRange,
     processPdf,
     handleFileSelect,

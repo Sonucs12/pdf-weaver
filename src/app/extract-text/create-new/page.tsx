@@ -24,6 +24,7 @@ export default function CreateNewPage() {
     isProcessing,
     fileInputRef,
     setEditedText,
+    setEditedMarkdown,
     setPageRange,
     processPdf,
     handleFileSelect,
@@ -96,9 +97,9 @@ export default function CreateNewPage() {
         return (
           <EditStep
             fileName={fileName}
-            editedText={editedText}
             editedMarkdown={editedMarkdown}
-            onTextChange={setEditedText}
+            editedText={editedText}
+            onTextChange={setEditedMarkdown}
             onReset={handleReset}
             isProcessing={isProcessing}
             progressMessage={progressMessage}

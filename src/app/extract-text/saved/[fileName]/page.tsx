@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import { RichTextEditor } from '@/app/extract-text/create-new/components/rich-text-editor';
+import { WyngEditor } from '@/app/extract-text/components/WyngEditor';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Save } from 'lucide-react';
 import { ExportMenu } from '@/app/extract-text/create-new/components/ExportMenu';
@@ -23,42 +23,28 @@ export default function EditSavedPage() {
   const [savedItems, setSavedItems] = useLocalStorage<SavedItem[]>('saved-extracts', []);
   const [item, setItem] = useState<SavedItem | null>(null);
   const [editedText, setEditedText] = useState('');
+  const [editedMarkdown, setEditedMarkdown] = useState('');
 
   useEffect(() => {
     const decodedFileName = decodeURIComponent(fileName as string);
     const foundItem = savedItems.find(i => i.fileName === decodedFileName);
     if (foundItem) {
       setItem(foundItem);
-      setEditedText(foundItem.editedText);
+      setEditedMarkdown(foundItem.editedMarkdown || '');
+      setEditedText(foundItem.editedText || markdownToHtml(foundItem.editedMarkdown || ''));
     } else {
       // Handle item not found, maybe redirect or show an error
       router.push('/extract-text/saved');
     }
   }, [fileName, savedItems, router]);
 
+  useEffect(() => {
+    setEditedText(markdownToHtml(editedMarkdown));
+  }, [editedMarkdown]);
+
   const handleUpdate = () => {
     if (item) {
-      // A simple conversion, you might want a more robust library for complex HTML
-      const htmlToMarkdown = (html: string) => {
-        return html
-          .replace(/<br>/g, '\n')
-          .replace(/<h3>/g, '### ')
-          .replace(/<h2>/g, '## ')
-          .replace(/<h1>/g, '# ')
-          .replace(/<\/h[1-3]>/g, '\n')
-          .replace(/<p>/g, '')
-          .replace(/<\/p>/g, '\n')
-          .replace(/<strong>/g, '**')
-          .replace(/<\/strong>/g, '**')
-          .replace(/<em>/g, '*')
-          .replace(/<\/em>/g, '*')
-          .replace(/<a href="(.*?)'>(.*?)<\/a>/g, '[$2]($1)')
-          .replace(/&lt;/g, '<')
-          .replace(/&gt;/g, '>')
-          .replace(/&amp;/g, '&');
-      };
-      const updatedMarkdown = htmlToMarkdown(editedText);
-      const updatedItem = { ...item, editedText, editedMarkdown: updatedMarkdown, savedAt: new Date().toISOString() };
+      const updatedItem = { ...item, editedText, editedMarkdown, savedAt: new Date().toISOString() };
       const updatedItems = savedItems.map(i => (i.fileName === item.fileName ? updatedItem : i));
       setSavedItems(updatedItems);
       router.push('/extract-text/saved');
@@ -89,9 +75,9 @@ export default function EditSavedPage() {
            
           </div>
         </div>
-        <RichTextEditor
-          content={editedText}
-          onChange={setEditedText}
+        <WyngEditor
+          markdown={editedMarkdown}
+          onChange={setEditedMarkdown}
           placeholder="Edit your content..."
         />
       </div>

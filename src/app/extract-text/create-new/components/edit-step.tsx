@@ -2,16 +2,15 @@
 
 import { FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RichTextEditor } from './rich-text-editor';
+import { WyngEditor } from '@/app/extract-text/components/WyngEditor';
 import { CancelButton } from './CancelButton';
 import { ExportMenu } from './ExportMenu';
 import { SaveButton } from './SaveButton';
 
 interface EditStepProps {
   fileName: string;
-  editedText: string;
   editedMarkdown: string;
+  editedText: string;
   onTextChange: (text: string) => void;
   onReset: () => void;
   isProcessing?: boolean;
@@ -55,25 +54,14 @@ export function EditStep({
           
         </div>
       )}
-      <Tabs defaultValue="write" className="flex-grow flex flex-col">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="write">Write</TabsTrigger>
-          <TabsTrigger value="preview">Preview</TabsTrigger>
-        </TabsList>
-        <TabsContent value="write" className="flex-grow mt-2">
-          <RichTextEditor
-            content={editedText}
-            onChange={onTextChange}
-            placeholder="Write or edit your content..."
-            className="min-h-[300px]"
-          />
-        </TabsContent>
-        <TabsContent value="preview" className="flex-grow mt-2">
-          <div className="prose dark:prose-invert max-w-none">
-            <div dangerouslySetInnerHTML={{ __html: editedText }} />
-          </div>
-        </TabsContent>
-      </Tabs>
+      <div className="flex-grow mt-2">
+        <WyngEditor
+          markdown={editedMarkdown}
+          onChange={onTextChange}
+          placeholder="Write or edit your content..."
+          className="min-h-[300px]"
+        />
+      </div>
     
     </div>
   );

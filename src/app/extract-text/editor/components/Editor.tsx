@@ -71,9 +71,7 @@ export function Editor() {
           <EditorContent editor={editor} />
         </CardContent>
       </Card>
-      <div className="h-full">
-        <Preview markdown={markdown} />
-      </div>
+     
     </div>
   );
 }

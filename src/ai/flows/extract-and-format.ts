@@ -5,7 +5,7 @@
  * No Supabase storage needed, processes images directly from base64
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, getAi, getGeminiApiKeys } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const InputSchema = z.object({
@@ -69,6 +69,51 @@ const flow = ai.defineFlow(
     const { images, pageNumbers } = input;
 
     // Process all pages in parallel
+    const keys = getGeminiApiKeys();
+
+    async function callPromptWithFailover(params: { image: string; pageNumber: number }) {
+      // First try default ai (uses default key env resolution)
+      try {
+        const { output } = await prompt(params);
+        return output;
+      } catch (err) {
+        // Try alternate keys (rate limit, quota, auth)
+        const errorMsg = err instanceof Error ? err.message.toLowerCase() : '';
+        const retryable = ['rate', 'quota', 'limit', 'quota exceeded', '429', 'unauthorized', 'key', 'api'].some(k => errorMsg.includes(k));
+        if (!retryable || keys.length === 0) throw err;
+
+        for (const key of keys) {
+          try {
+            const alt = getAi({ apiKey: key });
+            const altPrompt = alt.definePrompt({
+              name: 'extractAndFormatPromptAlt',
+              input: { 
+                schema: z.object({
+                  image: z.string(),
+                  pageNumber: z.number(),
+                })
+              },
+              output: { 
+                schema: z.object({
+                  formattedText: z.string(),
+                })
+              },
+              prompt: (prompt as any).spec.prompt,
+            });
+            const { output } = await altPrompt(params);
+            return output;
+          } catch (e) {
+            const msg = e instanceof Error ? e.message.toLowerCase() : '';
+            const stillRetryable = ['rate', 'quota', 'limit', '429', 'unauthorized', 'key', 'api'].some(k => msg.includes(k));
+            if (!stillRetryable) throw e;
+            continue;
+          }
+        }
+
+        throw err;
+      }
+    }
+
     const promises = images.map(async (base64Image, index) => {
       const pageNum = pageNumbers[index];
 
@@ -76,10 +121,7 @@ const flow = ai.defineFlow(
         // Convert base64 to data URL for Genkit media
         const dataUrl = `data:image/jpeg;base64,${base64Image}`;
         
-        const { output } = await prompt({
-          image: dataUrl,
-          pageNumber: pageNum,
-        });
+        const output = await callPromptWithFailover({ image: dataUrl, pageNumber: pageNum });
 
         if (!output?.formattedText?.trim()) {
           return {

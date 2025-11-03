@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { Button } from '@/components/ui/button';
-import { Save } from 'lucide-react';
+
 
 interface SaveButtonProps {
   fileName: string;
@@ -32,7 +32,6 @@ export function SaveButton({ fileName, editedText, editedMarkdown }: SaveButtonP
 
   return (
     <Button onClick={handleSave} disabled={isSaved}>
-      <Save className="mr-2 h-4 w-4" />
       {isSaved ? 'Saved!' : 'Save'}
     </Button>
   );

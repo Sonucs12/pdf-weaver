@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, RefreshCw, Loader2 } from 'lucide-react';
+import { FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RichTextEditor } from './rich-text-editor';
@@ -38,7 +38,7 @@ export function EditStep({
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={onReset} disabled={isProcessing}>
-            <RefreshCw className="mr-2 h-4 w-4" />Start Over
+          Start Over
           </Button>
           <SaveButton fileName={fileName} editedText={editedText} editedMarkdown={editedMarkdown} />
           <ExportMenu editedText={editedText} editedMarkdown={editedMarkdown} fileName={fileName} isProcessing={isProcessing} />

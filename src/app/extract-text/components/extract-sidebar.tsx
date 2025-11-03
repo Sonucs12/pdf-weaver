@@ -26,6 +26,11 @@ const menuItems: MenuItem[] = [
     label: 'Saved',
     icon: Save,
   },
+  {
+    href: '/extract-text/editor',
+    label: 'Editor',
+    icon: Save,
+  },
 ];
 
 export function ExtractSidebar() {

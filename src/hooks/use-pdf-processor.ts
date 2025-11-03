@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import * as pdfjsLib from 'pdfjs-dist';
-import { extractAndFormatPages, formatContent } from '@/ai/flows';
+import { extractAndFormatPages } from '@/ai/flows';
 import { parsePageRange } from '@/lib/utils/pdf-utils';
 import type { Step } from '@/app/extract-text/create-new/components/types';
 
@@ -25,52 +25,7 @@ export function usePdfProcessor() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  // Check if PDF has text content (digital) or needs OCR (scanned)
-  const checkPdfType = useCallback(async (dataUri: string): Promise<'digital' | 'scanned'> => {
-    try {
-      const loadingTask = pdfjsLib.getDocument(dataUri);
-      const pdf = await loadingTask.promise;
-      
-      // Check first page for text content
-      const page = await pdf.getPage(1);
-      const textContent = await page.getTextContent();
-      
-      // If first page has substantial text, it's likely digital
-      const hasText = textContent.items.length > 10;
-      
-      return hasText ? 'digital' : 'scanned';
-    } catch (error) {
-      console.error('Error checking PDF type:', error);
-      return 'scanned'; // Default to scanned if check fails
-    }
-  }, []);
-
-  // Extract text from a CHUNK of pages (digital PDF)
-  const extractTextChunk = useCallback(async (
-    dataUri: string,
-    pageNumbers: number[]
-  ): Promise<{ pageNumber: number; text: string }[]> => {
-    const loadingTask = pdfjsLib.getDocument(dataUri);
-    const pdf = await loadingTask.promise;
-    
-    const results: { pageNumber: number; text: string }[] = [];
-
-    for (const pageNum of pageNumbers) {
-      const page = await pdf.getPage(pageNum);
-      const textContent = await page.getTextContent();
-      
-      const pageText = textContent.items
-        .map((item: any) => item.str)
-        .join(' ')
-        .trim();
-      
-      results.push({ pageNumber: pageNum, text: pageText });
-    }
-
-    return results;
-  }, []);
-
-  // Convert a CHUNK of pages to images (scanned PDF)
+  // Convert a CHUNK of pages to images
   const convertChunkToImages = useCallback(async (
     dataUri: string,
     pageNumbers: number[]
@@ -109,7 +64,7 @@ export function usePdfProcessor() {
     if (!pdfDataUri) return;
   
     setStep('processing');
-    setProgressMessage('Analyzing PDF...');
+    setProgressMessage('Starting PDF processing...');
     setIsProcessing(true);
 
     try {
@@ -117,150 +72,67 @@ export function usePdfProcessor() {
       if (!pagesToProcess) {
         throw new Error('Invalid page range provided.');
       }
-
-      // Check if PDF is digital or scanned
-      setProgressMessage('Detecting PDF type...');
-      const pdfType = await checkPdfType(pdfDataUri);
       
       const totalPages = pagesToProcess.length;
       const CHUNK_SIZE = 2; // Process 2 pages at a time
       let allFormattedText = '';
       let processedCount = 0;
 
-      if (pdfType === 'digital') {
-        // FAST PATH: Extract text chunk-by-chunk
-        setProgressMessage('Digital PDF detected - extracting text...');
-        
-        for (let i = 0; i < totalPages; i += CHUNK_SIZE) {
-          const chunk = pagesToProcess.slice(i, Math.min(i + CHUNK_SIZE, totalPages));
-          
-          setProgressMessage(
-            `Extracting text from pages ${chunk[0]}-${chunk[chunk.length - 1]} of ${totalPages}...`
-          );
+      // Always use image pipeline for better layout understanding
+      setProgressMessage('Converting PDF pages to images for AI processing...');
+      
+      for (let i = 0; i < totalPages; i += CHUNK_SIZE) {
+        const chunk = pagesToProcess.slice(i, Math.min(i + CHUNK_SIZE, totalPages));
 
-          // Extract text for this chunk only
-          const textChunk = await extractTextChunk(pdfDataUri, chunk);
-          
-          setProgressMessage(
-            `Formatting pages ${chunk[0]}-${chunk[chunk.length - 1]} of ${totalPages}...`
-          );
+        setProgressMessage(
+          `Converting pages ${chunk[0]}-${chunk[chunk.length - 1]} to images...`
+        );
 
-          // Format each page in parallel
-          const formatPromises = textChunk.map(async ({ pageNumber, text }) => {
-            if (!text.trim()) {
-              return {
-                success: false,
-                formattedText: '',
-                pageNumber
-              };
+        // Convert only this chunk to images
+        const chunkImages = await convertChunkToImages(pdfDataUri, chunk);
+
+        setProgressMessage(
+          `Processing pages ${chunk[0]}-${chunk[chunk.length - 1]} of ${totalPages}...`
+        );
+
+        // Send chunk to AI
+        const results = await extractAndFormatPages({
+          images: chunkImages,
+          pageNumbers: chunk,
+        });
+
+        // Accumulate results and cleanup
+        for (const result of results) {
+          if (result.success && result.formattedText?.trim()) {
+            const separator = allFormattedText ? '\n\n---\n\n' : '';
+            allFormattedText += separator + result.formattedText.trim();
+            
+            setEditedText(allFormattedText);
+            
+            if (processedCount === 0) {
+              setStep('edit');
             }
-
-            try {
-              const { formattedText } = await formatContent({ text });
-              return {
-                success: true,
-                formattedText: formattedText || '',
-                pageNumber
-              };
-            } catch (error) {
-              return {
-                success: false,
-                formattedText: '',
-                pageNumber,
-                error: error instanceof Error ? error.message : 'Unknown error'
-              };
-            }
-          });
-
-          const results = await Promise.all(formatPromises);
-
-          // Accumulate and cleanup
-          for (const result of results) {
-            if (result.success && result.formattedText?.trim()) {
-              const separator = allFormattedText ? '\n\n---\n\n' : '';
-              allFormattedText += separator + result.formattedText.trim();
-              
-              setEditedText(allFormattedText);
-              
-              if (processedCount === 0) {
-                setStep('edit');
-              }
-              
-              processedCount++;
-              
-              setProgressMessage(
-                `Completed ${processedCount} of ${totalPages} pages...`
-              );
-            } else if (!result.success && result.error) {
-              toast({
-                title: 'Page Processing Warning',
-                description: `Page ${result.pageNumber}: ${result.error}`,
-              });
-            }
-          }
-          
-          // Trigger garbage collection hint
-          if (typeof global !== 'undefined' && global.gc) {
-            global.gc();
+            
+            processedCount++;
+            
+            setProgressMessage(
+              `Completed ${processedCount} of ${totalPages} pages...`
+            );
+          } else if (!result.success) {
+            console.warn(`Page ${result.pageNumber} failed:`, result.error);
+            toast({
+              title: 'Page Processing Warning',
+              description: `Page ${result.pageNumber}: ${result.error}`,
+            });
           }
         }
-      } else {
-        // SLOW PATH: Convert chunk-by-chunk (memory optimized)
-        setProgressMessage('Scanned PDF detected - processing with OCR...');
+
+        // Clear chunk images from memory
+        chunkImages.length = 0;
         
-        for (let i = 0; i < totalPages; i += CHUNK_SIZE) {
-          const chunk = pagesToProcess.slice(i, Math.min(i + CHUNK_SIZE, totalPages));
-
-          setProgressMessage(
-            `Converting pages ${chunk[0]}-${chunk[chunk.length - 1]} to images...`
-          );
-
-          // Convert only this chunk to images
-          const chunkImages = await convertChunkToImages(pdfDataUri, chunk);
-
-          setProgressMessage(
-            `Processing pages ${chunk[0]}-${chunk[chunk.length - 1]} of ${totalPages}...`
-          );
-
-          // Send chunk to AI
-          const results = await extractAndFormatPages({
-            images: chunkImages,
-            pageNumbers: chunk,
-          });
-
-          // Accumulate results and cleanup
-          for (const result of results) {
-            if (result.success && result.formattedText?.trim()) {
-              const separator = allFormattedText ? '\n\n---\n\n' : '';
-              allFormattedText += separator + result.formattedText.trim();
-              
-              setEditedText(allFormattedText);
-              
-              if (processedCount === 0) {
-                setStep('edit');
-              }
-              
-              processedCount++;
-              
-              setProgressMessage(
-                `Completed ${processedCount} of ${totalPages} pages...`
-              );
-            } else if (!result.success) {
-              console.warn(`Page ${result.pageNumber} failed:`, result.error);
-              toast({
-                title: 'Page Processing Warning',
-                description: `Page ${result.pageNumber}: ${result.error}`,
-              });
-            }
-          }
-
-          // Clear chunk images from memory
-          chunkImages.length = 0;
-          
-          // Trigger garbage collection hint
-          if (typeof global !== 'undefined' && global.gc) {
-            global.gc();
-          }
+        // Trigger garbage collection hint
+        if (typeof global !== 'undefined' && global.gc) {
+          global.gc();
         }
       }
 
@@ -281,7 +153,7 @@ export function usePdfProcessor() {
       });
       handleReset();
     }
-  }, [pdfDataUri, toast, pageCount, checkPdfType, extractTextChunk, convertChunkToImages]);
+  }, [pdfDataUri, toast, pageCount, convertChunkToImages]);
 
   const handleFileSelect = useCallback(async (file: File | null) => {
     if (!file) return;

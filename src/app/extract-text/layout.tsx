@@ -1,6 +1,6 @@
 'use client';
 
-import { ExtractSidebar } from '@/components/layout/extract-sidebar';
+import { ExtractSidebar } from '@/app/extract-text/components/extract-sidebar';
 
 export default function AppLayout({
   children,

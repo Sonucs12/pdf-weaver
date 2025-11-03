@@ -2,11 +2,11 @@
 
 import { type DragEvent } from 'react';
 import { usePdfProcessor } from '@/hooks/use-pdf-processor';
-import { UploadStep } from '@/components/pdf-weaver/upload-step';
-import { SelectPageStep } from '@/components/pdf-weaver/select-page-step';
-import { ProcessingStep } from '@/components/pdf-weaver/processing-step';
+import { UploadStep } from '@/app/extract-text/create-new/components/upload-step';
+import { SelectPageStep } from '@/app/extract-text/create-new/components/select-page-step';
+import { ProcessingStep } from '@/app/extract-text/create-new/components/processing-step';
 import dynamic from 'next/dynamic';
-const EditStep = dynamic(() => import('@/components/pdf-weaver/edit-step').then(m => m.EditStep), {
+const EditStep = dynamic(() => import('@/app/extract-text/create-new/components/edit-step').then(m => m.EditStep), {
   ssr: false,
 });
 

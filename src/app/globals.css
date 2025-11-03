@@ -56,3 +56,44 @@
     @apply bg-background text-foreground;
   }
 }
+.scrollbar-slim::-webkit-scrollbar {
+  width: 4px;
+  height: 2px;
+}
+.scrollbar-slim::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
+  width: 4px;
+}
+.scrollbar-slim::-webkit-scrollbar-thumb {
+  background: #bdbdbd;
+  border-radius: 8px;
+  width: 4px;
+}
+.scrollbar-slim::-webkit-scrollbar-thumb:hover {
+  background: #333333;
+  cursor: pointer;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #bdbdbd;
+}
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #bdbdbd;
+  border-radius: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}

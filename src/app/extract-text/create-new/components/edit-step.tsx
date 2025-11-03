@@ -59,7 +59,7 @@ export function EditStep({
             value={editedText}
             onChange={(e) => onTextChange(e.target.value)}
             placeholder="Your formatted text will appear here..."
-            className="flex-grow w-full h-full resize-none text-base leading-relaxed shadow-lg"
+            className="flex-grow w-full min-h-[300px] overflow-y-auto scrollbar-slim h-full resize-none text-base leading-relaxed shadow-lg"
           />
         </TabsContent>
         <TabsContent value="preview" className="flex-grow mt-2">

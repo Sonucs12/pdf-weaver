@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Save } from 'lucide-react';
 import { ExportMenu } from '@/app/extract-text/create-new/components/ExportMenu';
 import { markdownToHtml } from '@/hooks/use-markdown-to-html';
+import { MarkdownPreviewDialog } from '@/app/extract-text/components/MarkdownPreviewDialog';
 
 interface SavedItem {
   fileName: string;
@@ -67,6 +68,7 @@ export default function EditSavedPage() {
           {/* <h1 className="text-lg font-medium">Edit: {item.fileName}</h1> */}
           </div>
           <div className="flex gap-2">
+            <MarkdownPreviewDialog markdown={editedMarkdown} title={`Preview: ${item.fileName}`} triggerLabel="Preview" size="lg" />
             <Button onClick={handleUpdate}>
              
               Update

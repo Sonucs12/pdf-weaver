@@ -3,6 +3,7 @@
 import { FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { WyngEditor } from '@/app/extract-text/components/WyngEditor';
+import { MarkdownPreviewDialog } from '@/app/extract-text/components/MarkdownPreviewDialog';
 import { CancelButton } from './CancelButton';
 import { ExportMenu } from './ExportMenu';
 import { SaveButton } from './SaveButton';
@@ -39,6 +40,7 @@ export function EditStep({
           <Button variant="outline" onClick={onReset} disabled={isProcessing}>
           Start Over
           </Button>
+          <MarkdownPreviewDialog markdown={editedMarkdown} title="Preview Content" triggerLabel="Preview" size="lg" />
           <SaveButton fileName={fileName} editedText={editedText} editedMarkdown={editedMarkdown} />
           <ExportMenu editedText={editedText} editedMarkdown={editedMarkdown} fileName={fileName} isProcessing={isProcessing} />
         </div>

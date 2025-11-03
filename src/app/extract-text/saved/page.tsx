@@ -1,20 +1,33 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import { SavedExtractCard } from './components/SavedExtractCard';
 import { Save } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Download, Trash2 } from 'lucide-react';
 
-interface SavedDocument {
-  id: string;
+interface SavedItem {
   fileName: string;
-  savedDate: string;
-  preview: string;
+  editedText: string;
+  editedMarkdown: string;
+  savedAt: string;
 }
 
 export default function SavedPage() {
-  // TODO: Fetch saved documents from storage/API
-  const savedDocuments: SavedDocument[] = [];
+  const [savedItems, setSavedItems] = useLocalStorage<SavedItem[]>('saved-extracts', []);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleDelete = (fileName: string) => {
+    const updatedItems = savedItems.filter(item => item.fileName !== fileName);
+    setSavedItems(updatedItems);
+  };
+
+  if (!mounted) {
+    return null; // or a loading spinner
+  }
 
   return (
     <div className="flex-grow flex flex-col p-4 md:p-8">
@@ -27,40 +40,17 @@ export default function SavedPage() {
           <p className="text-muted-foreground">Your saved and downloaded documents</p>
         </div>
 
-        {savedDocuments.length === 0 ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>No Saved Documents</CardTitle>
-              <CardDescription>
-                You don't have any saved documents yet. Create and save a document to see it here.
-              </CardDescription>
-            </CardHeader>
-          </Card>
+        {savedItems.length === 0 ? (
+          <p>No saved documents yet.</p>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {savedDocuments.map((doc) => (
-              <Card key={doc.id} className="flex flex-col">
-                <CardHeader>
-                  <CardTitle className="truncate">{doc.fileName}</CardTitle>
-                  <CardDescription>
-                    Saved on: {doc.savedDate}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex-1 flex flex-col justify-between">
-                  <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                    {doc.preview}
-                  </p>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Download className="h-4 w-4 mr-2" />
-                      Download
-                    </Button>
-                    <Button variant="destructive" size="sm">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+            {savedItems.map((item) => (
+              <SavedExtractCard
+                key={item.fileName}
+                fileName={item.fileName}
+                content={item.editedMarkdown}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         )}

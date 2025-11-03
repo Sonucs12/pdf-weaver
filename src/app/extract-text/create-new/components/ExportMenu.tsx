@@ -65,7 +65,7 @@ export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing 
     <DropDownMenu
       trigger={
         <Button variant="outline" disabled={isProcessing}>
-          <FileDown className="mr-2 h-4 w-4" />
+         
           Export
         </Button>
       }

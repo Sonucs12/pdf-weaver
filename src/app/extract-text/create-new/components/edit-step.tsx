@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RichTextEditor } from './rich-text-editor';
 import { CancelButton } from './CancelButton';
 import { ExportMenu } from './ExportMenu';
+import { SaveButton } from './SaveButton';
 
 interface EditStepProps {
   fileName: string;
@@ -39,6 +40,7 @@ export function EditStep({
           <Button variant="outline" onClick={onReset} disabled={isProcessing}>
             <RefreshCw className="mr-2 h-4 w-4" />Start Over
           </Button>
+          <SaveButton fileName={fileName} editedText={editedText} editedMarkdown={editedMarkdown} />
           <ExportMenu editedText={editedText} editedMarkdown={editedMarkdown} fileName={fileName} isProcessing={isProcessing} />
         </div>
       </div>

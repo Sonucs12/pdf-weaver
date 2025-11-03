@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MarkdownPreview } from './markdown-preview';
-
+import { CancelButton } from './CancelButton';
 interface EditStepProps {
   fileName: string;
   editedText: string;
@@ -14,6 +14,7 @@ interface EditStepProps {
   onReset: () => void;
   isProcessing?: boolean;
   progressMessage?: string;
+  onCancel: () => void;
 }
 
 export function EditStep({
@@ -24,6 +25,7 @@ export function EditStep({
   onReset,
   isProcessing = false,
   progressMessage,
+  onCancel,
 }: EditStepProps) {
   return (
     <div className="w-full flex flex-col">
@@ -42,11 +44,14 @@ export function EditStep({
         </div>
       </div>
       {isProcessing && (
-        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center gap-3">
+        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
           <Loader2 className="h-5 w-5 animate-spin text-blue-600 dark:text-blue-400" />
           <p className="text-sm text-blue-900 dark:text-blue-100">
-            {progressMessage || 'Processing pages...'}
-          </p>
+              {progressMessage || 'Processing pages...'}
+            </p></div>
+            <CancelButton onCancel={onCancel} isProcessing={isProcessing} />
+          
         </div>
       )}
       <Tabs defaultValue="write" className="flex-grow flex flex-col">
@@ -66,6 +71,7 @@ export function EditStep({
           <MarkdownPreview markdown={editedText} />
         </TabsContent>
       </Tabs>
+    
     </div>
   );
 }

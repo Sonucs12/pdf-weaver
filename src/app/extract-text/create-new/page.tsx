@@ -2,11 +2,12 @@
 
 import { type DragEvent } from 'react';
 import { usePdfProcessor } from '@/hooks/use-pdf-processor';
-import { UploadStep } from '@/app/extract-text/create-new/components/upload-step';
-import { SelectPageStep } from '@/app/extract-text/create-new/components/select-page-step';
-import { ProcessingStep } from '@/app/extract-text/create-new/components/processing-step';
+import { LiveImagePreview } from './components/LiveImagePreview';
+import { UploadStep } from './components/upload-step';
+import { SelectPageStep } from './components/select-page-step';
+import { ProcessingStep } from './components/processing-step';
 import dynamic from 'next/dynamic';
-const EditStep = dynamic(() => import('@/app/extract-text/create-new/components/edit-step').then(m => m.EditStep), {
+const EditStep = dynamic(() => import('./components/edit-step').then(m => m.EditStep), {
   ssr: false,
 });
 
@@ -28,6 +29,9 @@ export default function CreateNewPage() {
     handleDragEvents,
     handleDownload,
     handleReset,
+    currentProcessingImage,
+  currentProcessingPage,
+  handleCancelProcessing,
   } = usePdfProcessor();
 
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
@@ -76,7 +80,18 @@ export default function CreateNewPage() {
           />
         );
       case 'processing':
-        return <ProcessingStep progressMessage={progressMessage} />;
+        return (
+          <div className="space-y-6">
+            <ProcessingStep progressMessage={progressMessage} />
+            {currentProcessingImage && (
+              <LiveImagePreview 
+                currentImage={currentProcessingImage}
+                currentPage={currentProcessingPage}
+                progressMessage={progressMessage}
+              />
+            )}
+          </div>
+        );
       case 'edit':
         return (
           <EditStep
@@ -87,6 +102,7 @@ export default function CreateNewPage() {
             onReset={handleReset}
             isProcessing={isProcessing}
             progressMessage={progressMessage}
+            onCancel={handleCancelProcessing}
           />
         );
     }
@@ -94,7 +110,22 @@ export default function CreateNewPage() {
 
   return (
     <div className="flex-grow flex mb-8 items-center justify-center p-4 md:p-8 transition-opacity duration-500">
-      {renderContent()}
+      <div className="w-full max-w-6xl">
+        {renderContent()}
+      </div>
+      
+      {/* Sticky Live Preview at bottom during edit step processing */}
+      {isProcessing && step === 'edit' && currentProcessingImage && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-background border-t border-border shadow-lg">
+          <div className="max-w-6xl mx-auto">
+            <LiveImagePreview 
+              currentImage={currentProcessingImage}
+              currentPage={currentProcessingPage}
+              progressMessage={progressMessage}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

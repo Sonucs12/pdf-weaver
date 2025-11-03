@@ -3,8 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Plus, FileEdit, Save, LucideIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
-
+import clsx from "clsx";
 interface MenuItem {
   href: string;
   label: string;
@@ -32,41 +31,26 @@ const menuItems: MenuItem[] = [
 export function ExtractSidebar() {
   const pathname = usePathname();
 
-  const isActive = (path: string) => {
-    if (pathname === path) return true;
-    if (path === '/extract-text/create-new' && pathname === '/extract-text') {
-      return true;
-    }
-    
-    return false;
-  };
 
   return (
     <aside className="w-64 border-r border-border bg-background flex flex-col">
       <nav className="flex-1 p-4">
-        <ul className="space-y-2">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.href);
-            
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    'w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                    active
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span>{item.label}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+      {menuItems.map((item) => (
+          <Link
+            key={item.label}
+            href={item.href}
+            className={clsx(
+              "flex items-center px-4 py-2 mt-2 text-sm  rounded-lg  transition-all duration-300",
+              {
+                "bg-sidebar-active text-sidebar-text": pathname === item.href,
+                "hover:bg-grey-background": pathname !== item.href,
+              }
+            )}
+          >
+            <item.icon className="h-4 w-4" />
+            <span className="ml-3  ">{item.label}</span>
+          </Link>
+        ))}
       </nav>
     </aside>
   );

@@ -45,15 +45,10 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <div className="flex flex-col min-h-screen">
+          <div className="flex flex-col">
             <Header />
-
-            <main className="flex-grow flex flex-col">
-              {children}
-            </main>
-
+            <main className="flex-grow flex flex-col">{children}</main>
             <Footer />
-
             <Toaster />
           </div>
         </ThemeProvider>

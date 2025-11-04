@@ -5,7 +5,10 @@ import StarterKit from "@tiptap/starter-kit";
 import { Markdown } from "tiptap-markdown";
 import { TiptapEditorToolbar } from "./TiptapEditorToolbar";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-
+import { SaveButton } from '@/app/extract-text/create-new/components/SaveButton';
+import { ExportMenu } from '@/app/extract-text/create-new/components/ExportMenu';
+import { MarkdownPreviewDialog } from '@/app/extract-text/components/MarkdownPreviewDialog';
+import { markdownToHtml } from '@/hooks/use-markdown-to-html';
 
 const defaultContent = `
 <h2>
@@ -27,6 +30,7 @@ const defaultContent = `
 
 export function Editor() {
   const [markdown, setMarkdown] = useState("");
+  const [editedText, setEditedText] = useState("");
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ 
@@ -36,7 +40,9 @@ export function Editor() {
     ],
     content: defaultContent,
     onUpdate({ editor }) {
-      setMarkdown(editor.storage.markdown.getMarkdown());
+      const currentMarkdown = editor.storage.markdown.getMarkdown();
+      setMarkdown(currentMarkdown);
+      setEditedText(markdownToHtml(currentMarkdown));
     },
     editorProps: {
       attributes: {
@@ -48,17 +54,24 @@ export function Editor() {
 
   useEffect(() => {
     if (editor && !markdown) {
-      setMarkdown(editor.storage.markdown.getMarkdown());
+      const initialMarkdown = editor.storage.markdown.getMarkdown();
+      setMarkdown(initialMarkdown);
+      setEditedText(markdownToHtml(initialMarkdown));
     }
   }, [editor, markdown]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4"> <div className="flex justify-end items-center gap-2">
+                <MarkdownPreviewDialog markdown={markdown} title="Preview Content" triggerLabel="Preview" size="lg" />
+                <SaveButton fileName="editor-content" editedText={editedText} editedMarkdown={markdown} />
+                <ExportMenu editedText={editedText} editedMarkdown={markdown} fileName="editor-content" isProcessing={false} />
+              </div>
       <Card className="flex flex-col">
         {editor && (
           <>
-            <CardHeader className="p-2 border-b">
+            <CardHeader className="p-2 border-b flex flex-row items-center justify-between">
               <TiptapEditorToolbar editor={editor} />
+             
             </CardHeader>
           </>
         )}

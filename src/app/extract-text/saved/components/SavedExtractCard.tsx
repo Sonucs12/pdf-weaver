@@ -16,16 +16,16 @@ interface SavedExtractCardProps {
 
 export function SavedExtractCard({ title, fileName, onDelete, createdAt, updatedAt }: SavedExtractCardProps) {
   return (
-    <Card>
+    <Card className='flex justify-between flex-col'>
       <CardHeader>
         <CardTitle className='text-md'>{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="line-clamp-3 text-sm">{fileName}</p>
-        {updatedAt && <p className="text-xs text-muted-foreground">Updated at {formatDate(updatedAt)}</p>}
-        {!updatedAt && createdAt && <p className="text-xs text-muted-foreground">Created at {formatDate(createdAt)}</p>}
+        <p className="line-clamp-2 text-sm mb-1">{fileName}</p>
+        {updatedAt && <p className="text-xs text-muted-foreground">Updated at {formatDate(updatedAt, 'PP')}</p>}
+        {!updatedAt && createdAt && <p className="text-xs text-muted-foreground">Created at {formatDate(createdAt, 'PP')}</p>}
       </CardContent>
-      <CardFooter className="flex justify-end gap-2">
+      <CardFooter className="flex mt-auto justify-end items-end gap-2">
         <Link href={`/extract-text/saved/${encodeURIComponent(title)}`}>
           <Button variant="outline" size={"icon"}>
             <Pencil className="h-4 w-4" />

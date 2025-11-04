@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, Loader2 } from 'lucide-react';
+import { FileText, Loader2, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { WyngEditor } from '@/app/extract-text/components/WyngEditor';
 import { MarkdownPreviewDialog } from '@/app/extract-text/components/MarkdownPreviewDialog';
@@ -14,6 +14,7 @@ interface EditStepProps {
   editedText: string;
   onTextChange: (text: string) => void;
   onReset: () => void;
+  onBack: () => void;
   isProcessing?: boolean;
   progressMessage?: string;
   onCancel: () => void;
@@ -25,6 +26,7 @@ export function EditStep({
   editedMarkdown,
   onTextChange,
   onReset,
+  onBack,
   isProcessing = false,
   progressMessage,
   onCancel,
@@ -33,6 +35,9 @@ export function EditStep({
     <div className="w-full flex flex-col">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
         <div className="flex items-center gap-2 text-sm">
+          <Button variant="outline" size="icon" onClick={onBack} disabled={isProcessing}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
           <FileText className="h-5 w-5 text-muted-foreground" />
           <span className="font-medium truncate">{fileName}</span>
         </div>
@@ -67,4 +72,3 @@ export function EditStep({
     </div>
   );
 }
-

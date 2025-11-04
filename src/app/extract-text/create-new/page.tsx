@@ -14,6 +14,7 @@ const EditStep = dynamic(() => import('./components/edit-step').then(m => m.Edit
 export default function CreateNewPage() {
   const {
     step,
+    setStep,
     editedText,
     editedMarkdown,
     fileName,
@@ -101,6 +102,7 @@ export default function CreateNewPage() {
             editedText={editedText}
             onTextChange={setEditedMarkdown}
             onReset={handleReset}
+            onBack={() => setStep('select-page')}
             isProcessing={isProcessing}
             progressMessage={progressMessage}
             onCancel={handleCancelProcessing}

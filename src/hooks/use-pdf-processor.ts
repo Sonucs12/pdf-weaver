@@ -391,6 +391,7 @@ export function usePdfProcessor() {
 
   return useMemo(() => ({
     step,
+    setStep,
     editedText,
     editedMarkdown,
     fileName,
@@ -411,7 +412,7 @@ export function usePdfProcessor() {
     handleReset,
     handleCancelProcessing,
   }), [
-    step, editedText, editedMarkdown, fileName, isDragging, pageCount, pageRange,
+    step, setStep, editedText, editedMarkdown, fileName, isDragging, pageCount, pageRange,
     processingState, isProcessing, processPdf, handleFileSelect,
     handleDragEvents, handleReset, handleCancelProcessing
   ]);

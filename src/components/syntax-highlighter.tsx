@@ -7,9 +7,10 @@ import { useTheme } from 'next-themes';
 interface SyntaxHighlighterProps {
     language: string;
     code: string;
+    wrapLongLines?: boolean;
 }
 
-export function SyntaxHighlighter({ language, code }: SyntaxHighlighterProps) {
+export function SyntaxHighlighter({ language, code, wrapLongLines = false }: SyntaxHighlighterProps) {
     const { theme } = useTheme();
 
     const style = theme === 'dark' ? oneDark : oneLight;
@@ -20,6 +21,7 @@ export function SyntaxHighlighter({ language, code }: SyntaxHighlighterProps) {
                 language={language}
                 style={style}
                 showLineNumbers={true}
+                wrapLongLines={wrapLongLines}
                 customStyle={{
                     borderRadius: '0',
                     padding: '0',

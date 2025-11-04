@@ -35,7 +35,7 @@ export function MarkdownPreviewDialog({ markdown, title = 'Preview', triggerLabe
       <DialogTrigger asChild>
         <Button variant="outline">{triggerLabel}</Button>
       </DialogTrigger>
-      <DialogContent className={`${contentClass} w-full`}> 
+      <DialogContent className={`${contentClass}`}> 
         <DialogHeader>
           <DialogTitle className='flex justify-between items-center'>{title} <div className="flex items-center justify-between gap-2">
           <div className="flex ml-4 justify-end">
@@ -50,6 +50,7 @@ export function MarkdownPreviewDialog({ markdown, title = 'Preview', triggerLabe
           <SyntaxHighlighter
             language={mode === 'html' ? 'markup' : 'markdown'}
            code={mode === 'html' ? html : markdown}
+           wrapLongLines={true}
           />
            
           

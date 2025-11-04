@@ -85,6 +85,7 @@ export function SaveButton({ fileName, editedText, editedMarkdown }: SaveButtonP
         open={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         onSave={handleSave}
+        savedItems={savedItems}
       />
     </>
   );

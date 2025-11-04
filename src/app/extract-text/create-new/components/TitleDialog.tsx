@@ -17,13 +17,20 @@ interface TitleDialogProps {
   onClose: () => void;
   onSave: (title: string) => void;
   initialTitle?: string;
+  savedItems: any[];
 }
 
-export function TitleDialog({ open, onClose, onSave, initialTitle = "" }: TitleDialogProps) {
+export function TitleDialog({ open, onClose, onSave, initialTitle = "", savedItems }: TitleDialogProps) {
   const [title, setTitle] = useState(initialTitle);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSave = () => {
     if (title) {
+      const isDuplicate = savedItems.some(item => item.title === title && item.title !== initialTitle);
+      if (isDuplicate) {
+        setError("A project with this title already exists. Please enter a different title.");
+        return;
+      }
       onSave(title);
       onClose();
     }
@@ -37,9 +44,13 @@ export function TitleDialog({ open, onClose, onSave, initialTitle = "" }: TitleD
         </DialogHeader>
         <Input
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            setError(null);
+          }}
           placeholder="Enter project title"
         />
+        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
         <DialogFooter>
           <Button onClick={onClose} variant="outline">
             Cancel

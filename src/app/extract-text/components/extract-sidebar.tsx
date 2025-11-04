@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Plus, FileEdit, Save, LucideIcon } from 'lucide-react';
+import { Plus, FileEdit, Save, LucideIcon, PenIcon } from 'lucide-react';
 import clsx from "clsx";
 interface MenuItem {
   href: string;
@@ -29,7 +29,7 @@ const menuItems: MenuItem[] = [
   {
     href: '/extract-text/editor',
     label: 'Editor',
-    icon: Save,
+    icon: PenIcon,
   },
 ];
 

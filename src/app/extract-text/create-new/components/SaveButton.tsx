@@ -19,16 +19,17 @@ export function SaveButton({ fileName, editedText, editedMarkdown }: SaveButtonP
 
   const handleSave = (title: string) => {
     const existingIndex = savedItems.findIndex(item => item.title === title);
-    const newItem = { title, fileName, editedText, editedMarkdown, savedAt: new Date().toISOString() };
 
     if (existingIndex > -1) {
       const updatedItems = [...savedItems];
       const existingItem = updatedItems[existingIndex];
       existingItem.editedText += `\n\n${editedText}`;
       existingItem.editedMarkdown += `\n\n${editedMarkdown}`;
+      existingItem.updatedAt = new Date().toISOString();
       updatedItems[existingIndex] = existingItem;
       setSavedItems(updatedItems);
     } else {
+      const newItem = { title, fileName, editedText, editedMarkdown, createdAt: new Date().toISOString() };
       setSavedItems([...savedItems, newItem]);
     }
     setIsSaved(true);

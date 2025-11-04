@@ -4,14 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pencil, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { formatDate } from '@/lib/utils';
 
 interface SavedExtractCardProps {
   title: string;
   fileName: string;
   onDelete: (title: string) => void;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export function SavedExtractCard({ title, fileName, onDelete }: SavedExtractCardProps) {
+export function SavedExtractCard({ title, fileName, onDelete, createdAt, updatedAt }: SavedExtractCardProps) {
   return (
     <Card>
       <CardHeader>
@@ -19,6 +22,8 @@ export function SavedExtractCard({ title, fileName, onDelete }: SavedExtractCard
       </CardHeader>
       <CardContent>
         <p className="line-clamp-3 text-sm">{fileName}</p>
+        {updatedAt && <p className="text-xs text-muted-foreground">Updated at {formatDate(updatedAt)}</p>}
+        {!updatedAt && createdAt && <p className="text-xs text-muted-foreground">Created at {formatDate(createdAt)}</p>}
       </CardContent>
       <CardFooter className="flex justify-end gap-2">
         <Link href={`/extract-text/saved/${encodeURIComponent(title)}`}>

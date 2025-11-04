@@ -15,7 +15,8 @@ interface SavedItem {
   fileName: string;
   editedText: string;
   editedMarkdown: string;
-  savedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export default function EditSavedPage() {
@@ -46,7 +47,7 @@ export default function EditSavedPage() {
 
   const handleUpdate = () => {
     if (item) {
-      const updatedItem = { ...item, editedText, editedMarkdown, savedAt: new Date().toISOString() };
+      const updatedItem = { ...item, editedText, editedMarkdown, updatedAt: new Date().toISOString() };
       const updatedItems = savedItems.map(i => (i.title === item.title ? updatedItem : i));
       setSavedItems(updatedItems);
       router.push('/extract-text/saved');

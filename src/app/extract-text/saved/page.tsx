@@ -10,7 +10,8 @@ interface SavedItem {
   fileName: string;
   editedText: string;
   editedMarkdown: string;
-  savedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export default function SavedPage() {
@@ -50,6 +51,8 @@ export default function SavedPage() {
                 key={item.title}
                 title={item.title}
                 fileName={item.fileName}
+                createdAt={item.createdAt}
+                updatedAt={item.updatedAt}
                 onDelete={handleDelete}
               />
             ))}

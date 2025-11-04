@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pencil, Trash2 } from 'lucide-react';
@@ -15,6 +16,14 @@ interface SavedExtractCardProps {
 }
 
 export function SavedExtractCard({ title, fileName, onDelete, createdAt, updatedAt }: SavedExtractCardProps) {
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteClick = async () => {
+    setIsDeleting(true);
+    await onDelete(title);
+    setIsDeleting(false);
+  };
+
   return (
     <Card className='flex justify-between flex-col'>
       <CardHeader>
@@ -32,7 +41,7 @@ export function SavedExtractCard({ title, fileName, onDelete, createdAt, updated
             
           </Button>
         </Link>
-        <Button variant="destructive" size={"icon"} onClick={() => onDelete(title)}>
+        <Button variant="destructive" size={"icon"} onClick={handleDeleteClick} loading={isDeleting}>
           <Trash2 className="h-4 w-4" />
          
         </Button>

@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { WyngEditor } from '@/app/extract-text/components/WyngEditor';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { ExportMenu } from '@/app/extract-text/create-new/components/ExportMenu';
 import { markdownToHtml } from '@/hooks/use-markdown-to-html';
 import { MarkdownPreviewDialog } from '@/app/extract-text/components/MarkdownPreviewDialog';
@@ -29,6 +29,7 @@ export default function EditSavedPage() {
   const [editedText, setEditedText] = useState('');
   const [editedMarkdown, setEditedMarkdown] = useState('');
   const [hasChanged, setHasChanged] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -54,9 +55,11 @@ export default function EditSavedPage() {
 
   const handleUpdate = () => {
     if (item && hasChanged) {
+      setIsUpdating(true);
       const updatedItem = { ...item, editedText, editedMarkdown, updatedAt: new Date().toISOString() };
       const updatedItems = savedItems.map(i => (i.title === item.title ? updatedItem : i));
       setSavedItems(updatedItems);
+      setIsUpdating(false);
       router.push('/extract-text/saved');
     } else {
       toast({
@@ -83,8 +86,7 @@ export default function EditSavedPage() {
           </div>
           <div className="flex gap-2">
             <MarkdownPreviewDialog markdown={editedMarkdown} title={`Preview: ${item.fileName}`} triggerLabel="Preview" size="lg" />
-            <Button onClick={handleUpdate} disabled={!hasChanged}>
-             
+            <Button onClick={handleUpdate} disabled={!hasChanged} loading={isUpdating}>
               Update
             </Button>
             <ExportMenu editedText={editedText} editedMarkdown={item.editedMarkdown} fileName={item.fileName} isProcessing={false} />

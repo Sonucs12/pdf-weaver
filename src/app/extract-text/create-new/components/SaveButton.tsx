@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { Button } from '@/components/ui/button';
-
+import { TitleDialog } from './TitleDialog';
 
 interface SaveButtonProps {
   fileName: string;
@@ -14,10 +14,11 @@ interface SaveButtonProps {
 export function SaveButton({ fileName, editedText, editedMarkdown }: SaveButtonProps) {
   const [savedItems, setSavedItems] = useLocalStorage<any[]>('saved-extracts', []);
   const [isSaved, setIsSaved] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleSave = () => {
-    const existingIndex = savedItems.findIndex(item => item.fileName === fileName);
-    const newItem = { fileName, editedText, editedMarkdown, savedAt: new Date().toISOString() };
+  const handleSave = (title: string) => {
+    const existingIndex = savedItems.findIndex(item => item.title === title);
+    const newItem = { title, fileName, editedText, editedMarkdown, savedAt: new Date().toISOString() };
 
     if (existingIndex > -1) {
       const updatedItems = [...savedItems];
@@ -31,8 +32,15 @@ export function SaveButton({ fileName, editedText, editedMarkdown }: SaveButtonP
   };
 
   return (
-    <Button onClick={handleSave} disabled={isSaved}>
-      {isSaved ? 'Saved!' : 'Save'}
-    </Button>
+    <>
+      <Button onClick={() => setIsDialogOpen(true)} disabled={isSaved}>
+        {isSaved ? 'Saved!' : 'Save'}
+      </Button>
+      <TitleDialog
+        open={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onSave={handleSave}
+      />
+    </>
   );
 }

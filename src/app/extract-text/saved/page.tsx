@@ -6,6 +6,7 @@ import { SavedExtractCard } from './components/SavedExtractCard';
 import { Save } from 'lucide-react';
 
 interface SavedItem {
+  title: string;
   fileName: string;
   editedText: string;
   editedMarkdown: string;
@@ -20,8 +21,8 @@ export default function SavedPage() {
     setMounted(true);
   }, []);
 
-  const handleDelete = (fileName: string) => {
-    const updatedItems = savedItems.filter(item => item.fileName !== fileName);
+  const handleDelete = (title: string) => {
+    const updatedItems = savedItems.filter(item => item.title !== title);
     setSavedItems(updatedItems);
   };
 
@@ -46,9 +47,9 @@ export default function SavedPage() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {savedItems.map((item) => (
               <SavedExtractCard
-                key={item.fileName}
+                key={item.title}
+                title={item.title}
                 fileName={item.fileName}
-                content={item.editedMarkdown}
                 onDelete={handleDelete}
               />
             ))}
@@ -58,4 +59,3 @@ export default function SavedPage() {
     </div>
   );
 }
-

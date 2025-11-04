@@ -11,6 +11,7 @@ import { markdownToHtml } from '@/hooks/use-markdown-to-html';
 import { MarkdownPreviewDialog } from '@/app/extract-text/components/MarkdownPreviewDialog';
 
 interface SavedItem {
+  title: string;
   fileName: string;
   editedText: string;
   editedMarkdown: string;
@@ -20,15 +21,15 @@ interface SavedItem {
 export default function EditSavedPage() {
   const router = useRouter();
   const params = useParams();
-  const { fileName } = params;
+  const { title } = params;
   const [savedItems, setSavedItems] = useLocalStorage<SavedItem[]>('saved-extracts', []);
   const [item, setItem] = useState<SavedItem | null>(null);
   const [editedText, setEditedText] = useState('');
   const [editedMarkdown, setEditedMarkdown] = useState('');
 
   useEffect(() => {
-    const decodedFileName = decodeURIComponent(fileName as string);
-    const foundItem = savedItems.find(i => i.fileName === decodedFileName);
+    const decodedTitle = decodeURIComponent(title as string);
+    const foundItem = savedItems.find(i => i.title === decodedTitle);
     if (foundItem) {
       setItem(foundItem);
       setEditedMarkdown(foundItem.editedMarkdown || '');
@@ -37,7 +38,7 @@ export default function EditSavedPage() {
       // Handle item not found, maybe redirect or show an error
       router.push('/extract-text/saved');
     }
-  }, [fileName, savedItems, router]);
+  }, [title, savedItems, router]);
 
   useEffect(() => {
     setEditedText(markdownToHtml(editedMarkdown));
@@ -46,7 +47,7 @@ export default function EditSavedPage() {
   const handleUpdate = () => {
     if (item) {
       const updatedItem = { ...item, editedText, editedMarkdown, savedAt: new Date().toISOString() };
-      const updatedItems = savedItems.map(i => (i.fileName === item.fileName ? updatedItem : i));
+      const updatedItems = savedItems.map(i => (i.title === item.title ? updatedItem : i));
       setSavedItems(updatedItems);
       router.push('/extract-text/saved');
     }

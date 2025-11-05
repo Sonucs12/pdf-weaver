@@ -1,7 +1,18 @@
-'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
+import { generateMetadata } from "@/lib/metadata";
+import { StructuredData } from "@/components/StructuredData";
+
+const { metadata, schema } = generateMetadata({
+  title: "About Us",
+  description: "Learn more about our company",
+  path: "https://yourdomain.com/about",
+  faq: [
+    { question: "Who are we?", answer: "We are innovators in tech." },
+  ],
+}); 
+export { metadata };
 
 const features = [
   {
@@ -67,7 +78,7 @@ export default function AboutPage() {
             </CardContent>
           </Card>
         ))}
-      </div>
+      </div>{schema && <StructuredData data={schema} />}
     </div>
   );
 }

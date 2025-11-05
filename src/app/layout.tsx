@@ -1,18 +1,15 @@
-import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
-import { siteConfig } from "@/lib/metadata";
 import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
+import { generateMetadata, siteConfig } from "@/lib/metadata";
+import { StructuredData } from "@/components/StructuredData";
 
-export const metadata: Metadata = {
-  title: {
-    default: siteConfig.name,
-    template: `%s | ${siteConfig.name}`,
-  },
+export const { metadata, schema } = generateMetadata({
+  title: siteConfig.name,
   description: siteConfig.description,
-};
+  path: "/",
+});
 
 export default function RootLayout({
   children,
@@ -49,6 +46,7 @@ export default function RootLayout({
             <main className="flex-grow flex flex-col">{children}</main>
             <Toaster />
         </ThemeProvider>
+        {schema && <StructuredData data={schema} />}
       </body>
     </html>
   );

@@ -3,10 +3,9 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pencil, Trash2 } from 'lucide-react';
-import Link from 'next/link';
+import { Trash2 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
-
+import { EditButton } from '../../components/EditButton';
 interface SavedExtractCardProps {
   title: string;
   fileName: string;
@@ -35,12 +34,7 @@ export function SavedExtractCard({ title, fileName, onDelete, createdAt, updated
         {!updatedAt && createdAt && <p className="text-xs text-muted-foreground">Created at {formatDate(createdAt, 'PP')}</p>}
       </CardContent>
       <CardFooter className="flex mt-auto justify-end items-end gap-2">
-        <Link href={`/extract-text/saved/${encodeURIComponent(title)}`}>
-          <Button variant="outline" size={"icon"}>
-            <Pencil className="h-4 w-4" />
-            
-          </Button>
-        </Link>
+        <EditButton title={title}/>
         <Button variant="destructive" size={"icon"} onClick={handleDeleteClick} loading={isDeleting}>
           <Trash2 className="h-4 w-4" />
          

@@ -1,8 +1,10 @@
 'use client';
 
 import { FileEdit } from 'lucide-react';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { DraftCard } from './components/DraftCard';
+import { useRouter } from 'next/navigation';
 
 interface Draft {
   id: string;
@@ -10,10 +12,21 @@ interface Draft {
   fileName: string;
   lastModified: string;
   preview: string;
+  editedMarkdown: string;
 }
 
 export default function DraftPage() {
-  const [drafts] = useLocalStorage<Draft[]>('pdf-weaver-drafts', []);
+  const [drafts, setDrafts] = useLocalStorage<Draft[]>('pdf-weaver-drafts', []);
+  const router = useRouter();
+
+  const handleDelete = (id: string) => {
+    setDrafts(drafts.filter(draft => draft.id !== id));
+  };
+
+  const handleEdit = (draft: Draft) => {
+    sessionStorage.setItem('edit-draft', JSON.stringify(draft));
+    router.push('/extract-text/create-new');
+  };
 
   return (
     <div className="flex-grow flex flex-col p-4 md:p-8">
@@ -38,19 +51,7 @@ export default function DraftPage() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {drafts.map((draft) => (
-              <Card key={draft.id} className="cursor-pointer hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="truncate">{draft.title}</CardTitle>
-                  <CardDescription>
-                    Last modified: {draft.lastModified}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {draft.preview}
-                  </p>
-                </CardContent>
-              </Card>
+              <DraftCard key={draft.id} draft={draft} onDelete={handleDelete} onEdit={handleEdit} />
             ))}
           </div>
         )}

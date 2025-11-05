@@ -1,11 +1,14 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { FileText, Loader2, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAutoSaveDraft } from '@/hooks/use-auto-save-draft';
 import { WyngEditor } from '@/app/extract-text/components/WyngEditor';
 import { MarkdownPreviewDialog } from '@/app/extract-text/components/MarkdownPreviewDialog';
 import { CancelButton } from './CancelButton';
 import { ExportMenu } from './ExportMenu';
+
 import { SaveButton } from './SaveButton';
 
 interface EditStepProps {
@@ -28,15 +31,32 @@ export function EditStep({
   onReset,
   onBack,
   isProcessing = false,
-  progressMessage,
-  onCancel,
-}: EditStepProps) {
-  return (
-    <div className="w-full flex flex-col">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-        <div className="flex items-center gap-2 text-sm">
-          <Button variant="outline" size="icon" onClick={onBack} disabled={isProcessing}>
-            <ArrowLeft className="h-4 w-4" />
+    progressMessage,
+        onCancel,
+      }: EditStepProps) {
+        const { saveDraft } = useAutoSaveDraft();
+        const [isDirty, setIsDirty] = useState(true);
+      
+        const handleTextChange = (text: string) => {
+          onTextChange(text);
+          setIsDirty(true);
+        };
+      
+        const handleSave = () => {
+          setIsDirty(false);
+        };
+      
+        const handleBackClick = () => {
+          if (isDirty && editedMarkdown.trim()) {
+            saveDraft(editedMarkdown, fileName);
+          }
+          onBack();
+        };    
+      return (
+        <div className="w-full flex flex-col">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-2 text-sm">
+              <Button variant="outline" size="icon" onClick={handleBackClick} disabled={isProcessing}>            <ArrowLeft className="h-4 w-4" />
           </Button>
           <FileText className="h-5 w-5 text-muted-foreground" />
           <span className="font-medium truncate">{fileName}</span>
@@ -46,7 +66,7 @@ export function EditStep({
           Start Over
           </Button>
           <MarkdownPreviewDialog markdown={editedMarkdown} title="Preview Content" triggerLabel="Preview" size="lg" />
-          <SaveButton fileName={fileName} editedText={editedText} editedMarkdown={editedMarkdown} />
+          <SaveButton fileName={fileName} editedText={editedText} editedMarkdown={editedMarkdown} onSave={handleSave} />
           <ExportMenu editedText={editedText} editedMarkdown={editedMarkdown} fileName={fileName} isProcessing={isProcessing} />
         </div>
       </div>
@@ -64,7 +84,7 @@ export function EditStep({
       <div className="flex-grow mt-2">
         <WyngEditor
           markdown={editedMarkdown}
-          onChange={onTextChange}
+          onChange={handleTextChange}
           placeholder="Write or edit your content..."
           className="min-h-[300px]"
         />

@@ -11,9 +11,10 @@ interface SaveButtonProps {
   fileName: string;
   editedText: string;
   editedMarkdown: string;
+  onSave: () => void;
 }
 
-export function SaveButton({ fileName, editedText, editedMarkdown }: SaveButtonProps) {
+export function SaveButton({ fileName, editedText, editedMarkdown, onSave }: SaveButtonProps) {
   const [savedItems, setSavedItems] = useLocalStorage<any[]>('saved-extracts', []);
   const [isSaved, setIsSaved] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -47,6 +48,7 @@ export function SaveButton({ fileName, editedText, editedMarkdown }: SaveButtonP
     }
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 2000);
+    onSave();
   };
 
   const menuItems = [

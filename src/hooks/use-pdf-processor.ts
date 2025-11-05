@@ -93,7 +93,8 @@ export function usePdfProcessor() {
     error: string,
     processedCount: number,
     totalPages: number,
-    hasContent: boolean
+    hasContent: boolean,
+    allFormattedText: string
   ) => {
     cancelRef.current = true;
     resetProcessing();
@@ -214,7 +215,7 @@ export function usePdfProcessor() {
           results = await extractAndFormatPages({ images: chunkImages, pageNumbers: chunk });
         } catch (error) {
           const rawError = error instanceof Error ? error.message : 'AI processing failed';
-          handleProcessingError(rawError, processedCount, totalPages, allFormattedText.trim().length > 0);
+          handleProcessingError(rawError, processedCount, totalPages, allFormattedText.trim().length > 0, allFormattedText);
           return;
         }
 
@@ -257,7 +258,8 @@ export function usePdfProcessor() {
                 result.error || 'Unknown error', 
                 processedCount, 
                 totalPages, 
-                allFormattedText.trim().length > 0
+                allFormattedText.trim().length > 0,
+                allFormattedText
               );
               return;
             } else {

@@ -1,18 +1,19 @@
 'use client';
 
 import { FileEdit } from 'lucide-react';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface Draft {
   id: string;
+  title: string;
   fileName: string;
   lastModified: string;
   preview: string;
 }
 
 export default function DraftPage() {
-  // TODO: Fetch drafts from storage/API
-  const drafts: Draft[] = [];
+  const [drafts] = useLocalStorage<Draft[]>('pdf-weaver-drafts', []);
 
   return (
     <div className="flex-grow flex flex-col p-4 md:p-8">
@@ -39,7 +40,7 @@ export default function DraftPage() {
             {drafts.map((draft) => (
               <Card key={draft.id} className="cursor-pointer hover:shadow-lg transition-shadow">
                 <CardHeader>
-                  <CardTitle className="truncate">{draft.fileName}</CardTitle>
+                  <CardTitle className="truncate">{draft.title}</CardTitle>
                   <CardDescription>
                     Last modified: {draft.lastModified}
                   </CardDescription>

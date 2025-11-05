@@ -2,7 +2,6 @@
 
 import { type DragEvent } from 'react';
 import { usePdfProcessor } from '@/hooks/use-pdf-processor';
-import { LiveImagePreview } from './components/LiveImagePreview';
 import { UploadStep } from './components/upload-step';
 import { SelectPageStep } from './components/select-page-step';
 import { ProcessingStep } from './components/processing-step';

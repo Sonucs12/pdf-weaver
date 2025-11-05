@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useMemo } from 'react';
+import { useAutoSaveDraft } from '@/hooks/use-auto-save-draft';
 import { useToast } from '@/hooks/use-toast';
 import * as pdfjsLib from 'pdfjs-dist';
 import { extractAndFormatPages } from '@/ai/flows';
@@ -49,6 +50,7 @@ export function usePdfProcessor() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cancelRef = useRef(false);
   const { toast } = useToast();
+  const { saveDraft } = useAutoSaveDraft();
 
   const getUserFriendlyError = useCallback((error: string): string => {
     const errorLower = error.toLowerCase();
@@ -108,6 +110,9 @@ export function usePdfProcessor() {
       duration: 6000,
     });
     
+    if (hasContent) {
+      saveDraft(allFormattedText, fileName);
+    }
     setStep(hasContent ? 'edit' : 'select-page');
   }, [getUserFriendlyError, resetProcessing, toast]);
 

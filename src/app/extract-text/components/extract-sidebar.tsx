@@ -53,7 +53,7 @@ function DesktopSidebar() {
               }
             )}
           >
-            <item.icon className="h-4 w-4" />
+            <item.icon size={18} />
             <span className="ml-3">{item.label}</span>
           </Link>
         ))}
@@ -67,21 +67,21 @@ function MobileNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="w-full border-t border-border bg-background flex items-center py-2">
-      <div className="h-full flex flex-row items-center overflow-x-auto scrollbar-hidden px-2 gap-2">
+    <nav className="w-full border-t border-border bg-background flex items-center justify-center py-2">
+      <div className="h-full flex flex-row items-center overflow-x-auto scrollbar-hidden px-2 gap-4">
         {menuItems.map((item) => (
           <Link
             key={item.label}
             href={item.href}
             className={clsx(
-              "flex flex-col justify-center items-center px-4 pt-2 text-sm rounded-lg transition-all duration-300 whitespace-nowrap gap-1",
+              "flex flex-col justify-center items-center px-4 pt-2 text-sm rounded-lg transition-all duration-300 whitespace-nowrap",
               {
                 "bg-sidebar-active text-sidebar-text": pathname === item.href,
                 "hover:bg-grey-background": pathname !== item.href,
               }
             )}
           >
-            <item.icon className="h-4 w-4" />
+            <item.icon size={18} />
             <span className="text-[10px]">{item.label}</span>
           </Link>
         ))}

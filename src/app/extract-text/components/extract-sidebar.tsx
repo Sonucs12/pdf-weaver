@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Plus, FileEdit, Save, LucideIcon, PenIcon } from 'lucide-react';
 import clsx from "clsx";
+
 interface MenuItem {
   href: string;
   label: string;
@@ -36,16 +37,15 @@ const menuItems: MenuItem[] = [
 export function ExtractSidebar() {
   const pathname = usePathname();
 
-
   return (
-    <aside className="w-64 border-r border-border bg-background flex flex-col">
-      <nav className="flex-1 p-4">
-      {menuItems.map((item) => (
+    <aside className="md:w-64 w-full border-r border-border bg-background flex md:flex-col">
+      <nav className="md:flex-1 flex flex-row md:flex-col p-4 gap-2 md:gap-0 overflow-x-auto scrollbar-hidden w-full">
+        {menuItems.map((item) => (
           <Link
             key={item.label}
             href={item.href}
             className={clsx(
-              "flex items-center px-4 py-2 mt-2 text-sm  rounded-lg  transition-all duration-300",
+              "flex items-center px-4 py-2 md:mt-2 text-sm rounded-lg transition-all duration-300 whitespace-nowrap",
               {
                 "bg-sidebar-active text-sidebar-text": pathname === item.href,
                 "hover:bg-grey-background": pathname !== item.href,
@@ -53,7 +53,7 @@ export function ExtractSidebar() {
             )}
           >
             <item.icon className="h-4 w-4" />
-            <span className="ml-3  ">{item.label}</span>
+            <span className="ml-3">{item.label}</span>
           </Link>
         ))}
       </nav>

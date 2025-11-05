@@ -7,6 +7,8 @@ import { Markdown } from "tiptap-markdown";
 import { TiptapEditorToolbar } from "@/app/extract-text/editor/components/TiptapEditorToolbar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { markdownToHtml } from "@/hooks/use-markdown-to-html";
+import Link from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
 
 interface WyngEditorProps {
   markdown: string;
@@ -22,6 +24,18 @@ export function WyngEditor({ markdown, onChange, placeholder, className }: WyngE
         heading: { levels: [1, 2, 3, 4, 5, 6] },
       }),
       Markdown,
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-blue-500 underline',
+        },
+      }),
+      Image.configure({
+        inline: false,
+        HTMLAttributes: {
+          class: "rounded-md max-w-full mx-auto",
+        },
+      }),
     ],
     content: markdownToHtml(markdown || ""),
     onUpdate({ editor }) {

@@ -21,15 +21,45 @@ import {
   Minus,
   WrapText,
   RemoveFormatting,
+  Link as LinkIcon,
+  Unlink,
+  Image,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useCallback } from "react";
 
 type Props = {
   editor: Editor;
 };
 
 export function TiptapEditorToolbar({ editor }: Props) {
+  const handleAddLink = useCallback(() => {
+    const previousUrl = editor.getAttributes("link").href;
+    const url = window.prompt("Enter URL:", previousUrl);
+
+    if (url === null) return;
+
+    if (url === "") {
+      editor.chain().focus().extendMarkRange("link").unsetLink().run();
+      return;
+    }
+
+    editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+  }, [editor]);
+
+  const handleRemoveLink = useCallback(() => {
+    editor.chain().focus().unsetLink().run();
+  }, [editor]);
+
+  const handleAddImage = useCallback(() => {
+    const url = window.prompt("Enter image URL");
+    if (!url) return;
+  
+    editor.chain().focus().setImage({ src: url }).run();
+  }, [editor]);
+  
+
   const formattingButtons = [
     {
       action: () => editor.chain().focus().toggleBold().run(),
@@ -136,6 +166,33 @@ export function TiptapEditorToolbar({ editor }: Props) {
     },
   ];
 
+  const linkButtons = [
+    {
+      action: handleAddLink,
+      isActive: editor.isActive("link"),
+      icon: LinkIcon,
+      tooltip: "Add Link",
+      disabled: false,
+    },
+    {
+      action: handleRemoveLink,
+      isActive: false,
+      icon: Unlink,
+      tooltip: "Remove Link",
+      disabled: !editor.isActive("link"),
+    },
+  ];
+
+  const mediaButtons = [
+    {
+      action: handleAddImage,
+      isActive: false,
+      icon: Image,
+      tooltip: "Insert Image",
+      disabled: false,
+    },
+  ];
+
   const utilityButtons = [
     {
       action: () => editor.chain().focus().setHorizontalRule().run(),
@@ -193,6 +250,10 @@ export function TiptapEditorToolbar({ editor }: Props) {
       <div className="flex gap-1">{renderButtons(blockButtons)}</div>
       <Separator orientation="vertical" className="h-8" />
       <div className="flex gap-1">{renderButtons(listButtons)}</div>
+      <Separator orientation="vertical" className="h-8" />
+      <div className="flex gap-1">{renderButtons(linkButtons)}</div>
+      <Separator orientation="vertical" className="h-8" />
+      <div className="flex gap-1">{renderButtons(mediaButtons)}</div>
       <Separator orientation="vertical" className="h-8" />
       <div className="flex gap-1">{renderButtons(utilityButtons)}</div>
     </div>

@@ -16,6 +16,27 @@ interface SaveButtonProps {
   isDisabled?: boolean;
 }
 
+// Exported function for creating new project
+export const createNewProject = (
+  editedText: string,
+  editedMarkdown: string,
+  toast: ReturnType<typeof useToast>['toast'],
+  onOpenDialog: () => void
+) => {
+  const isContentEmpty = !editedText.trim() && !editedMarkdown.trim();
+  
+  if (isContentEmpty) {
+    toast({
+      variant: 'destructive',
+      title: 'Cannot save empty content',
+      description: 'Please add some content before saving.',
+    });
+    return;
+  }
+  
+  onOpenDialog();
+};
+
 export function SaveButton({ fileName, editedText, editedMarkdown, onSave, isEditMode = false, isDisabled = false }: SaveButtonProps) {
   const [savedItems, setSavedItems] = useLocalStorage<any[]>('saved-extracts', []);
   const [isSaved, setIsSaved] = useState(false);
@@ -53,20 +74,14 @@ export function SaveButton({ fileName, editedText, editedMarkdown, onSave, isEdi
     onSave();
   };
 
+  const handleNewProjectClick = () => {
+    createNewProject(editedText, editedMarkdown, toast, () => setIsDialogOpen(true));
+  };
+
   const menuItems = [
     {
       label: 'New Project',
-      onClick: () => {
-        if (isContentEmpty) {
-          toast({
-            variant: 'destructive',
-            title: 'Cannot save empty content',
-            description: 'Please add some content before saving.',
-          });
-          return;
-        }
-        setIsDialogOpen(true);
-      },
+      onClick: handleNewProjectClick,
     },
     {
       label: 'Merge into existing project',

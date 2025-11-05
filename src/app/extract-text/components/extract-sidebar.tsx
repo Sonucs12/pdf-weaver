@@ -67,8 +67,8 @@ function MobileNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="w-full border-b border-border bg-background">
-      <div className="flex flex-row overflow-x-auto p-2 gap-2">
+    <nav className="w-full border-t border-border bg-background">
+      <div className="flex flex-row overflow-x-auto scrollbar-hidden p-2 gap-2">
         {menuItems.map((item) => (
           <Link
             key={item.label}
@@ -95,7 +95,7 @@ export function ExtractSidebar() {
   return (
     <>
       {/* Show only on mobile */}
-      <div className="md:hidden sticky bottom-0">
+      <div className="md:hidden">
         <MobileNav />
       </div>
       

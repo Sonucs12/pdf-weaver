@@ -74,7 +74,7 @@ function MobileNav() {
             key={item.label}
             href={item.href}
             className={clsx(
-              "flex flex-col justify-center items-center px-4 pt-2 text-sm rounded-lg transition-all duration-300 whitespace-nowrap",
+              "flex flex-col justify-center items-center px-4 py-2 text-sm rounded-lg transition-all duration-300 whitespace-nowrap",
               {
                 "bg-sidebar-active text-sidebar-text": pathname === item.href,
                 "hover:bg-grey-background": pathname !== item.href,
@@ -82,7 +82,7 @@ function MobileNav() {
             )}
           >
             <item.icon size={18} />
-            <span className="text-[10px]">{item.label}</span>
+            <span className="text-xs">{item.label}</span>
           </Link>
         ))}
       </div>
@@ -90,16 +90,12 @@ function MobileNav() {
   );
 }
 
-// Main component that renders both
 export function ExtractSidebar() {
   return (
     <>
-      {/* Show only on mobile */}
       <div className="md:hidden fixed bottom-0 right-0 w-full z-10">
         <MobileNav />
       </div>
-      
-      {/* Show only on desktop */}
       <div className="hidden md:flex">
         <DesktopSidebar />
       </div>

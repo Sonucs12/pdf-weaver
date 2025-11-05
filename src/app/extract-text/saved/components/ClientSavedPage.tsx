@@ -42,15 +42,14 @@ export default function ClientSavedPage() {
   }, [savedItems, searchQuery]);
 
   if (!mounted) {
-    return null; // or a loading spinner
+    return null; 
   }
 
   return (
     <div className="flex-grow flex flex-col p-4 md:p-8">
       <div className="max-w-6xl w-full mx-auto">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-            <Save className="h-8 w-8" />
+        <div className="mb-4 space-y-4">
+          <h1 className="text-2xl font-bold mb-2">
             Saved Documents
           </h1>
           <SearchInput
@@ -58,7 +57,7 @@ export default function ClientSavedPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             onSearch={setSearchQuery}
             onClear={() => setSearchQuery('')}
-            className="max-w-xs"
+           
           />
         </div>
 

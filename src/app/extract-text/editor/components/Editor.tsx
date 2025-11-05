@@ -213,16 +213,16 @@ export function Editor({
         onSave={handleSave}
       />
       
-      <Card className="flex flex-col">
+      <div className="flex flex-col border-none ">
         {editor && (
-          <CardHeader className="p-2 border-b flex flex-row items-center justify-between">
+          <div className=" sticky top-0 z-10 bg-background py-2  border-b flex flex-row items-center justify-between">
             <TiptapEditorToolbar editor={editor} />
-          </CardHeader>
+          </div>
         )}
-        <CardContent className="p-4 flex-1 overflow-y-auto">
+        <div className="py-4 px-0 flex-1 overflow-y-auto">
           <EditorContent editor={editor} />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

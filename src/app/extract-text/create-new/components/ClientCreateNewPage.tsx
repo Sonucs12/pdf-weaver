@@ -112,7 +112,7 @@ export default function ClientCreateNewPage() {
 
   return (
     <div className="flex-grow flex mb-8 items-center justify-center p-4 md:p-8 transition-opacity duration-500">
-      <div className="w-full max-w-6xl">
+      <div className="w-full max-w-7xl">
         {renderContent()}
       </div>
       

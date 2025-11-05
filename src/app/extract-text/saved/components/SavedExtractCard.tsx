@@ -26,7 +26,7 @@ export function SavedExtractCard({ title, fileName, onDelete, createdAt, updated
   return (
     <Card className='flex justify-between flex-col'>
       <CardHeader>
-        <CardTitle className='text-md'>{title}</CardTitle>
+        <CardTitle className='text-sm line-clamp-2'>{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <p className="line-clamp-2 text-sm mb-1">{fileName}</p>

@@ -240,7 +240,7 @@ export function TiptapEditorToolbar({ editor }: Props) {
     ));
 
   return (
-    <div className="flex flex-wrap items-center gap-2 p-2">
+    <div className="flex flex-wrap items-center gap-2 py-2">
       <div className="flex gap-1">{renderButtons(historyButtons)}</div>
       <Separator orientation="vertical" className="h-8" />
       <div className="flex gap-1">{renderButtons(formattingButtons)}</div>

@@ -10,7 +10,7 @@ export default function AppLayout({
   return (
     <div className="flex md:flex-row flex-col-reverse w-full overflow-hidden ">
       <ExtractSidebar />
-      <main className="flex-1 overflow-auto md:max-h-[calc(100vh-4.7rem)] pb-14 md:pb-0">
+      <main className="flex-1 overflow-auto md:h-[calc(100vh-4.7rem)] pb-14 md:pb-0">
         {children}
       </main>
     </div>

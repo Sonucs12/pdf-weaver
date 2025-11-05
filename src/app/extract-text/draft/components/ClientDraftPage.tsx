@@ -1,11 +1,7 @@
-'use client';
-
-import { FileEdit } from 'lucide-react';
+"use client"
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { DraftCard } from './DraftCard';
-import { useRouter } from 'next/navigation';
-
 interface Draft {
   id: string;
   title: string;
@@ -17,8 +13,6 @@ interface Draft {
 
 export default function ClientDraftPage() {
   const [drafts, setDrafts] = useLocalStorage<Draft[]>('pdf-weaver-drafts', []);
-  const router = useRouter();
-
   const handleDelete = (id: string) => {
     setDrafts(drafts.filter(draft => draft.id !== id));
   };
@@ -27,11 +21,10 @@ export default function ClientDraftPage() {
     <div className="flex-grow flex flex-col p-4 md:p-8">
       <div className="max-w-6xl w-full mx-auto">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-            <FileEdit className="h-8 w-8" />
+          <h1 className="text-2xl font-bold mb-1">
             Drafts
           </h1>
-          <p className="text-muted-foreground">Your unsaved work in progress</p>
+          <p className="text-muted-foreground text-sm">Your unsaved work in progress</p>
         </div>
 
         {drafts.length === 0 ? (
@@ -44,7 +37,7 @@ export default function ClientDraftPage() {
             </CardHeader>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 min-w-md">
             {drafts.map((draft) => (
               <DraftCard key={draft.id} draft={draft} onDelete={handleDelete} />
             ))}

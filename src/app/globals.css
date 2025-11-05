@@ -57,6 +57,19 @@
     --sidebar-text: 210 0% 0%;
   }
 }
+.prose {
+
+  code {
+    @apply bg-muted text-foreground rounded-md px-1.5 py-1 text-sm whitespace-pre-wrap break-words;
+  }
+  pre {
+    @apply bg-muted p-4 rounded-md overflow-x-auto text-foreground whitespace-pre-wrap break-words;
+  }
+
+  img {
+    @apply rounded-md;
+  }
+}
 
 @layer base {
   * {

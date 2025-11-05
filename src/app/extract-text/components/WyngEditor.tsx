@@ -59,18 +59,16 @@ export function WyngEditor({ markdown, onChange, placeholder, className }: WyngE
   }, [editor, markdown]);
 
   return (
-    <div className="space-y-4">
-      <Card className="flex flex-col">
-        {editor && (
-          <CardHeader className="sticky top-0 z-10 p-3 border-b bg-card">
-            <TiptapEditorToolbar editor={editor} />
-          </CardHeader>
-        )}
-        <CardContent className=" p-4 flex-1 overflow-y-auto">
-          <EditorContent editor={editor} />
-        </CardContent>
-      </Card>
+    <div className="flex flex-col border-none ">
+    {editor && (
+      <div className=" sticky top-0 z-10 bg-background py-2  border-b flex flex-row items-center justify-between">
+        <TiptapEditorToolbar editor={editor} />
+      </div>
+    )}
+    <div className="py-4 flex-1 overflow-y-auto">
+      <EditorContent editor={editor} />
     </div>
+  </div>
   );
 }
 

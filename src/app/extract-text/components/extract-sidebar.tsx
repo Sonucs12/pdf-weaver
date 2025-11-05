@@ -34,18 +34,19 @@ const menuItems: MenuItem[] = [
   },
 ];
 
-export function ExtractSidebar() {
+// Desktop Sidebar Component
+function DesktopSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="md:w-64 w-full border-r border-border bg-background flex md:flex-col">
-      <nav className="md:flex-1 flex flex-row md:flex-col p-4 gap-2 md:gap-0 overflow-x-auto scrollbar-hidden w-full">
+    <aside className="w-64 border-r border-border bg-background flex flex-col">
+      <nav className="flex-1 p-4">
         {menuItems.map((item) => (
           <Link
             key={item.label}
             href={item.href}
             className={clsx(
-              "flex items-center px-4 py-2 md:mt-2 text-sm rounded-lg transition-all duration-300 whitespace-nowrap",
+              "flex items-center px-4 py-2 mt-2 text-sm rounded-lg transition-all duration-300",
               {
                 "bg-sidebar-active text-sidebar-text": pathname === item.href,
                 "hover:bg-grey-background": pathname !== item.href,
@@ -58,5 +59,50 @@ export function ExtractSidebar() {
         ))}
       </nav>
     </aside>
+  );
+}
+
+// Mobile Navigation Component
+function MobileNav() {
+  const pathname = usePathname();
+
+  return (
+    <nav className="w-full border-b border-border bg-background">
+      <div className="flex flex-row overflow-x-auto p-2 gap-2">
+        {menuItems.map((item) => (
+          <Link
+            key={item.label}
+            href={item.href}
+            className={clsx(
+              "flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-300 whitespace-nowrap",
+              {
+                "bg-sidebar-active text-sidebar-text": pathname === item.href,
+                "hover:bg-grey-background": pathname !== item.href,
+              }
+            )}
+          >
+            <item.icon className="h-4 w-4" />
+            <span className="ml-3">{item.label}</span>
+          </Link>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
+// Main component that renders both
+export function ExtractSidebar() {
+  return (
+    <>
+      {/* Show only on mobile */}
+      <div className="md:hidden sticky bottom-0">
+        <MobileNav />
+      </div>
+      
+      {/* Show only on desktop */}
+      <div className="hidden md:block">
+        <DesktopSidebar />
+      </div>
+    </>
   );
 }

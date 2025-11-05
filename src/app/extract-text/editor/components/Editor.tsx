@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Markdown } from "tiptap-markdown";
@@ -28,9 +28,11 @@ const defaultContent = `
 </p>
 `;
 
-export function Editor() {
-  const [markdown, setMarkdown] = useState("");
-  const [editedText, setEditedText] = useState("");
+export function Editor({ initialContent = '', fileName: propFileName = 'untitled', isEditMode = false, id }: { initialContent?: string; fileName?: string; isEditMode?: boolean; id?: string }) {
+  const [markdown, setMarkdown] = useState(isEditMode ? (initialContent || '') : '');
+  const [editedText, setEditedText] = useState(isEditMode ? markdownToHtml(initialContent || '') : '');
+  const [fileName, setFileName] = useState(propFileName);
+  const baselineMarkdownRef = useRef<string>(isEditMode ? (initialContent || '') : '');
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ 
@@ -38,7 +40,7 @@ export function Editor() {
       }),
       Markdown,
     ],
-    content: defaultContent,
+    content: isEditMode ? (initialContent || '') : defaultContent,
     onUpdate({ editor }) {
       const currentMarkdown = editor.storage.markdown.getMarkdown();
       setMarkdown(currentMarkdown);
@@ -53,18 +55,31 @@ export function Editor() {
   });
 
   useEffect(() => {
-    if (editor && !markdown) {
+    if (!editor) return;
+    if (isEditMode) {
+      editor.commands.setContent(initialContent || '');
+      setMarkdown(initialContent || '');
+      setEditedText(markdownToHtml(initialContent || ''));
+      baselineMarkdownRef.current = initialContent || '';
+      if (propFileName && propFileName !== fileName) setFileName(propFileName);
+      return;
+    }
+    if (!markdown) {
+      editor.commands.setContent(defaultContent);
       const initialMarkdown = editor.storage.markdown.getMarkdown();
       setMarkdown(initialMarkdown);
       setEditedText(markdownToHtml(initialMarkdown));
     }
-  }, [editor, markdown]);
+    if (propFileName && propFileName !== fileName) setFileName(propFileName);
+  }, [editor, isEditMode, initialContent, propFileName]);
+
+  const hasChanged = isEditMode ? ((markdown || '').trim() !== (baselineMarkdownRef.current || '').trim()) : false;
 
   return (
     <div className="space-y-4"> <div className="flex justify-end items-center gap-2">
                 <MarkdownPreviewDialog markdown={markdown} title="Preview Content" triggerLabel="Preview" size="lg" />
-                <SaveButton fileName="editor-content" editedText={editedText} editedMarkdown={markdown} />
-                <ExportMenu editedText={editedText} editedMarkdown={markdown} fileName="editor-content" isProcessing={false} />
+                <SaveButton fileName={fileName} editedText={editedText} editedMarkdown={markdown} onSave={() => {}} isEditMode={isEditMode} isDisabled={isEditMode ? !hasChanged : false} />
+                <ExportMenu editedText={editedText} editedMarkdown={markdown} fileName={fileName} isProcessing={false} />
               </div>
       <Card className="flex flex-col">
         {editor && (

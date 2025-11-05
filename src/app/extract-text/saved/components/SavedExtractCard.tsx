@@ -34,7 +34,7 @@ export function SavedExtractCard({ title, fileName, onDelete, createdAt, updated
         {!updatedAt && createdAt && <p className="text-xs text-muted-foreground">Created at {formatDate(createdAt, 'PP')}</p>}
       </CardContent>
       <CardFooter className="flex mt-auto justify-end items-end gap-2">
-        <EditButton title={title}/>
+        <EditButton id={title} title={title}/>
         <Button variant="destructive" size={"icon"} onClick={handleDeleteClick} loading={isDeleting}>
           <Trash2 className="h-4 w-4" />
          

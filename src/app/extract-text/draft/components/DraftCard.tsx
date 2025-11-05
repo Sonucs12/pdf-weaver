@@ -18,10 +18,9 @@ interface Draft {
 interface DraftCardProps {
   draft: Draft;
   onDelete: (id: string) => void;
-  onEdit: (draft: Draft) => void;
 }
 
-export function DraftCard({ draft, onDelete, onEdit }: DraftCardProps) {
+export function DraftCard({ draft, onDelete }: DraftCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDeleteClick = async () => {
@@ -45,7 +44,7 @@ export function DraftCard({ draft, onDelete, onEdit }: DraftCardProps) {
         <p className="text-sm text-muted-foreground line-clamp-2 mt-2">{draft.preview}</p>
       </CardContent>
       <CardFooter className="flex mt-auto justify-end items-end gap-2">
-        <EditButton id={draft.id} title={draft.title} onClick={() => onEdit(draft)} />
+        <EditButton id={draft.id} title={draft.title} />
         <SaveButton
           fileName={draft.fileName}
           editedText={draft.editedMarkdown}

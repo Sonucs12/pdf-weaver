@@ -12,9 +12,11 @@ interface SaveButtonProps {
   editedText: string;
   editedMarkdown: string;
   onSave: () => void;
+  isEditMode?: boolean;
+  isDisabled?: boolean;
 }
 
-export function SaveButton({ fileName, editedText, editedMarkdown, onSave }: SaveButtonProps) {
+export function SaveButton({ fileName, editedText, editedMarkdown, onSave, isEditMode = false, isDisabled = false }: SaveButtonProps) {
   const [savedItems, setSavedItems] = useLocalStorage<any[]>('saved-extracts', []);
   const [isSaved, setIsSaved] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -80,7 +82,7 @@ export function SaveButton({ fileName, editedText, editedMarkdown, onSave }: Sav
   return (
     <>
       <DropDownMenu
-        trigger={<Button disabled={isSaved || isContentEmpty}>{isSaved ? 'Saved!' : 'Save'}</Button>}
+        trigger={<Button disabled={isSaved || isContentEmpty || isDisabled}>{isSaved ? (isEditMode ? 'Updated!' : 'Saved!') : (isEditMode ? 'Update' : 'Save')}</Button>}
         items={menuItems}
       />
       <TitleDialog

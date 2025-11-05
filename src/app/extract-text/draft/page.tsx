@@ -23,11 +23,6 @@ export default function DraftPage() {
     setDrafts(drafts.filter(draft => draft.id !== id));
   };
 
-  const handleEdit = (draft: Draft) => {
-    sessionStorage.setItem('edit-draft', JSON.stringify(draft));
-    router.push('/extract-text/create-new');
-  };
-
   return (
     <div className="flex-grow flex flex-col p-4 md:p-8">
       <div className="max-w-6xl w-full mx-auto">
@@ -51,7 +46,7 @@ export default function DraftPage() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {drafts.map((draft) => (
-              <DraftCard key={draft.id} draft={draft} onDelete={handleDelete} onEdit={handleEdit} />
+              <DraftCard key={draft.id} draft={draft} onDelete={handleDelete} />
             ))}
           </div>
         )}

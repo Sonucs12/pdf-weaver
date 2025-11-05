@@ -67,14 +67,14 @@ function MobileNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="w-full border-t border-border bg-background">
-      <div className="flex flex-row overflow-x-auto scrollbar-hidden p-2 gap-2">
+    <nav className="w-full border-t border-border bg-background flex items-center py-2">
+      <div className="h-full flex flex-row items-center overflow-x-auto scrollbar-hidden px-2 gap-2">
         {menuItems.map((item) => (
           <Link
             key={item.label}
             href={item.href}
             className={clsx(
-              "flex items-center px-4 py-2 text-sm rounded-lg transition-all duration-300 whitespace-nowrap",
+              "flex flex-col justify-center items-center px-4 pt-2 text-sm rounded-lg transition-all duration-300 whitespace-nowrap gap-1",
               {
                 "bg-sidebar-active text-sidebar-text": pathname === item.href,
                 "hover:bg-grey-background": pathname !== item.href,
@@ -82,7 +82,7 @@ function MobileNav() {
             )}
           >
             <item.icon className="h-4 w-4" />
-            <span className="ml-3">{item.label}</span>
+            <span className="text-[10px]">{item.label}</span>
           </Link>
         ))}
       </div>
@@ -95,12 +95,12 @@ export function ExtractSidebar() {
   return (
     <>
       {/* Show only on mobile */}
-      <div className="md:hidden">
+      <div className="md:hidden fixed bottom-0 right-0 w-full z-10">
         <MobileNav />
       </div>
       
       {/* Show only on desktop */}
-      <div className="hidden md:block">
+      <div className="hidden md:flex">
         <DesktopSidebar />
       </div>
     </>

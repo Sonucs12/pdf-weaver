@@ -1,6 +1,7 @@
 "use client";
 
 import type { Editor } from "@tiptap/react";
+import type { LucideIcon } from "lucide-react";
 import {
   Bold,
   Italic,
@@ -27,28 +28,67 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, memo } from "react";
 
-type Props = {
-  editor: Editor;
-};
+interface ToolbarButton {
+  action: () => void;
+  isActive: boolean;
+  icon: LucideIcon;
+  tooltip: string;
+  disabled: boolean;
+}
 
-export function TiptapEditorToolbar({ editor }: Props) {
-  // Force re-render on selection/content changes so isActive()/can() reflect current state
+interface TiptapEditorToolbarProps {
+  editor: Editor | null;
+}
+
+// Memoized button group component to prevent unnecessary re-renders
+const ButtonGroup = memo(({ buttons }: { buttons: ToolbarButton[] }) => (
+  <div className="flex gap-1">
+    {buttons.map((btn, index) => (
+      <Button
+        key={index}
+        variant={btn.isActive ? "default" : "outline"}
+        size="icon"
+        onClick={btn.action}
+        disabled={btn.disabled}
+        aria-label={btn.tooltip}
+        title={btn.tooltip}
+        className="h-8 w-8"
+      >
+        <btn.icon className="h-4 w-4" />
+      </Button>
+    ))}
+  </div>
+));
+
+ButtonGroup.displayName = "ButtonGroup";
+
+export const TiptapEditorToolbar = memo(({ editor }: TiptapEditorToolbarProps) => {
   const [, forceRerender] = useState(0);
+
+  // Memoized update handler
+  const handleUpdate = useCallback(() => {
+    forceRerender((v) => v + 1);
+  }, []);
+
   useEffect(() => {
     if (!editor) return;
-    const update = () => forceRerender(v => v + 1);
-    editor.on('selectionUpdate', update);
-    editor.on('transaction', update);
-    editor.on('update', update);
+
+    editor.on("selectionUpdate", handleUpdate);
+    editor.on("transaction", handleUpdate);
+    editor.on("update", handleUpdate);
+
     return () => {
-      editor.off('selectionUpdate', update);
-      editor.off('transaction', update);
-      editor.off('update', update);
+      editor.off("selectionUpdate", handleUpdate);
+      editor.off("transaction", handleUpdate);
+      editor.off("update", handleUpdate);
     };
-  }, [editor]);
+  }, [editor, handleUpdate]);
+
   const handleAddLink = useCallback(() => {
+    if (!editor) return;
+
     const previousUrl = editor.getAttributes("link").href;
     const url = window.prompt("Enter URL:", previousUrl);
 
@@ -63,18 +103,43 @@ export function TiptapEditorToolbar({ editor }: Props) {
   }, [editor]);
 
   const handleRemoveLink = useCallback(() => {
+    if (!editor) return;
     editor.chain().focus().unsetLink().run();
   }, [editor]);
 
   const handleAddImage = useCallback(() => {
+    if (!editor) return;
+
     const url = window.prompt("Enter image URL");
     if (!url) return;
-  
+
     editor.chain().focus().setImage({ src: url }).run();
   }, [editor]);
-  
 
-  const formattingButtons = [
+  const handleClearFormatting = useCallback(() => {
+    if (!editor) return;
+
+    const chain = editor.chain().focus();
+    
+    if (editor.isActive("bulletList") || editor.isActive("orderedList")) {
+      chain.liftListItem("listItem").run();
+      return;
+    }
+    
+    if (editor.isActive("heading") || editor.isActive("codeBlock") || editor.isActive("blockquote")) {
+      chain.clearNodes().setParagraph().run();
+      return;
+    }
+    
+    chain.unsetAllMarks().run();
+  }, [editor]);
+
+  // Early return if editor is not ready
+  if (!editor) {
+    return null;
+  }
+
+  const formattingButtons: ToolbarButton[] = [
     {
       action: () => editor.chain().focus().toggleBold().run(),
       isActive: editor.isActive("bold"),
@@ -105,82 +170,93 @@ export function TiptapEditorToolbar({ editor }: Props) {
     },
   ];
 
-  const headingButtons = [
+  const headingButtons: ToolbarButton[] = [
     {
       action: () => editor.chain().focus().toggleHeading({ level: 1 }).run(),
       isActive: editor.isActive("heading", { level: 1 }),
       icon: Heading1,
       tooltip: "Heading 1",
+      disabled: false,
     },
     {
       action: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
       isActive: editor.isActive("heading", { level: 2 }),
       icon: Heading2,
       tooltip: "Heading 2",
+      disabled: false,
     },
     {
       action: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
       isActive: editor.isActive("heading", { level: 3 }),
       icon: Heading3,
       tooltip: "Heading 3",
+      disabled: false,
     },
     {
       action: () => editor.chain().focus().toggleHeading({ level: 4 }).run(),
       isActive: editor.isActive("heading", { level: 4 }),
       icon: Heading4,
       tooltip: "Heading 4",
+      disabled: false,
     },
     {
       action: () => editor.chain().focus().toggleHeading({ level: 5 }).run(),
       isActive: editor.isActive("heading", { level: 5 }),
       icon: Heading5,
       tooltip: "Heading 5",
+      disabled: false,
     },
     {
       action: () => editor.chain().focus().toggleHeading({ level: 6 }).run(),
       isActive: editor.isActive("heading", { level: 6 }),
       icon: Heading6,
       tooltip: "Heading 6",
+      disabled: false,
     },
   ];
 
-  const blockButtons = [
+  const blockButtons: ToolbarButton[] = [
     {
       action: () => editor.chain().focus().setParagraph().run(),
       isActive: editor.isActive("paragraph"),
       icon: WrapText,
       tooltip: "Paragraph",
+      disabled: false,
     },
     {
       action: () => editor.chain().focus().toggleCodeBlock().run(),
       isActive: editor.isActive("codeBlock"),
       icon: CodeSquare,
       tooltip: "Code Block",
+      disabled: false,
     },
     {
       action: () => editor.chain().focus().toggleBlockquote().run(),
       isActive: editor.isActive("blockquote"),
       icon: Quote,
       tooltip: "Blockquote",
+      disabled: false,
     },
   ];
 
-  const listButtons = [
+  const listButtons: ToolbarButton[] = [
     {
       action: () => editor.chain().focus().toggleBulletList().run(),
       isActive: editor.isActive("bulletList"),
       icon: List,
       tooltip: "Bullet List",
+      disabled: false,
     },
     {
       action: () => editor.chain().focus().toggleOrderedList().run(),
       isActive: editor.isActive("orderedList"),
       icon: ListOrdered,
       tooltip: "Ordered List",
+      disabled: false,
     },
   ];
 
-  const linkButtons = [
+  const linkButtons: ToolbarButton[] = [
     {
       action: handleAddLink,
       isActive: editor.isActive("link"),
@@ -193,11 +269,11 @@ export function TiptapEditorToolbar({ editor }: Props) {
       isActive: false,
       icon: Unlink,
       tooltip: "Remove Link",
-      disabled: !editor.isActive("link") || !editor.can().chain().focus().unsetLink().run(),
+      disabled: !editor.isActive("link"),
     },
   ];
 
-  const mediaButtons = [
+  const mediaButtons: ToolbarButton[] = [
     {
       action: handleAddImage,
       isActive: false,
@@ -207,69 +283,64 @@ export function TiptapEditorToolbar({ editor }: Props) {
     },
   ];
 
-  const utilityButtons = [
+  const utilityButtons: ToolbarButton[] = [
     {
       action: () => editor.chain().focus().setHorizontalRule().run(),
       isActive: false,
       icon: Minus,
       tooltip: "Horizontal Rule",
+      disabled: false,
     },
     {
-      action: () => editor.chain().focus().unsetAllMarks().run(),
+      action: handleClearFormatting,
       isActive: false,
       icon: RemoveFormatting,
       tooltip: "Clear Formatting",
+      disabled: (() => {
+        const canInline = editor.can().chain().focus().unsetAllMarks().run();
+        const canList = editor.isActive("bulletList") || editor.isActive("orderedList");
+        const canBlock = editor.isActive("heading") || editor.isActive("codeBlock") || editor.isActive("blockquote");
+        return !(canInline || canList || canBlock);
+      })(),
     },
   ];
 
-  const historyButtons = [
+  const historyButtons: ToolbarButton[] = [
     {
       action: () => editor.chain().focus().undo().run(),
+      isActive: false,
       icon: Undo,
       tooltip: "Undo (Ctrl+Z)",
       disabled: !editor.can().chain().focus().undo().run(),
     },
     {
       action: () => editor.chain().focus().redo().run(),
+      isActive: false,
       icon: Redo,
       tooltip: "Redo (Ctrl+Shift+Z)",
       disabled: !editor.can().chain().focus().redo().run(),
     },
   ];
 
-  const renderButtons = (buttons: any[]) =>
-    buttons.map((btn, index) => (
-      <Button
-        key={index}
-        variant={btn.isActive ? "default" : "outline"}
-        size="icon"
-        onClick={btn.action}
-        disabled={btn.disabled}
-        aria-label={btn.tooltip}
-        title={btn.tooltip}
-        className="h-8 w-8"
-      >
-        <btn.icon className="h-4 w-4" />
-      </Button>
-    ));
-
   return (
     <div className="flex flex-wrap items-center gap-2 py-2">
-      <div className="flex gap-1">{renderButtons(historyButtons)}</div>
+      <ButtonGroup buttons={historyButtons} />
       <Separator orientation="vertical" className="h-8" />
-      <div className="flex gap-1">{renderButtons(formattingButtons)}</div>
+      <ButtonGroup buttons={formattingButtons} />
       <Separator orientation="vertical" className="h-8" />
-      <div className="flex gap-1">{renderButtons(headingButtons)}</div>
+      <ButtonGroup buttons={headingButtons} />
       <Separator orientation="vertical" className="h-8" />
-      <div className="flex gap-1">{renderButtons(blockButtons)}</div>
+      <ButtonGroup buttons={blockButtons} />
       <Separator orientation="vertical" className="h-8" />
-      <div className="flex gap-1">{renderButtons(listButtons)}</div>
+      <ButtonGroup buttons={listButtons} />
       <Separator orientation="vertical" className="h-8" />
-      <div className="flex gap-1">{renderButtons(linkButtons)}</div>
+      <ButtonGroup buttons={linkButtons} />
       <Separator orientation="vertical" className="h-8" />
-      <div className="flex gap-1">{renderButtons(mediaButtons)}</div>
+      <ButtonGroup buttons={mediaButtons} />
       <Separator orientation="vertical" className="h-8" />
-      <div className="flex gap-1">{renderButtons(utilityButtons)}</div>
+      <ButtonGroup buttons={utilityButtons} />
     </div>
   );
-}
+});
+
+TiptapEditorToolbar.displayName = "TiptapEditorToolbar";

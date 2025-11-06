@@ -1,19 +1,13 @@
 "use client";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import { Markdown } from "tiptap-markdown";
-import { TiptapEditorToolbar } from "./TiptapEditorToolbar";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Editor as TiptapEditor } from "@tiptap/react";
 import { Button } from "@/components/ui/button";
 import { SaveButton } from '@/app/extract-text/create-new/components/SaveButton';
 import { ExportMenu } from '@/app/extract-text/create-new/components/ExportMenu';
 import { MarkdownPreviewDialog } from '@/app/extract-text/components/MarkdownPreviewDialog';
 import { markdownToHtml } from '@/hooks/use-markdown-to-html';
 import { useRouter } from "next/navigation";
-import Link from '@tiptap/extension-link';
-import Image from '@tiptap/extension-image';
-import CodeBlock from '@tiptap/extension-code-block';
+import { BaseTiptapEditor } from "@/app/extract-text/components/BaseTiptapEditor";
 const DEFAULT_CONTENT = `
 <h2>
   Welcome to TypeSync Editor
@@ -32,34 +26,7 @@ const DEFAULT_CONTENT = `
 </p>
 `;
 
-const EDITOR_EXTENSIONS = [
-  StarterKit.configure({ 
-    heading: { levels: [1, 2, 3, 4, 5, 6] },
-    codeBlock: false,
-  }),
-  Markdown,
-  CodeBlock.configure({
-    HTMLAttributes: {
-      class: 'not-prose whitespace-pre tab-[4] block w-full overflow-x-auto rounded-md bg-muted p-3 font-mono text-sm',
-    },
-  }),
-  Link.configure({
-    openOnClick: false,
-    HTMLAttributes: {
-      class: 'text-blue-500 underline',
-    },
-  }),
-  Image.configure({
-    HTMLAttributes: {
-      class: 'max-w-full h-auto',
-    },
-  }),
-];
-const EDITOR_PROPS = {
-  attributes: {
-    class: 'prose dark:prose-invert max-w-none focus:outline-none prose-pre:whitespace-pre prose-pre:tab-size-[4]'
-  }
-};
+const EDITOR_PROPS = {};
 
 interface EditorProps {
   initialContent?: string;
@@ -155,57 +122,44 @@ export function Editor({
     [effectiveEditMode, markdown]
   );
 
-  const handleEditorUpdate = useCallback(({ editor }: any) => {
-    const currentMarkdown = editor.storage.markdown.getMarkdown();
+  const handleEditorUpdate = useCallback((currentMarkdown: string) => {
     setMarkdown(currentMarkdown);
     setEditedText(markdownToHtml(currentMarkdown));
   }, []);
 
   const handleSave = useCallback(() => {}, []);
 
+  const [editorRef, setEditorRef] = useState<TiptapEditor | null>(null);
+
   const handleStartFromScratch = useCallback(() => {
     setForceCreateMode(true);
-    if (!editor) return;
+    if (!editorRef) return;
     
-    editor.commands.setContent(DEFAULT_CONTENT);
-    const fresh = editor.storage.markdown.getMarkdown();
+    editorRef.commands.setContent(DEFAULT_CONTENT);
+    const fresh = editorRef.storage.markdown.getMarkdown();
     setMarkdown(fresh);
     setEditedText(markdownToHtml(fresh));
     baselineMarkdownRef.current = '';
     setFileName('untitled');
     
     router.replace('/extract-text/editor');
-  }, [router]);
-
-  const editor = useEditor({
-    extensions: EDITOR_EXTENSIONS,
-    content: effectiveEditMode ? (initialContent || '') : DEFAULT_CONTENT,
-    onUpdate: handleEditorUpdate,
-    editorProps: EDITOR_PROPS,
-    immediatelyRender: false,
-  });
+  }, [router, editorRef]);
 
   useEffect(() => {
-    if (!editor) return;
-    
-    if (effectiveEditMode) {
-      editor.commands.setContent(initialContent || '');
-      setMarkdown(initialContent || '');
-      setEditedText(markdownToHtml(initialContent || ''));
-      baselineMarkdownRef.current = initialContent || '';
-      if (propFileName && propFileName !== fileName) setFileName(propFileName);
-      return;
-    }
-    
-    if (!markdown) {
-      editor.commands.setContent(DEFAULT_CONTENT);
-      const initialMarkdown = editor.storage.markdown.getMarkdown();
-      setMarkdown(initialMarkdown);
-      setEditedText(markdownToHtml(initialMarkdown));
-    }
-    
     if (propFileName && propFileName !== fileName) setFileName(propFileName);
-  }, [editor, effectiveEditMode, initialContent, propFileName, fileName, markdown]);
+    // Initialize state from initialContent when switching to edit mode
+    if (effectiveEditMode && baselineMarkdownRef.current !== (initialContent || '')) {
+      const initial = initialContent || '';
+      baselineMarkdownRef.current = initial;
+      setMarkdown(initial);
+      setEditedText(markdownToHtml(initial));
+    }
+    // Initialize create mode content if empty
+    if (!effectiveEditMode && !markdown) {
+      setMarkdown('');
+      setEditedText(markdownToHtml(''));
+    }
+  }, [effectiveEditMode, initialContent, propFileName, fileName, markdown]);
 
   return (
     <div className="space-y-4">
@@ -220,16 +174,11 @@ export function Editor({
         onSave={handleSave}
       />
       
-      <div className="flex flex-col border-none ">
-        {editor && (
-          <div className=" sticky top-0 z-10 bg-background py-2  border-b flex flex-row items-center justify-between">
-            <TiptapEditorToolbar editor={editor} />
-          </div>
-        )}
-        <div className="py-4 px-0 flex-1 overflow-y-auto">
-          <EditorContent editor={editor} />
-        </div>
-      </div>
+      <BaseTiptapEditor
+        markdown={markdown}
+        onChange={handleEditorUpdate}
+        onEditorReady={setEditorRef}
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { DropDownMenu, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Download, Copy, FileDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useHtmlToWord } from '@/hooks/use-html-to-word';
 
 interface ExportMenuProps {
   editedText: string;
@@ -14,6 +15,7 @@ interface ExportMenuProps {
 
 export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing }: ExportMenuProps) {
   const { toast } = useToast();
+  const { convertAndDownload, copyToClipboard, isConverting } = useHtmlToWord();
 
   const handleDownload = (format: 'html' | 'md') => {
     const content = format === 'md' ? editedMarkdown : editedText;
@@ -58,6 +60,32 @@ export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing 
       icon: <Copy className="h-4 w-4" />,
       onClick: () => handleCopy('md'),
       disabled: isProcessing,
+    },
+    {
+      label: 'Download as DOCX',
+      icon: <FileDown className="h-4 w-4" />,
+      onClick: async () => {
+        try {
+          const base = fileName.replace(/\.pdf$/i, '');
+          await convertAndDownload(editedText, base);
+        } catch (e) {
+          toast({ variant: 'destructive', title: 'DOCX download failed' });
+        }
+      },
+      disabled: isProcessing || isConverting,
+    },
+    {
+      label: 'Copy as DOCX',
+      icon: <Copy className="h-4 w-4" />,
+      onClick: async () => {
+        try {
+          await copyToClipboard(editedText, fileName.replace(/\.pdf$/i, ''));
+          toast({ title: 'DOCX copied to clipboard!' });
+        } catch (e) {
+          toast({ variant: 'destructive', title: 'Copy failed', description: 'Your browser may not allow copying files to the clipboard.' });
+        }
+      },
+      disabled: isProcessing || isConverting,
     },
   ];
 

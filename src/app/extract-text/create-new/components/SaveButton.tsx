@@ -14,6 +14,7 @@ interface SaveButtonProps {
   onSave: () => void;
   isEditMode?: boolean;
   isDisabled?: boolean;
+  id?: string;
 }
 
 interface SavedItem {
@@ -51,7 +52,8 @@ export function SaveButton({
   editedMarkdown, 
   onSave, 
   isEditMode = false, 
-  isDisabled = false 
+  isDisabled = false,
+  id
 }: SaveButtonProps) {
   const [savedItems, setSavedItems] = useLocalStorage<SavedItem[]>('saved-extracts', []);
   const [isSaved, setIsSaved] = useState(false);
@@ -68,6 +70,23 @@ export function SaveButton({
       description: 'Please add some content before saving.',
     });
   };
+
+  const handleUpdate = () => {
+    if (isContentEmpty) {
+      showEmptyContentToast();
+      return;
+    }
+  
+    const updatedItems = savedItems.map(item => 
+      item.title === id ? { ...item, editedText, editedMarkdown, updatedAt: new Date().toISOString() } : item
+    );
+  
+    setSavedItems(updatedItems);
+    setIsSaved(true);
+    setTimeout(() => setIsSaved(false), 2000);
+    onSave();
+  };
+  
 
   const handleSave = (title: string) => {
     if (isContentEmpty) {
@@ -112,11 +131,15 @@ export function SaveButton({
   };
 
   const handleSaveButtonClick = () => {
-    if (isContentEmpty) {
-      showEmptyContentToast();
-      return;
+    if (isEditMode) {
+      handleUpdate();
+    } else {
+      if (isContentEmpty) {
+        showEmptyContentToast();
+        return;
+      }
+      setIsSheetOpen(true);
     }
-    setIsSheetOpen(true);
   };
 
   const getSaveButtonLabel = () => {

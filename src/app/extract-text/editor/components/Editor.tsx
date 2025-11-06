@@ -32,6 +32,7 @@ interface EditorProps {
 }
 
 interface EditorToolbarProps {
+  id?: string;
   isEditMode: boolean;
   forceCreateMode: boolean;
   fileName: string;
@@ -42,12 +43,13 @@ interface EditorToolbarProps {
   onSave: () => void;
 }
 
-const EditorToolbar = ({ 
-  isEditMode, 
-  forceCreateMode, 
-  fileName, 
-  markdown, 
-  editedText, 
+const EditorToolbar = ({
+  id,
+  isEditMode,
+  forceCreateMode,
+  fileName,
+  markdown,
+  editedText,
   hasChanged,
   onStartFromScratch,
   onSave 
@@ -77,14 +79,14 @@ const EditorToolbar = ({
           size="lg" 
         />
         <SaveButton 
+          id={id}
           fileName={fileName} 
           editedText={editedText} 
           editedMarkdown={markdown} 
           onSave={onSave} 
           isEditMode={effectiveEditMode} 
           isDisabled={effectiveEditMode ? !hasChanged : false}
-        />
-        <ExportMenu 
+        />        <ExportMenu 
           editedText={editedText} 
           editedMarkdown={markdown} 
           fileName={fileName} 
@@ -157,6 +159,7 @@ export function Editor({
   return (
     <div className="space-y-4">
       <EditorToolbar
+        id={id}
         isEditMode={isEditMode}
         forceCreateMode={forceCreateMode}
         fileName={fileName}

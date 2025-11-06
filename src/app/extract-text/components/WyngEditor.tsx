@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { markdownToHtml } from "@/hooks/use-markdown-to-html";
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
+import CodeBlock from '@tiptap/extension-code-block';
 
 interface WyngEditorProps {
   markdown: string;
@@ -22,8 +23,14 @@ export function WyngEditor({ markdown, onChange, placeholder, className }: WyngE
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3, 4, 5, 6] },
+        codeBlock: false, // we provide our own
       }),
       Markdown,
+      CodeBlock.configure({
+        HTMLAttributes: {
+          class: 'not-prose whitespace-pre tab-[4] block w-full overflow-x-auto rounded-md bg-muted p-3 font-mono text-sm',
+        },
+      }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
@@ -43,7 +50,7 @@ export function WyngEditor({ markdown, onChange, placeholder, className }: WyngE
     },
     editorProps: {
       attributes: {
-        class: `prose dark:prose-invert max-w-none focus:outline-none ${className || ""}`,
+        class: `prose dark:prose-invert max-w-none focus:outline-none prose-pre:whitespace-pre prose-pre:tab-size-[4] ${className || ""}`,
         "data-placeholder": placeholder || "Write or edit your content...",
       },
     },

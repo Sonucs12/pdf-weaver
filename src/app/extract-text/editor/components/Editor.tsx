@@ -13,6 +13,7 @@ import { markdownToHtml } from '@/hooks/use-markdown-to-html';
 import { useRouter } from "next/navigation";
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
+import CodeBlock from '@tiptap/extension-code-block';
 const DEFAULT_CONTENT = `
 <h2>
   Welcome to TypeSync Editor
@@ -34,8 +35,14 @@ const DEFAULT_CONTENT = `
 const EDITOR_EXTENSIONS = [
   StarterKit.configure({ 
     heading: { levels: [1, 2, 3, 4, 5, 6] },
+    codeBlock: false,
   }),
   Markdown,
+  CodeBlock.configure({
+    HTMLAttributes: {
+      class: 'not-prose whitespace-pre tab-[4] block w-full overflow-x-auto rounded-md bg-muted p-3 font-mono text-sm',
+    },
+  }),
   Link.configure({
     openOnClick: false,
     HTMLAttributes: {
@@ -50,7 +57,7 @@ const EDITOR_EXTENSIONS = [
 ];
 const EDITOR_PROPS = {
   attributes: {
-    class: 'prose dark:prose-invert max-w-none focus:outline-none'
+    class: 'prose dark:prose-invert max-w-none focus:outline-none prose-pre:whitespace-pre prose-pre:tab-size-[4]'
   }
 };
 

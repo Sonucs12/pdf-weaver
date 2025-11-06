@@ -2,15 +2,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
 import { generateMetadata } from "@/lib/metadata";
-import { StructuredData } from "@/components/StructuredData";
 
-const { metadata, schema } = generateMetadata({
-  title: "About Us",
-  description: "Learn more about our company",
-  path: "https://yourdomain.com/about",
-  faq: [
-    { question: "Who are we?", answer: "We are innovators in tech." },
-  ],
+const { metadata } = generateMetadata({
+  title: "About us",
+  description: "PDF Weaver is a powerful tool designed to streamline your workflow by converting PDF documents into editable Markdown. Our mission is to provide a seamless and intuitive experience for developers, writers, and content creators.",
+  path: "/about",
 }); 
 export { metadata };
 
@@ -78,7 +74,7 @@ export default function AboutPage() {
             </CardContent>
           </Card>
         ))}
-      </div>{schema && <StructuredData data={schema} />}
+      </div>
     </div>
   );
 }

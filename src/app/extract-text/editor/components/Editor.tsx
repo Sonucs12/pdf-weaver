@@ -57,7 +57,7 @@ const EditorToolbar = ({
   const effectiveEditMode = isEditMode && !forceCreateMode;
 
   return (
-    <div className="flex justify-between items-center gap-2">
+    <div className="flex justify-between flex-wrap items-center gap-4">
       <div>
         {effectiveEditMode && (
           <span className="text-sm font-medium text-foreground">
@@ -66,7 +66,7 @@ const EditorToolbar = ({
         )}
       </div>
       
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
         {isEditMode && !forceCreateMode && (
           <Button variant="outline" onClick={onStartFromScratch}>
             Start from scratch
@@ -86,7 +86,8 @@ const EditorToolbar = ({
           onSave={onSave} 
           isEditMode={effectiveEditMode} 
           isDisabled={effectiveEditMode ? !hasChanged : false}
-        />        <ExportMenu 
+        />        
+        <ExportMenu 
           editedText={editedText} 
           editedMarkdown={markdown} 
           fileName={fileName} 

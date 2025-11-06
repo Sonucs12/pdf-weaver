@@ -8,7 +8,7 @@ import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import CodeBlock from '@tiptap/extension-code-block';
 import { markdownToHtml } from "@/hooks/use-markdown-to-html";
-import { TiptapEditorToolbar } from "@/app/extract-text/editor/components/TiptapEditorToolbar";
+import { TiptapEditorToolbar } from "./TiptapEditorToolbar";
 
 interface BaseTiptapEditorProps {
   markdown: string;

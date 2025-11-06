@@ -5,7 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { WyngEditor } from '@/app/extract-text/components/WyngEditor';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { BackButton } from '@/components/ui/BackButton';
+import { Save, Loader2 } from 'lucide-react';
 import { ExportMenu } from '@/app/extract-text/create-new/components/ExportMenu';
 import { markdownToHtml } from '@/hooks/use-markdown-to-html';
 import { MarkdownPreviewDialog } from '@/app/extract-text/components/MarkdownPreviewDialog';
@@ -78,10 +79,7 @@ export default function EditSavedPage() {
       <div className="max-w-6xl w-full mx-auto">
         <div className="mb-6 flex justify-between items-center">
           <div className='flex items-center justify-center flex-wrap gap-2'>
-          <span onClick={() => router.push('/extract-text/saved')} className='flex items-center  text-sm cursor-pointer justify-center gap-1'>
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </span>
+            <BackButton onClick={() => router.push('/extract-text/saved')} />
           {/* <h1 className="text-lg font-medium">Edit: {item.fileName}</h1> */}
           </div>
           <div className="flex gap-2">

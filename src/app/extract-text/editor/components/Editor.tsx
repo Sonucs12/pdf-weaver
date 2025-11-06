@@ -8,22 +8,18 @@ import { MarkdownPreviewDialog } from '@/app/extract-text/components/MarkdownPre
 import { markdownToHtml } from '@/hooks/use-markdown-to-html';
 import { useRouter } from "next/navigation";
 import { BaseTiptapEditor } from "@/app/extract-text/components/BaseTiptapEditor";
-const DEFAULT_CONTENT = `
-<h2>
-  Welcome to TypeSync Editor
-</h2>
-<p>
-  This is a WYSIWYG editor built with <strong>Tiptap</strong>, <strong>Next.js</strong>, and <strong>ShadCN UI</strong>. You can write your content here and see live previews in Markdown and HTML on the right.
-</p>
-<ul>
-  <li>Real-time WYSIWYG editing</li>
-  <li>Markdown and HTML previews</li>
-  <li>Light and Dark mode support</li>
-  <li>Minimalist, distraction-free interface</li>
-</ul>
-<p>
-  Use the toolbar above to format your text. Try things like <strong>bold</strong>, <em>italics</em>, <code>code</code>, and more.
-</p>
+const DEFAULT_MARKDOWN = `## Welcome to TypeSync Editor
+
+This is a WYSIWYG editor built with **Tiptap**, **Next.js**, and **ShadCN UI**. You can write your content here and see live previews in Markdown and HTML on the right.
+
+- Real-time WYSIWYG editing
+- Markdown and HTML previews
+- Light and Dark mode support
+- Minimalist, distraction-free interface
+
+Use the toolbar above to format your text. Try things like **bold**, _italics_, \
+
+\`inline code\`, and more.
 `;
 
 const EDITOR_PROPS = {};
@@ -133,10 +129,7 @@ export function Editor({
 
   const handleStartFromScratch = useCallback(() => {
     setForceCreateMode(true);
-    if (!editorRef) return;
-    
-    editorRef.commands.setContent(DEFAULT_CONTENT);
-    const fresh = editorRef.storage.markdown.getMarkdown();
+    const fresh = DEFAULT_MARKDOWN;
     setMarkdown(fresh);
     setEditedText(markdownToHtml(fresh));
     baselineMarkdownRef.current = '';
@@ -156,8 +149,8 @@ export function Editor({
     }
     // Initialize create mode content if empty
     if (!effectiveEditMode && !markdown) {
-      setMarkdown('');
-      setEditedText(markdownToHtml(''));
+      setMarkdown(DEFAULT_MARKDOWN);
+      setEditedText(markdownToHtml(DEFAULT_MARKDOWN));
     }
   }, [effectiveEditMode, initialContent, propFileName, fileName, markdown]);
 

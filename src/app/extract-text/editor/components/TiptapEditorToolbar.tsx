@@ -27,13 +27,27 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type Props = {
   editor: Editor;
 };
 
 export function TiptapEditorToolbar({ editor }: Props) {
+  // Force re-render on selection/content changes so isActive()/can() reflect current state
+  const [, forceRerender] = useState(0);
+  useEffect(() => {
+    if (!editor) return;
+    const update = () => forceRerender(v => v + 1);
+    editor.on('selectionUpdate', update);
+    editor.on('transaction', update);
+    editor.on('update', update);
+    return () => {
+      editor.off('selectionUpdate', update);
+      editor.off('transaction', update);
+      editor.off('update', update);
+    };
+  }, [editor]);
   const handleAddLink = useCallback(() => {
     const previousUrl = editor.getAttributes("link").href;
     const url = window.prompt("Enter URL:", previousUrl);
@@ -179,7 +193,7 @@ export function TiptapEditorToolbar({ editor }: Props) {
       isActive: false,
       icon: Unlink,
       tooltip: "Remove Link",
-      disabled: !editor.isActive("link"),
+      disabled: !editor.isActive("link") || !editor.can().chain().focus().unsetLink().run(),
     },
   ];
 

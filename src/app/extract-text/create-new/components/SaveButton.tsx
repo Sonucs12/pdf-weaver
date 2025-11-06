@@ -155,12 +155,12 @@ export function SaveButton({
                 <h3 className="text-sm text-center text-muted-foreground px-1">
                   Merge into existing project
                 </h3>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col">
                   {savedItems.map((item) => (
                     <Button
                       key={item.title}
-                      variant="outline"
-                      className="w-full justify-start"
+                      variant="ghost"
+                      className="w-full justify-start h-9"
                       onClick={() => handleMergeIntoProject(item.title)}
                     >
                       {item.title}

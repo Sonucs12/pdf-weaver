@@ -50,6 +50,19 @@ export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing 
       disabled: isProcessing,
     },
     {
+      label: 'Download as DOCX',
+      icon: <Download className="h-4 w-4" />,
+      onClick: async () => {
+        try {
+          const base = fileName.replace(/\.pdf$/i, '');
+          await convertAndDownload(editedText, base);
+        } catch (e) {
+          toast({ variant: 'destructive', title: 'DOCX download failed' });
+        }
+      },
+      disabled: isProcessing || isConverting,
+    },
+    {
       label: 'Copy as HTML',
       icon: <Copy className="h-4 w-4" />,
       onClick: () => handleCopy('html'),
@@ -61,19 +74,7 @@ export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing 
       onClick: () => handleCopy('md'),
       disabled: isProcessing,
     },
-    {
-      label: 'Download as DOCX',
-      icon: <FileDown className="h-4 w-4" />,
-      onClick: async () => {
-        try {
-          const base = fileName.replace(/\.pdf$/i, '');
-          await convertAndDownload(editedText, base);
-        } catch (e) {
-          toast({ variant: 'destructive', title: 'DOCX download failed' });
-        }
-      },
-      disabled: isProcessing || isConverting,
-    },
+  
     {
       label: 'Copy as DOCX',
       icon: <Copy className="h-4 w-4" />,

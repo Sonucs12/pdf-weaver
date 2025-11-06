@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useAutoSaveDraft } from '@/hooks/use-auto-save-draft';
 import { useToast } from '@/hooks/use-toast';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -49,8 +49,68 @@ export function usePdfProcessor() {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cancelRef = useRef(false);
+  const workerRef = useRef<Worker | null>(null);
   const { toast } = useToast();
   const { saveDraft } = useAutoSaveDraft();
+
+  // Initialize Web Worker
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        // Create inline worker to avoid file path issues
+        const workerCode = `
+          self.onmessage = async (e) => {
+            const { type, data } = e.data;
+
+            if (type === 'CONVERT_TO_BASE64') {
+              try {
+                const { arrayBuffer } = data;
+                const uint8Array = new Uint8Array(arrayBuffer);
+                
+                const CHUNK_SIZE = 8192;
+                let binary = '';
+                
+                for (let i = 0; i < uint8Array.byteLength; i += CHUNK_SIZE) {
+                  const chunk = uint8Array.subarray(i, Math.min(i + CHUNK_SIZE, uint8Array.byteLength));
+                  binary += String.fromCharCode.apply(null, Array.from(chunk));
+                  
+                  const progress = Math.round((i / uint8Array.byteLength) * 100);
+                  self.postMessage({ type: 'PROGRESS', progress });
+                }
+                
+                const base64 = btoa(binary);
+                const dataUri = \`data:application/pdf;base64,\${base64}\`;
+                
+                self.postMessage({ 
+                  type: 'SUCCESS', 
+                  dataUri 
+                });
+              } catch (error) {
+                self.postMessage({ 
+                  type: 'ERROR', 
+                  error: error instanceof Error ? error.message : 'Failed to convert PDF' 
+                });
+              }
+            }
+          };
+        `;
+        
+        const blob = new Blob([workerCode], { type: 'application/javascript' });
+        const workerUrl = URL.createObjectURL(blob);
+        workerRef.current = new Worker(workerUrl);
+        
+        return () => {
+          if (workerRef.current) {
+            workerRef.current.terminate();
+            workerRef.current = null;
+          }
+          URL.revokeObjectURL(workerUrl);
+        };
+      } catch (error) {
+        console.warn('Web Worker not available, falling back to main thread');
+      }
+    }
+  }, []);
 
   const getUserFriendlyError = useCallback((error: string): string => {
     const errorLower = error.toLowerCase();
@@ -115,7 +175,7 @@ export function usePdfProcessor() {
       saveDraft(allFormattedText, fileName);
     }
     setStep(hasContent ? 'edit' : 'select-page');
-  }, [getUserFriendlyError, resetProcessing, toast]);
+  }, [getUserFriendlyError, resetProcessing, toast, fileName, saveDraft]);
 
   const convertChunkToImages = useCallback(async (
     dataUri: string,
@@ -231,19 +291,15 @@ export function usePdfProcessor() {
           return;
         }
 
-                for (const result of results) {
+        for (const result of results) {
+          if (result.success && result.formattedText?.trim()) {
+            const separator = allFormattedText ? '\n\n---\n\n' : '';
+            allFormattedText += separator + result.formattedText.trim();
+            setEditedMarkdown(allFormattedText);
 
-                  if (result.success && result.formattedText?.trim()) {
-
-                    const separator = allFormattedText ? '\n\n---\n\n' : '';
-
-                    allFormattedText += separator + result.formattedText.trim();
-
-                    setEditedMarkdown(allFormattedText);
-
-                    const html = markdownToHtml(allFormattedText);
-
-                    setEditedText(html);
+            const html = markdownToHtml(allFormattedText);
+            setEditedText(html);
+            
             if (processedCount === 0) setStep('edit');
             
             processedCount++;
@@ -312,6 +368,47 @@ export function usePdfProcessor() {
     updateProcessingState({ message: 'Cancelling processing...' });
   }, [updateProcessingState]);
 
+  // Convert ArrayBuffer to Base64 using Web Worker
+  const convertToBase64WithWorker = useCallback((arrayBuffer: ArrayBuffer): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      if (!workerRef.current) {
+        // Fallback to main thread if worker not available
+        try {
+          const uint8Array = new Uint8Array(arrayBuffer);
+          let binary = '';
+          for (let i = 0; i < uint8Array.byteLength; i++) {
+            binary += String.fromCharCode(uint8Array[i]);
+          }
+          const dataUri = `data:application/pdf;base64,${btoa(binary)}`;
+          resolve(dataUri);
+        } catch (error) {
+          reject(error);
+        }
+        return;
+      }
+
+      const handleMessage = (e: MessageEvent) => {
+        const { type, dataUri, error, progress } = e.data;
+        
+        if (type === 'PROGRESS') {
+          updateProcessingState({ message: `Converting PDF to base64... ${progress}%` });
+        } else if (type === 'SUCCESS') {
+          workerRef.current?.removeEventListener('message', handleMessage);
+          resolve(dataUri);
+        } else if (type === 'ERROR') {
+          workerRef.current?.removeEventListener('message', handleMessage);
+          reject(new Error(error));
+        }
+      };
+
+      workerRef.current.addEventListener('message', handleMessage);
+      workerRef.current.postMessage({
+        type: 'CONVERT_TO_BASE64',
+        data: { arrayBuffer }
+      });
+    });
+  }, [updateProcessingState]);
+
   const handleFileSelect = useCallback(async (file: File | null) => {
     if (!file) return;
 
@@ -326,7 +423,7 @@ export function usePdfProcessor() {
 
     setFileName(file.name);
     setStep('processing');
-    updateProcessingState({ message: 'Reading PDF file...' });
+    updateProcessingState({ message: 'Preparing PDF file...' });
 
     const reader = new FileReader();
     reader.readAsArrayBuffer(file);
@@ -334,15 +431,9 @@ export function usePdfProcessor() {
     reader.onload = async () => {
       try {
         const arrayBuffer = reader.result as ArrayBuffer;
-        const uint8Array = new Uint8Array(arrayBuffer);
         
-        let binary = '';
-        for (let i = 0; i < uint8Array.byteLength; i++) {
-          binary += String.fromCharCode(uint8Array[i]);
-        }
-        const dataUri = `data:application/pdf;base64,${btoa(binary)}`;
-        
-        updateProcessingState({ message: 'Loading PDF...' });
+        // Use Web Worker for base64 conversion (progress updates handled in worker)
+        const dataUri = await convertToBase64WithWorker(arrayBuffer);
         
         const loadingTask = pdfjsLib.getDocument(dataUri);
         const pdf = await loadingTask.promise;
@@ -354,30 +445,41 @@ export function usePdfProcessor() {
         if (count > 1) {
           setPageRange(`1-${count}`);
           setStep('select-page');
+          updateProcessingState({ message: '' });
         } else {
           await processPdf('1');
         }
       } catch (error) {
+        console.error('PDF Loading Error:', error);
         const rawError = error instanceof Error ? error.message : 'Could not read the PDF file';
+        const errorDetails = error instanceof Error ? error.stack : '';
+        
         toast({
           variant: 'destructive',
           title: 'PDF Loading Failed',
           description: getUserFriendlyError(rawError),
           duration: 6000,
         });
+        
+        // Log detailed error for debugging
+        if (errorDetails) {
+          console.error('Error details:', errorDetails);
+        }
+        
         handleReset();
       }
     };
     
     reader.onerror = () => {
+      console.error('FileReader error:', reader.error);
       toast({
         variant: 'destructive',
         title: 'File Read Error',
-        description: 'Failed to read the file.',
+        description: 'Failed to read the file. The file may be corrupted or too large.',
       });
       handleReset();
     };
-  }, [toast, processPdf, getUserFriendlyError, updateProcessingState]);
+  }, [toast, processPdf, getUserFriendlyError, updateProcessingState, convertToBase64WithWorker]);
 
   const handleDragEvents = useCallback((isEntering: boolean) => {
     setIsDragging(isEntering);
@@ -387,6 +489,7 @@ export function usePdfProcessor() {
     cancelRef.current = false;
     setStep('upload');
     setEditedText('');
+    setEditedMarkdown('');
     setFileName('');
     setPdfDataUri(null);
     setPageCount(0);

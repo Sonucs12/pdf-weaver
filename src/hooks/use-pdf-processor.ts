@@ -5,6 +5,8 @@ import { useAutoSaveDraft } from '@/hooks/use-auto-save-draft';
 import { useToast } from '@/hooks/use-toast';
 import * as pdfjsLib from 'pdfjs-dist';
 import { extractAndFormatPages } from '@/ai/flows';
+import { useGenerationTracker } from '@/hooks/use-generation-tracker';
+import { MAX_PAGES_ALLOWED, MAX_PDF_GENERATIONS } from '@/lib/security';
 import { parsePageRange } from '@/lib/utils/pdf-utils';
 import type { Step } from '@/app/extract-text/create-new/components/types';
 
@@ -53,6 +55,7 @@ export function usePdfProcessor() {
   const renderWorkerRef = useRef<Worker | null>(null);
   const { toast } = useToast();
   const { saveDraft } = useAutoSaveDraft();
+  const { generationCount, incrementGenerationCount, isLoading: isGenerationCountLoading } = useGenerationTracker();
 
   // Initialize Web Workers
   useEffect(() => {
@@ -243,6 +246,15 @@ export function usePdfProcessor() {
 
   const processPdf = useCallback(async (rangeToProcess?: string) => {
     if (!pdfDataUri) return;
+
+    if (generationCount !== null && generationCount >= MAX_PDF_GENERATIONS) {
+      toast({
+        variant: 'destructive',
+        title: 'Generation Limit Reached',
+        description: `You have reached the maximum of ${MAX_PDF_GENERATIONS} PDF generations.`,
+      });
+      return;
+    }
   
     cancelRef.current = false;
     setStep('processing');
@@ -255,7 +267,16 @@ export function usePdfProcessor() {
 
     try {
       const pagesToProcess = parsePageRange(rangeToProcess || '1', pageCount);
-      if (!pagesToProcess) throw new Error('Invalid page range provided.');
+      if (!pagesToProcess) {
+        toast({
+          variant: 'destructive',
+          title: 'Invalid Page Range',
+          description: `You can only process up to ${MAX_PAGES_ALLOWED} pages at a time.`,
+        });
+        resetProcessing();
+        setStep('select-page');
+        return;
+      }
       
       const totalPages = pagesToProcess.length;
       let allFormattedText = '';
@@ -368,6 +389,7 @@ export function usePdfProcessor() {
       if (!allFormattedText.trim()) throw new Error('Failed to extract any text from the selected page(s).');
 
       updateProcessingState({ message: `Successfully processed ${processedCount} of ${totalPages} pages!` });
+      await incrementGenerationCount();
       resetProcessing();
 
     } catch (error) {

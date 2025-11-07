@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-const DB_NAME = 'PDFWeaverDB';
+const DB_NAME = 'PDFwriteDB';
 const DB_VERSION = 1;
 const STORE_NAME = 'settings';
 

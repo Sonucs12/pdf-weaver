@@ -9,7 +9,7 @@ import ScrollContainer from "@/components/ui/ScrollContainer";
 export default function ClientEditorPage() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
-  const [drafts] = useLocalStorage<any[]>("pdf-weaver-drafts", []);
+  const [drafts] = useLocalStorage<any[]>("pdf-write-drafts", []);
   const [savedItems] = useLocalStorage<any[]>("saved-extracts", []);
   const [initialContent, setInitialContent] = useState<string>("");
   const [fileName, setFileName] = useState<string>("");

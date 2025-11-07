@@ -5,7 +5,7 @@ import { generateMetadata } from "@/lib/metadata";
 
 const { metadata } = generateMetadata({
   title: "About us",
-  description: "PDF Weaver is a powerful tool designed to streamline your workflow by converting PDF documents into editable Markdown. Our mission is to provide a seamless and intuitive experience for developers, writers, and content creators.",
+  description: "PDFWrite is a powerful tool designed to streamline your workflow by converting PDF documents into editable Markdown. Our mission is to provide a seamless and intuitive experience for developers, writers, and content creators.",
   path: "/about",
 }); 
 export { metadata };
@@ -13,7 +13,7 @@ export { metadata };
 const features = [
   {
     title: "Seamless PDF to Markdown Conversion",
-    description: "Effortlessly upload your PDF documents and watch as PDF Weaver intelligently extracts the text and converts it into clean, editable Markdown. Our powerful engine handles various PDF layouts, preserving the structure of your content.",
+    description: "Effortlessly upload your PDF documents and watch as PDFWrite intelligently extracts the text and converts it into clean, editable Markdown. Our powerful engine handles various PDF layouts, preserving the structure of your content.",
     keywords: ["PDF extraction", "Markdown conversion", "text extraction"],
   },
   {
@@ -47,9 +47,9 @@ export default function AboutPage() {
   return (
     <div className="container mx-auto p-4 md:p-8">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">About PDF Weaver</h1>
+        <h1 className="text-4xl font-bold mb-4">About PDFWrite</h1>
         <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-          PDF Weaver is a powerful tool designed to streamline your workflow by converting PDF documents into editable Markdown. Our mission is to provide a seamless and intuitive experience for developers, writers, and content creators.
+          PDFWrite is a powerful tool designed to streamline your workflow by converting PDF documents into editable Markdown. Our mission is to provide a seamless and intuitive experience for developers, writers, and content creators.
         </p>
       </div>
 

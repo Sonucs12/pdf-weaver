@@ -117,7 +117,7 @@ export default function LandingPage() {
           </p>
           <Button asChild size="lg">
             <Link href="/extract-text">
-              Try PDF Weaver Now <ArrowRight className="ml-2" />
+              Try PDFWrite Now <ArrowRight className="ml-2" />
             </Link>
           </Button>
         </div>

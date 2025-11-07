@@ -79,7 +79,7 @@ export function usePdfProcessor() {
           console.warn('Image worker error:', err);
         });
 
-        console.log('[PDF Weaver] Workers initialized: base64 + render + image');
+        console.log('[PDFWrite] Workers initialized: base64 + render + image');
 
         return () => {
           if (base64WorkerRef.current) {
@@ -173,14 +173,14 @@ export function usePdfProcessor() {
   ): Promise<string[]> => {
     return new Promise((resolve, reject) => {
       if (!renderWorkerRef.current) {
-        console.log('[PDF Weaver] Render: falling back to main thread (no worker)');
+        console.log('[PDFWrite] Render: falling back to main thread (no worker)');
         // Fallback to main thread rendering
         return convertChunkToImagesMainThread(dataUri, pageNumbers)
           .then(resolve)
           .catch(reject);
       }
 
-      console.log('[PDF Weaver] Render: using worker');
+      console.log('[PDFWrite] Render: using worker');
       const handleMessage = (e: MessageEvent) => {
         const { type, images, error, pageNum, preview } = e.data;
         
@@ -192,13 +192,13 @@ export function usePdfProcessor() {
         } else if (type === 'SUCCESS') {
           renderWorkerRef.current?.removeEventListener('message', handleMessage);
           renderWorkerRef.current?.removeEventListener('error', handleErrorEvent);
-          console.log('[PDF Weaver] Render worker: success');
+          console.log('[PDFWrite] Render worker: success');
           resolve(images);
         } else if (type === 'ERROR') {
           renderWorkerRef.current?.removeEventListener('message', handleMessage);
           renderWorkerRef.current?.removeEventListener('error', handleErrorEvent);
           // Fallback to main thread on worker-reported error
-          console.warn('[PDF Weaver] Render worker: reported error, falling back to main thread:', error);
+          console.warn('[PDFWrite] Render worker: reported error, falling back to main thread:', error);
           convertChunkToImagesMainThread(dataUri, pageNumbers).then(resolve).catch(reject);
         }
       };
@@ -207,7 +207,7 @@ export function usePdfProcessor() {
         renderWorkerRef.current?.removeEventListener('message', handleMessage);
         renderWorkerRef.current?.removeEventListener('error', handleErrorEvent);
         // Fallback to main thread on worker load/runtime error
-        console.warn('[PDF Weaver] Render worker: runtime/load error, falling back to main thread');
+        console.warn('[PDFWrite] Render worker: runtime/load error, falling back to main thread');
         convertChunkToImagesMainThread(dataUri, pageNumbers).then(resolve).catch(reject);
       };
 
@@ -631,7 +631,7 @@ export function usePdfProcessor() {
   const convertToBase64WithWorker = useCallback((arrayBuffer: ArrayBuffer): Promise<string> => {
     return new Promise((resolve, reject) => {
       if (!base64WorkerRef.current) {
-        console.log('[PDF Weaver] Base64: falling back to main thread (no worker)');
+        console.log('[PDFWrite] Base64: falling back to main thread (no worker)');
         // Fallback to main thread if worker not available
         try {
           const uint8Array = new Uint8Array(arrayBuffer);
@@ -647,7 +647,7 @@ export function usePdfProcessor() {
         return;
       }
 
-      console.log('[PDF Weaver] Base64: using worker');
+      console.log('[PDFWrite] Base64: using worker');
       const handleMessage = (e: MessageEvent) => {
         const { type, dataUri, error, progress } = e.data;
         
@@ -655,11 +655,11 @@ export function usePdfProcessor() {
           updateProcessingState({ message: `Preparing PDF... ${progress}%` });
         } else if (type === 'SUCCESS') {
           base64WorkerRef.current?.removeEventListener('message', handleMessage);
-          console.log('[PDF Weaver] Base64 worker: success');
+          console.log('[PDFWrite] Base64 worker: success');
           resolve(dataUri);
         } else if (type === 'ERROR') {
           base64WorkerRef.current?.removeEventListener('message', handleMessage);
-          console.warn('[PDF Weaver] Base64 worker: reported error');
+          console.warn('[PDFWrite] Base64 worker: reported error');
           reject(new Error(error));
         }
       };

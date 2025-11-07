@@ -3,7 +3,7 @@ import { generateMetadata } from "@/lib/metadata";
 
 const { metadata } = generateMetadata({
   title: "Privacy Policy",
-  description: "Our privacy policy for PDF Weaver.",
+  description: "Our privacy policy for PDFWrite.",
   path: "/privacy-policy",
 });
 export { metadata };

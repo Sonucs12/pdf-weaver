@@ -12,7 +12,7 @@ interface Draft {
 }
 
 export default function ClientDraftPage() {
-  const [drafts, setDrafts] = useLocalStorage<Draft[]>('pdf-weaver-drafts', []);
+  const [drafts, setDrafts] = useLocalStorage<Draft[]>('pdf-write-drafts', []);
   const handleDelete = (id: string) => {
     setDrafts(drafts.filter(draft => draft.id !== id));
   };

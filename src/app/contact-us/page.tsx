@@ -7,7 +7,7 @@ import { generateMetadata } from "@/lib/metadata";
 
 const { metadata } = generateMetadata({
   title: "Contact Us",
-  description: "Get in touch with the PDF Weaver team. We'd love to hear from you!",
+  description: "Get in touch with the PDFWrite team. We'd love to hear from you!",
   path: "/contact-us",
 });
 export { metadata };

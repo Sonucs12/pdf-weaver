@@ -1,9 +1,9 @@
 export const siteConfig = {
-  name: 'PDF Weaver',
+  name: 'PDFWrite',
   description: 'Convert any PDF into structured, editable text.',
-  url: 'https://pdfweaver.vercel.app',
-  defaultImage: 'https://pdfweaver.app/favicon.ico',
-  twitterHandle: '@pdfweaver',
+  url: 'https://pdfwrite.vercel.app',
+  defaultImage: 'https://pdfwrite.vercel.app/favicon.ico',
+  twitterHandle: '@pdfwrite',
 };
 
 type FAQItem = {

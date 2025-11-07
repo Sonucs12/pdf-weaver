@@ -13,7 +13,7 @@ interface Draft {
 }
 
 export function useAutoSaveDraft() {
-  const [drafts, setDrafts] = useLocalStorage<Draft[]>('pdf-weaver-drafts', []);
+  const [drafts, setDrafts] = useLocalStorage<Draft[]>('pdf-write-drafts', []);
   const { toast } = useToast();
 
   const saveDraft = (editedMarkdown: string, fileName: string) => {

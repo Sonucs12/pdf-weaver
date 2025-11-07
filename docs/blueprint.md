@@ -1,4 +1,4 @@
-# **App Name**: PDF Weaver
+# **App Name**: PDFWrite
 
 ## Core Features:
 

@@ -3,7 +3,7 @@ import { generateMetadata } from "@/lib/metadata";
 
 const { metadata } = generateMetadata({
   title: "Disclaimer",
-  description: "Important information and disclaimers for PDF Weaver.",
+  description: "Important information and disclaimers for PDFWrite.",
   path: "/disclaimer",
 });
 export { metadata };
@@ -19,7 +19,7 @@ export default function DisclaimerPage() {
         <h2 className="text-2xl font-bold mb-4">General Information</h2>
         <div className="prose dark:prose-invert max-w-none">
           <p>
-            The information provided by PDF Weaver ("we," "us," or "our") on this website is for general informational purposes only. All information on the site is provided in good faith, however, we make no representation or warranty of any kind, express or implied, regarding the accuracy, adequacy, validity, reliability, availability, or completeness of any information on the site.
+            The information provided by PDFWrite ("we," "us," or "our") on this website is for general informational purposes only. All information on the site is provided in good faith, however, we make no representation or warranty of any kind, express or implied, regarding the accuracy, adequacy, validity, reliability, availability, or completeness of any information on the site.
           </p>
           <h2>Limitation of Liability</h2>
           <p>

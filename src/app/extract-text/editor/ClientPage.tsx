@@ -24,7 +24,9 @@ export default function ClientEditorPage() {
         savedItems.find((i) => i.title === id);
 
       if (itemToEdit) {
-        setInitialContent(itemToEdit.editedMarkdown || itemToEdit.editedText || "");
+        setInitialContent(
+          itemToEdit.editedMarkdown || itemToEdit.editedText || ""
+        );
         setFileName(itemToEdit.fileName || "untitled");
       } else {
         console.error("Item not found for ID:", id);
@@ -42,9 +44,8 @@ export default function ClientEditorPage() {
   }
 
   return (
-    <div className="flex flex-col">
-         <ScrollContainer scrollType="div">
-      <main className="flex-1 md:h-[calc(100vh-4.7rem)] mx-auto py-4 sm:py-6 md:py-8">
+    <ScrollContainer scrollType="div">
+      <main className="flex-1 md:h-[calc(100vh-4.2rem)] mx-auto py-4 sm:py-6 md:py-8">
         <Editor
           id={id || undefined}
           initialContent={initialContent}
@@ -52,9 +53,6 @@ export default function ClientEditorPage() {
           isEditMode={isEditMode}
         />
       </main>
-      </ScrollContainer>
-    </div>
+    </ScrollContainer>
   );
 }
-
-

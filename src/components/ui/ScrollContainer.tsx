@@ -2,6 +2,8 @@ import { useEffect, useState, useRef, ReactNode, useCallback } from "react";
 import { motion } from "framer-motion";
 import { ArrowBigDown } from "lucide-react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
+import { useIsMobile } from "@/hooks/use-mobile";
+
 interface ScrollContainerProps {
   children: ReactNode;
   scrollType: "div" | "window";
@@ -10,13 +12,15 @@ interface ScrollContainerProps {
 
 const ScrollContainer: React.FC<ScrollContainerProps> = ({
   children,
-  scrollType,
+  scrollType: propScrollType,
   scrollRef,
 }) => {
   const internalRef = useRef<HTMLDivElement>(null);
   const containerRef = scrollRef || internalRef;
   const [showScrollArrow, setShowScrollArrow] = useState(false);
   const [scrollDirection, setScrollDirection] = useState<"up" | "down">("down");
+  const isMobile = useIsMobile();
+  const scrollType = isMobile && propScrollType === 'div' ? 'window' : propScrollType;
 
   const getScrollTop = useCallback((): number => {
     if (scrollType === "window") {

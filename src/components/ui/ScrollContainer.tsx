@@ -110,7 +110,7 @@ const ScrollContainer: React.FC<ScrollContainerProps> = ({
       {showScrollArrow && (
         <button
           onClick={handleScrollArrowClick}
-          className={`fixed md:bottom-10 bottom-5 md:right-10 right-2 bg-blue-600/50 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg z-50 transition-opacity text-md`}
+          className={`fixed md:bottom-10 bottom-20 md:right-10 right-2 bg-blue-600/50 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg z-50 transition-opacity text-md`}
           aria-label={scrollDirection === 'down' ? 'Scroll to bottom' : 'Scroll to top'}
         >
           <motion.div

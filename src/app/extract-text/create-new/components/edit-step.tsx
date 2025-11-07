@@ -56,12 +56,12 @@ export function EditStep({
   return (
     <div className="w-full flex flex-col">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-        <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-2 text-sm px-4 sm:px-6 md:px-8">
           <BackButton onClick={handleBackClick} disabled={isProcessing} />{" "}
          
           <span className="font-medium line-clamp-1">{fileName}</span>
         </div>
-        <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-hidden">
+        <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide px-4 sm:px-6 md:px-8">
           <Button variant="outline" onClick={onReset} disabled={isProcessing}>
             Start Over
           </Button>
@@ -86,14 +86,14 @@ export function EditStep({
         </div>
       </div>
       {isProcessing && (
-        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center justify-between gap-3">
+        <div className="mb-4 py-3 px-4 sm:px-6 md:px-8 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Loader2 className="h-5 w-5 animate-spin text-blue-600 dark:text-blue-400" />
             <p className="text-sm text-blue-900 dark:text-blue-100">
               {progressMessage || "Processing pages..."}
             </p>
           </div>
-          <CancelButton onCancel={onCancel} isProcessing={isProcessing} />
+          <CancelButton onCancel={onCancel} isProcessing={isProcessing}/>
         </div>
       )}
       <div className="flex-grow mt-2">

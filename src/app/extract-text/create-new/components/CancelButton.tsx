@@ -17,7 +17,7 @@ export function CancelButton({ onCancel, isProcessing }: CancelButtonProps) {
        
       >
         <XCircle className="h-5 w-5" />
-        Cancel Processing
+        Cancel
       </Button>
     
   );

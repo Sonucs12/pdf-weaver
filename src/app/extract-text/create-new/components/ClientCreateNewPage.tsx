@@ -61,6 +61,7 @@ export default function ClientCreateNewPage() {
     switch (step) {
       case 'upload':
         return (
+          <div className='px-4 sm:px-6 md:px-8'>
           <UploadStep
             isDragging={isDragging}
             onDragEnter={handleDragEnter}
@@ -69,20 +70,22 @@ export default function ClientCreateNewPage() {
             onDrop={handleDrop}
             onFileSelect={handleFileSelect}
             fileInputRef={fileInputRef}
-          />
+          /></div>
         );
       case 'select-page':
         return (
+          <div className='px-4 sm:px-6 md:px-8'>
           <SelectPageStep
             pageCount={pageCount}
             pageRange={pageRange}
             onPageRangeChange={setPageRange}
             onProcess={() => startProcessing(pageRange)}
           />
+          </div>
         );
       case 'processing':
         return (
-          <div className="space-y-6">
+          <div className="space-y-6 px-4 sm:px-6 md:px-8">
             <ProcessingStep progressMessage={progressMessage} />
             {/* {currentProcessingImage && (
               <LiveImagePreview 
@@ -111,7 +114,7 @@ export default function ClientCreateNewPage() {
   };
 
   return (
-    <div className="flex-grow flex mb-8 items-center justify-center p-4 md:p-8 transition-opacity duration-500">
+    <div className="flex-grow flex mb-8 items-center justify-center py-4 sm:py-6 md:py-8 transition-opacity duration-500">
       <div className="w-full max-w-7xl">
         {renderContent()}
       </div>

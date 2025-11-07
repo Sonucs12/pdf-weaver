@@ -9,7 +9,7 @@ import Image from "@tiptap/extension-image";
 import CodeBlock from "@tiptap/extension-code-block";
 import { markdownToHtml } from "@/hooks/use-markdown-to-html";
 import { TiptapEditorToolbar } from "./TiptapEditorToolbar";
-import ScrollContainer from "@/components/ui/ScrollContainer";
+
 
 interface BaseTiptapEditorProps {
   markdown: string;
@@ -26,7 +26,7 @@ export function BaseTiptapEditor({
   placeholder,
   onEditorReady,
 }: BaseTiptapEditorProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
+
 
   const baseExtensions = [
     StarterKit.configure({
@@ -87,8 +87,8 @@ export function BaseTiptapEditor({
   }, [editor, markdown]);
 
   return (
-    <ScrollContainer scrollType="div" scrollRef={scrollRef}>
-      <div className="flex flex-col border-none h-screen">
+ 
+      <div className="flex flex-col border-none">
         {editor ? (
           <div className=" sticky top-0 z-10 bg-background py-2  border-b flex flex-row items-center justify-between">
             <TiptapEditorToolbar editor={editor} />
@@ -99,6 +99,6 @@ export function BaseTiptapEditor({
           <EditorContent editor={editor} />
         </div>
       </div>
-    </ScrollContainer>
+
   );
 }

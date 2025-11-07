@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, ReactNode, useCallback } from "react";
 import { motion } from "framer-motion";
 import { ArrowBigDown } from "lucide-react";
-
+import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 interface ScrollContainerProps {
   children: ReactNode;
   scrollType: "div" | "window";
@@ -97,20 +97,23 @@ const ScrollContainer: React.FC<ScrollContainerProps> = ({
   }, [scrollRef, getScrollHeight, scrollTo]);
 
   return (
-    <div className="relative" ref={scrollType === "div" ? containerRef : undefined}>
+    <div
+      className={`relative${scrollType === 'div' ? ' overflow-y-auto h-full' : ''}`}
+      ref={scrollType === 'div' ? containerRef : undefined}
+    >
       {children}
 
       {showScrollArrow && (
         <button
           onClick={handleScrollArrowClick}
           className={`fixed md:bottom-10 bottom-5 md:right-10 right-2 bg-blue-600/50 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg z-50 transition-opacity text-md`}
-          aria-label={scrollDirection === "down" ? "Scroll to bottom" : "Scroll to top"}
+          aria-label={scrollDirection === 'down' ? 'Scroll to bottom' : 'Scroll to top'}
         >
           <motion.div
-            animate={{ rotate: scrollDirection === "down" ? 0 : 180 }}
+            animate={{ rotate: scrollDirection === 'down' ? 0 : 180 }}
             transition={{ duration: 0.3 }}
           >
-            <ArrowBigDown className="w-4 h-4" />
+            <IoIosArrowDown className="w-4 h-4" />
           </motion.div>
         </button>
       )}

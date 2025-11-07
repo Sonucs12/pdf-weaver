@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { Editor } from "./components/Editor";
+import ScrollContainer from "@/components/ui/ScrollContainer";
 
 export default function ClientEditorPage() {
   const searchParams = useSearchParams();
@@ -41,8 +42,9 @@ export default function ClientEditorPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <main className="flex-1 container mx-auto p-4 sm:p-6 md:p-8">
+    <div className="flex flex-col">
+         <ScrollContainer scrollType="div">
+      <main className="flex-1 container md:h-[calc(100vh-4.7rem)] mx-auto p-4 sm:p-6 md:p-8">
         <Editor
           id={id || undefined}
           initialContent={initialContent}
@@ -50,6 +52,7 @@ export default function ClientEditorPage() {
           isEditMode={isEditMode}
         />
       </main>
+      </ScrollContainer>
     </div>
   );
 }

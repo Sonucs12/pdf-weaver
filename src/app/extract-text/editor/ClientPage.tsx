@@ -44,7 +44,7 @@ export default function ClientEditorPage() {
   return (
     <div className="flex flex-col">
          <ScrollContainer scrollType="div">
-      <main className="flex-1 container md:h-[calc(100vh-4.7rem)] mx-auto p-4 sm:p-6 md:p-8">
+      <main className="flex-1 container md:h-[calc(100vh-4.7rem)] mx-auto py-4 sm:py-6 md:py-8">
         <Editor
           id={id || undefined}
           initialContent={initialContent}

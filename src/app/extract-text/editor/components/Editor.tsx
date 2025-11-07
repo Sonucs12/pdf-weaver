@@ -66,7 +66,7 @@ const EditorToolbar = ({
         )}
       </div>
       
-      <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
+      <div className="flex items-center px-4 sm:px-6 md:px-8 gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
         {isEditMode && !forceCreateMode && (
           <Button variant="outline" onClick={onStartFromScratch}>
             Start from scratch

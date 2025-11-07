@@ -7,8 +7,7 @@
     "dev": "next dev --turbopack -p 9002",
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
-"build": "next build",
-
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
@@ -59,6 +58,7 @@
     "markdown-it": "^14.1.0",
     "motion": "^12.23.24",
     "next": "15.3.3",
+    "next-sitemap": "^4.2.3",
     "next-themes": "^0.3.0",
     "patch-package": "^8.0.0",
     "pdf-lib": "^1.17.1",

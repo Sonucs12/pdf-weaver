@@ -8,6 +8,8 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { siteConfig } from '@/lib/metadata';
 import { Button } from '@/components/ui/button';
 
+import { Navigation } from './navigation';
+
 export const Header = () => {
   const pathname = usePathname();
   const isAppPage = pathname.startsWith('/extract-text');
@@ -19,6 +21,7 @@ export const Header = () => {
           <Logo className="h-7 w-7 text-primary" />
           <h1 className="text-xl font-headline font-bold text-foreground">{siteConfig.name}</h1>
         </Link>
+        <Navigation />
         <div className="flex items-center gap-4">
        
           {!isAppPage && (

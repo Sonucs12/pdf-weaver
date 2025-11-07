@@ -57,14 +57,12 @@ const EditorToolbar = ({
   const effectiveEditMode = isEditMode && !forceCreateMode;
 
   return (
-    <div className="flex justify-between flex-wrap items-center gap-4 px-4 sm:px-6 md:px-8">
-      <div>
+    <div className="flex justify-between flex-wrap items-center gap-4">
         {effectiveEditMode && (
-          <span className="text-sm font-medium text-foreground">
+          <span className="text-sm font-medium text-foreground px-4 sm:px-6 md:px-8">
             {fileName}
           </span>
         )}
-      </div>
       
       <div className="flex items-center px-4 sm:px-6 md:px-8 gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
         {isEditMode && !forceCreateMode && (

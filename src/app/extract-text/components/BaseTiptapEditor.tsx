@@ -87,18 +87,17 @@ export function BaseTiptapEditor({
   }, [editor, markdown]);
 
   return (
- 
-      <div className="flex flex-col border-none px-4 sm:px-6 md:px-8">
-        {editor ? (
-          <div className=" sticky top-0 z-10 bg-background py-2  border-b flex flex-row items-center justify-between">
-            <TiptapEditorToolbar editor={editor} />
-          </div>
-        ) : null}
-
-        <div className="py-4 flex-1">
-          <EditorContent editor={editor} />
+    <div className="flex flex-col">
+      {editor && (
+        <div className="sticky top-[4.1rem] z-20 bg-background border-b py-2 px-4 sm:px-6 md:px-8">
+          <TiptapEditorToolbar editor={editor} />
         </div>
+      )}
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-8 py-4">
+        <EditorContent editor={editor} />
       </div>
-
+    </div>
   );
+  
+  
 }

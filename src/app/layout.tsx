@@ -43,7 +43,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
             <Header />
-            <main className="flex-grow flex flex-col">{children}</main>
+            <main className="h-screen">{children}</main>
             <Toaster />
         </ThemeProvider>
         {schema && <StructuredData data={schema} />}

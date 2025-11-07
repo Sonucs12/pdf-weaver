@@ -22,9 +22,9 @@ export default function AppLayout({
 }) {
   return (
     <>
-    <div className="flex md:flex-row flex-col-reverse w-full overflow-hidden ">
+    <div className="flex md:flex-row flex-col-reverse w-full">
       <ExtractSidebar />
-      <main className="flex-1 overflow-auto md:h-[calc(100vh-4.2rem)] pb-14 md:pb-0">
+      <main className="flex-1 pb-14 md:pb-0">
         {children}
       </main>
     </div>

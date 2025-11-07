@@ -39,14 +39,14 @@ function DesktopSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 border-r border-border bg-background flex flex-col">
-      <nav className="flex-1 p-4">
+    <aside className=" w-64 border-r border-border bg-background flex items-center flex-col">
+      <nav className="fixed top-14 h-full p-4">
         {menuItems.map((item) => (
           <Link
             key={item.label}
             href={item.href}
             className={clsx(
-              "flex items-center px-4 py-2 mt-2 text-sm rounded-lg transition-all duration-300",
+              "w-[14rem] flex items-center px-4 py-2 mt-2 text-sm rounded-lg transition-all duration-300",
               {
                 "bg-sidebar-active text-sidebar-text": pathname === item.href,
                 "hover:bg-grey-background": pathname !== item.href,

@@ -9,6 +9,10 @@ import Image from "@tiptap/extension-image";
 import CodeBlock from "@tiptap/extension-code-block";
 import { markdownToHtml } from "@/hooks/use-markdown-to-html";
 import { TiptapEditorToolbar } from "./TiptapEditorToolbar";
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
 
 
 interface BaseTiptapEditorProps {
@@ -34,21 +38,36 @@ export function BaseTiptapEditor({
       codeBlock: false,
       link: false,
     }),
+  
     Link.configure({
       openOnClick: false,
       HTMLAttributes: { class: "text-blue-500 underline" },
     }),
+  
     Markdown,
+  
     CodeBlock.configure({
       HTMLAttributes: {
         class:
           "not-prose whitespace-pre tab-[4] block w-full overflow-x-auto rounded-md bg-muted p-3 font-mono text-sm",
       },
     }),
+  
     Image.configure({
       inline: false,
       HTMLAttributes: { class: "rounded-md max-w-full mx-auto" },
     }),
+  
+    // 🧩 Table extensions
+    Table.configure({
+      resizable: true,
+      HTMLAttributes: {
+        class: "border-collapse w-full text-sm",
+      },
+    }),
+    TableRow,
+    TableHeader,
+    TableCell,
   ];
   const extensions = baseExtensions.filter(
     (ext, i) =>

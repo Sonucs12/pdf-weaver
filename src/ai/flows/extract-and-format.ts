@@ -26,7 +26,15 @@ const PROMPT_TEMPLATE = `You are an expert PDF text extractor and formatter. Ext
 3. **Paragraphs**: Separate distinct paragraphs with blank lines for readability.
 4. **Code Blocks**: If you detect code, wrap it in \`\`\` with the appropriate language.
 5. **Emphasis**: Use **bold** or *italics* to highlight key information.
-6. **Tables**: Format tables using markdown table syntax if you find left column ,right column, rows table like structure.
+6. **Tables**: 
+   - If content has two or more columns (like comparison or difference tables), convert it into a Markdown table.
+   - Detect rows by horizontal separators or aligned content.
+   - Example format:
+     | Column 1 | Column 2 |
+     |-----------|-----------|
+     | Row 1 data | Row 1 data |
+     | Row 2 data | Row 2 data |
+   - If the image or text shows “difference between X and Y” or looks like side-by-side comparison (columns divided by lines or spacing), always format it as a markdown table.  
 7. **Whitespace**: Use whitespace effectively to improve readability.
 
 **Important**: 

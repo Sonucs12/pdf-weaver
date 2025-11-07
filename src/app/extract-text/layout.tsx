@@ -22,7 +22,7 @@ export default function AppLayout({
 }) {
   return (
     <>
-    <div className="flex md:flex-row flex-col-reverse w-full">
+    <div className="flex min-h-screen md:flex-row flex-col-reverse w-full">
       <ExtractSidebar />
       <main className="flex-1 pb-14 md:pb-0">
         {children}

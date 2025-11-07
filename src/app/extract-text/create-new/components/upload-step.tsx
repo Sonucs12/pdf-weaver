@@ -29,7 +29,7 @@ export function UploadStep({
   };
 
   return (
-    <Card 
+    <div
       className="w-full  text-center shadow-lg transition-all duration-300"
       onDragEnter={onDragEnter}
       onDragLeave={onDragLeave}
@@ -62,7 +62,7 @@ export function UploadStep({
           />
         </div>
       </CardContent>
-    </Card>
+    </div>
   );
 }
 

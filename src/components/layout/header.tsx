@@ -15,7 +15,7 @@ export const Header = () => {
   const isAppPage = pathname.startsWith('/extract-text');
 
   return (
-    <header className="px-4 border-b bg-background/80 backdrop-blur-sm sticky top-0 z-20">
+    <header className="px-4 border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="flex h-16 items-center justify-between mx-auto">
         <Link href="/" className="flex items-center gap-2">
           <Logo className="h-7 w-7 text-primary" />

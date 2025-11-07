@@ -89,7 +89,7 @@ export function BaseTiptapEditor({
   return (
     <div className="flex flex-col">
       {editor && (
-        <div className="sticky top-[4.1rem] z-20 bg-background border-b py-2 px-4 sm:px-6 md:px-8">
+        <div className="sticky top-[4rem] z-20 bg-background border-b py-2 px-4 sm:px-6 md:px-8">
           <TiptapEditorToolbar editor={editor} />
         </div>
       )}

@@ -44,7 +44,7 @@ export default function ClientEditorPage() {
   }
 
   return (
-
+    <ScrollContainer scrollType="window">
       <main className="flex-1 mx-auto py-4 sm:py-6 md:py-8">
         <Editor
           id={id || undefined}
@@ -53,6 +53,6 @@ export default function ClientEditorPage() {
           isEditMode={isEditMode}
         />
       </main>
-  
+    </ScrollContainer>
   );
 }

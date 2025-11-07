@@ -26,7 +26,7 @@ const PROMPT_TEMPLATE = `You are an expert PDF text extractor and formatter. Ext
 3. **Paragraphs**: Separate distinct paragraphs with blank lines for readability.
 4. **Code Blocks**: If you detect code, wrap it in \`\`\` with the appropriate language.
 5. **Emphasis**: Use **bold** or *italics* to highlight key information.
-6. **Tables**: Format tables using markdown table syntax if you find table like structure like ifpdf content has left praragraph right pragraph.
+6. **Tables**: Format tables using markdown table syntax if you find table like structure like if pdf content has left praragraph right pragraph.
 7. **Whitespace**: Use whitespace effectively to improve readability.
 
 **Important**: 

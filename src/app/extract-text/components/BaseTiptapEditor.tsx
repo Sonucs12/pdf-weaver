@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useEditor, EditorContent, Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Markdown } from "tiptap-markdown";
-import Link from '@tiptap/extension-link';
-import Image from '@tiptap/extension-image';
-import CodeBlock from '@tiptap/extension-code-block';
+import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
+import CodeBlock from "@tiptap/extension-code-block";
 import { markdownToHtml } from "@/hooks/use-markdown-to-html";
 import { TiptapEditorToolbar } from "./TiptapEditorToolbar";
+import ScrollContainer from "@/components/ui/ScrollContainer";
 
 interface BaseTiptapEditorProps {
   markdown: string;
@@ -25,6 +26,8 @@ export function BaseTiptapEditor({
   placeholder,
   onEditorReady,
 }: BaseTiptapEditorProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
   const baseExtensions = [
     StarterKit.configure({
       heading: { levels: [1, 2, 3, 4, 5, 6] },
@@ -33,12 +36,13 @@ export function BaseTiptapEditor({
     }),
     Link.configure({
       openOnClick: false,
-      HTMLAttributes: { class: 'text-blue-500 underline' },
+      HTMLAttributes: { class: "text-blue-500 underline" },
     }),
     Markdown,
     CodeBlock.configure({
       HTMLAttributes: {
-        class: 'not-prose whitespace-pre tab-[4] block w-full overflow-x-auto rounded-md bg-muted p-3 font-mono text-sm',
+        class:
+          "not-prose whitespace-pre tab-[4] block w-full overflow-x-auto rounded-md bg-muted p-3 font-mono text-sm",
       },
     }),
     Image.configure({
@@ -46,8 +50,10 @@ export function BaseTiptapEditor({
       HTMLAttributes: { class: "rounded-md max-w-full mx-auto" },
     }),
   ];
-  const extensions = baseExtensions.filter((ext, i) =>
-    baseExtensions.findIndex(e => (e as any).name === (ext as any).name) === i
+  const extensions = baseExtensions.filter(
+    (ext, i) =>
+      baseExtensions.findIndex((e) => (e as any).name === (ext as any).name) ===
+      i
   );
 
   const editor = useEditor({
@@ -58,7 +64,9 @@ export function BaseTiptapEditor({
     },
     editorProps: {
       attributes: {
-        class: `prose dark:prose-invert max-w-none focus:outline-none prose-pre:whitespace-pre prose-pre:tab-size-[4] ${className || ""}`,
+        class: `prose dark:prose-invert max-w-none focus:outline-none prose-pre:whitespace-pre prose-pre:tab-size-[4] ${
+          className || ""
+        }`,
         "data-placeholder": placeholder || "Write or edit your content...",
       },
     },
@@ -79,17 +87,18 @@ export function BaseTiptapEditor({
   }, [editor, markdown]);
 
   return (
-    <div className="flex flex-col border-none ">
-      {editor ? (
-        <div className=" sticky top-0 z-10 bg-background py-2  border-b flex flex-row items-center justify-between">
-          <TiptapEditorToolbar editor={editor} />
+    <ScrollContainer scrollType="div" scrollRef={scrollRef}>
+      <div className="flex flex-col border-none h-screen">
+        {editor ? (
+          <div className=" sticky top-0 z-10 bg-background py-2  border-b flex flex-row items-center justify-between">
+            <TiptapEditorToolbar editor={editor} />
+          </div>
+        ) : null}
+
+        <div className="py-4 flex-1">
+          <EditorContent editor={editor} />
         </div>
-      ) : null}
-      <div className="py-4 flex-1 overflow-y-auto">
-        <EditorContent editor={editor} />
       </div>
-    </div>
+    </ScrollContainer>
   );
 }
-
-

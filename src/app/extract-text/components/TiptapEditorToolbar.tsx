@@ -327,19 +327,19 @@ export const TiptapEditorToolbar = memo(
 
     return (
       <div className="flex flex-wrap items-center gap-2 py-2">
-         <div className="flex whitespace-normal overflow-x-auto scrollbar-hide gap-2">
+         <div className="flex whitespace-normal overflow-x-auto scrollbar-hide gap-2 px-4 md:px-0 sm:px-0">
         <ButtonGroup buttons={historyButtons} />
         <Separator orientation="vertical" className="h-8" />
         <ButtonGroup buttons={headingButtons} />
         </div>
-        <Separator orientation="vertical" className="h-8 hidden md:block" />
-        <div className="flex whitespace-normal overflow-x-auto scrollbar-hide gap-2">
+        <Separator orientation="vertical" className="h-8 hidden lg:block" />
+        <div className="flex whitespace-normal overflow-x-auto scrollbar-hide gap-2 px-4 md:px-0 sm:px-0">
         <ButtonGroup buttons={formattingButtons} />
         <Separator orientation="vertical" className="h-8" />
         <ButtonGroup buttons={blockButtons} />
         </div>
-        <Separator orientation="vertical" className="h-8 hidden md:block" />
-        <div className="flex whitespace-normal overflow-x-auto scrollbar-hide gap-2">
+        <Separator orientation="vertical" className="h-8 hidden lg:block" />
+        <div className="flex whitespace-normal overflow-x-auto scrollbar-hide gap-2 px-4 md:px-0 sm:px-0">
         <ButtonGroup buttons={linkButtons} />
         <Separator orientation="vertical" className="h-8" />
         <ButtonGroup buttons={utilityButtons} />

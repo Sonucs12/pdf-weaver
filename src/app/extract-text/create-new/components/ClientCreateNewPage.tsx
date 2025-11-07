@@ -26,13 +26,13 @@ export default function ClientCreateNewPage() {
     setEditedText,
     setEditedMarkdown,
     setPageRange,
-    processPdf,
+    startProcessing,
     handleFileSelect,
     handleDragEvents,
     handleReset,
     currentProcessingImage,
-  currentProcessingPage,
-  handleCancelProcessing,
+    currentProcessingPage,
+    handleCancelProcessing,
   } = usePdfProcessor();
 
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
@@ -52,8 +52,8 @@ export default function ClientCreateNewPage() {
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     handleDragEvents(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileSelect(e.dataTransfer.files[0]);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFileSelect(e.dataTransfer.files);
     }
   };
 
@@ -77,7 +77,7 @@ export default function ClientCreateNewPage() {
             pageCount={pageCount}
             pageRange={pageRange}
             onPageRangeChange={setPageRange}
-            onProcess={() => processPdf(pageRange)}
+            onProcess={() => startProcessing(pageRange)}
           />
         );
       case 'processing':

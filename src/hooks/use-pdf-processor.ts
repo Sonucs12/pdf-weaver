@@ -39,7 +39,9 @@ export function usePdfProcessor() {
   const [editedMarkdown, setEditedMarkdown] = useState('');
   const [fileName, setFileName] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+  const [fileType, setFileType] = useState<'pdf' | 'image' | null>(null);
   const [pdfDataUri, setPdfDataUri] = useState<string | null>(null);
+  const [imageDataUris, setImageDataUris] = useState<string[]>([]);
   const [pageCount, setPageCount] = useState(0);
   const [pageRange, setPageRange] = useState('1');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -53,6 +55,7 @@ export function usePdfProcessor() {
   const cancelRef = useRef(false);
   const base64WorkerRef = useRef<Worker | null>(null);
   const renderWorkerRef = useRef<Worker | null>(null);
+  const imageWorkerRef = useRef<Worker | null>(null);
   const { toast } = useToast();
   const { saveDraft } = useAutoSaveDraft();
   const { generationCount, incrementGenerationCount, isLoading: isGenerationCountLoading } = useGenerationTracker();
@@ -63,6 +66,7 @@ export function usePdfProcessor() {
       try {
         base64WorkerRef.current = new Worker(new URL('../workers/base64Worker.js', import.meta.url));
         renderWorkerRef.current = new Worker(new URL('../workers/renderWorker.js', import.meta.url));
+        imageWorkerRef.current = new Worker(new URL('../workers/imageWorker.js', import.meta.url));
 
         // Helpful error logs in case worker script fails to load (e.g., CSP/CDN issues)
         base64WorkerRef.current.addEventListener('error', (err) => {
@@ -71,8 +75,11 @@ export function usePdfProcessor() {
         renderWorkerRef.current.addEventListener('error', (err) => {
           console.warn('Render worker error:', err);
         });
+        imageWorkerRef.current.addEventListener('error', (err) => {
+          console.warn('Image worker error:', err);
+        });
 
-        console.log('[PDF Weaver] Workers initialized: base64 + render');
+        console.log('[PDF Weaver] Workers initialized: base64 + render + image');
 
         return () => {
           if (base64WorkerRef.current) {
@@ -82,6 +89,10 @@ export function usePdfProcessor() {
           if (renderWorkerRef.current) {
             renderWorkerRef.current.terminate();
             renderWorkerRef.current = null;
+          }
+          if (imageWorkerRef.current) {
+            imageWorkerRef.current.terminate();
+            imageWorkerRef.current = null;
           }
         };
       } catch (error) {
@@ -244,17 +255,8 @@ export function usePdfProcessor() {
     return images;
   }, [updateProcessingState]);
 
-  const processPdf = useCallback(async (rangeToProcess?: string) => {
+  const processPdfPages = useCallback(async (rangeToProcess?: string) => {
     if (!pdfDataUri) return;
-
-    if (generationCount !== null && generationCount >= MAX_PDF_GENERATIONS) {
-      toast({
-        variant: 'destructive',
-        title: 'Generation Limit Reached',
-        description: `You have reached the maximum of ${MAX_PDF_GENERATIONS} PDF generations.`,
-      });
-      return;
-    }
   
     cancelRef.current = false;
     setStep('processing');
@@ -303,7 +305,6 @@ export function usePdfProcessor() {
           message: `Converting pages ${chunk[0]}-${chunk[chunk.length - 1]} to images...` 
         });
 
-        // Use worker for rendering
         const chunkImages = await convertChunkToImagesWithWorker(pdfDataUri, chunk);
 
         if (cancelRef.current) {
@@ -416,6 +417,211 @@ export function usePdfProcessor() {
     }
   }, [pdfDataUri, pageCount, convertChunkToImagesWithWorker, editedText, toast, getUserFriendlyError, handleProcessingError, resetProcessing, updateProcessingState]);
 
+  const processImages = useCallback(async (rangeToProcess?: string, images?: string[], count?: number) => {
+    console.log('[Processing Images] Starting...');
+    const uris = images || imageDataUris;
+    const totalCount = count || pageCount;
+    console.log('[Processing Images] URIs length:', uris.length, 'Total count:', totalCount);
+
+    if (generationCount !== null && generationCount >= MAX_PDF_GENERATIONS) {
+      toast({
+        variant: 'destructive',
+        title: 'Generation Limit Reached',
+        description: `You have reached the maximum of ${MAX_PDF_GENERATIONS} image generations.`,
+      });
+      return;
+    }
+  
+    cancelRef.current = false;
+    setStep('processing');
+    setIsProcessing(true);
+    updateProcessingState({ 
+      currentImage: null, 
+      currentPage: null, 
+      message: 'Starting image processing...' 
+    });
+
+    try {
+      const imagesToProcess = parsePageRange(rangeToProcess || '1', totalCount);
+      if (!imagesToProcess) {
+        toast({
+          variant: 'destructive',
+          title: 'Invalid Image Range',
+          description: `You can only process up to ${MAX_PAGES_ALLOWED} images at a time.`,
+        });
+        resetProcessing();
+        setStep('select-page');
+        return;
+      }
+      
+      const totalImages = imagesToProcess.length;
+      let allFormattedText = '';
+      let processedCount = 0;
+
+      updateProcessingState({ message: 'Compressing images...' });
+      
+      for (let i = 0; i < totalImages; i += CHUNK_SIZE) {
+        if (cancelRef.current) {
+          resetProcessing();
+          toast({
+            title: 'Processing Cancelled',
+            description: allFormattedText.trim() 
+              ? `Kept ${processedCount} of ${totalImages} processed images.`
+              : 'No images were processed.',
+          });
+          setStep(allFormattedText.trim() ? 'edit' : 'select-page');
+          return;
+        }
+
+        const chunkIndices = imagesToProcess.slice(i, Math.min(i + CHUNK_SIZE, totalImages));
+        const chunkImageUris = chunkIndices.map(index => uris[index - 1]);
+
+        updateProcessingState({ 
+          message: `Compressing images ${chunkIndices[0]}-${chunkIndices[chunkIndices.length - 1]}...` 
+        });
+
+        const chunkImages = await Promise.all(chunkImageUris.map(uri => {
+          return new Promise<string>((resolve, reject) => {
+            if (!imageWorkerRef.current) {
+              // No fallback for image compression, just resolve the original image
+              resolve(uri.split(',')[1]);
+              return;
+            }
+            const handleMessage = (e: MessageEvent) => {
+              if (e.data.type === 'SUCCESS') {
+                imageWorkerRef.current?.removeEventListener('message', handleMessage);
+                resolve(e.data.compressedImage);
+              } else if (e.data.type === 'ERROR') {
+                imageWorkerRef.current?.removeEventListener('message', handleMessage);
+                reject(new Error(e.data.error));
+              }
+            };
+            imageWorkerRef.current.addEventListener('message', handleMessage);
+            imageWorkerRef.current.postMessage({ type: 'COMPRESS_IMAGE', data: { imageDataUri: uri } });
+          });
+        }));
+
+        if (cancelRef.current) {
+          resetProcessing();
+          toast({
+            title: 'Processing Cancelled',
+            description: allFormattedText.trim() 
+              ? `Kept ${processedCount} of ${totalImages} processed images.`
+              : 'No images were processed.',
+          });
+          setStep(allFormattedText.trim() ? 'edit' : 'select-page');
+          return;
+        }
+
+        updateProcessingState({ 
+          message: `Processing images ${chunkIndices[0]}-${chunkIndices[chunkIndices.length - 1]} of ${totalImages}...` 
+        });
+
+        console.log('[Processing Images] Calling AI...');
+        let results;
+        try {
+          results = await extractAndFormatPages({ images: chunkImages, pageNumbers: chunkIndices });
+        } catch (error) {
+          const rawError = error instanceof Error ? error.message : 'AI processing failed';
+          handleProcessingError(rawError, processedCount, totalImages, allFormattedText.trim().length > 0, allFormattedText);
+          return;
+        }
+
+        if (cancelRef.current) {
+          resetProcessing();
+          toast({
+            title: 'Processing Cancelled',
+            description: allFormattedText.trim() 
+              ? `Kept ${processedCount} of ${totalImages} processed images.`
+              : 'No images were processed.',
+          });
+          setStep(allFormattedText.trim() ? 'edit' : 'select-page');
+          return;
+        }
+
+        for (const result of results) {
+          if (result.success && result.formattedText?.trim()) {
+            const separator = allFormattedText ? '\n\n---\n\n' : '';
+            allFormattedText += separator + result.formattedText.trim();
+            setEditedMarkdown(allFormattedText);
+
+            const html = markdownToHtml(allFormattedText);
+            setEditedText(html);
+            
+            if (processedCount === 0) setStep('edit');
+            
+            processedCount++;
+            updateProcessingState({ message: `Completed ${processedCount} of ${totalImages} images...` });
+          } else if (!result.success) {
+            const errorMsg = result.error?.toLowerCase() || '';
+            const isCriticalError = ['rate limit', 'quota', 'api', 'limit exceeded']
+              .some(pattern => errorMsg.includes(pattern));
+            
+            if (isCriticalError) {
+              handleProcessingError(
+                result.error || 'Unknown error', 
+                processedCount, 
+                totalImages, 
+                allFormattedText.trim().length > 0,
+                allFormattedText
+              );
+              return;
+            } else {
+              toast({
+                title: 'Image Processing Warning',
+                description: `Image ${result.pageNumber}: ${getUserFriendlyError(result.error || 'Unknown error')}`,
+                duration: 5000,
+              });
+            }
+          }
+        }
+
+        chunkImages.length = 0;
+        updateProcessingState({ currentImage: null, currentPage: null });
+        
+        if (typeof global !== 'undefined' && global.gc) global.gc();
+      }
+
+      if (!allFormattedText.trim()) throw new Error('Failed to extract any text from the selected image(s).');
+
+      updateProcessingState({ message: `Successfully processed ${processedCount} of ${totalImages} images!` });
+      await incrementGenerationCount();
+      resetProcessing();
+
+    } catch (error) {
+      resetProcessing();
+      
+      if (error instanceof Error && error.message === 'Processing cancelled by user') {
+        toast({
+          title: 'Processing Cancelled',
+          description: editedText.trim() ? 'Kept processed content.' : 'No images were processed.',
+          duration: 4000,
+        });
+        setStep(editedText.trim() ? 'edit' : 'select-page');
+        return;
+      }
+      
+      const rawError = error instanceof Error ? error.message : 'An unknown error occurred';
+      toast({
+        variant: 'destructive',
+        title: 'Processing Failed',
+        description: getUserFriendlyError(rawError),
+        duration: 6000,
+      });
+      handleReset();
+    }
+  }, [imageDataUris, pageCount, editedText, toast, getUserFriendlyError, handleProcessingError, resetProcessing, updateProcessingState]);
+
+  const startProcessing = useCallback(async (rangeToProcess?: string, fileTypeOverride?: 'pdf' | 'image', images?: string[], count?: number) => {
+    const type = fileTypeOverride || fileType;
+    console.log('[Processing] Starting processing with fileType:', type);
+    if (type === 'pdf') {
+      await processPdfPages(rangeToProcess);
+    } else if (type === 'image') {
+      await processImages(rangeToProcess, images, count);
+    }
+  }, [fileType, processPdfPages, processImages]);
+
   const handleCancelProcessing = useCallback(() => {
     cancelRef.current = true;
     updateProcessingState({ message: 'Cancelling processing...' });
@@ -466,18 +672,7 @@ export function usePdfProcessor() {
     });
   }, [updateProcessingState]);
 
-  const handleFileSelect = useCallback(async (file: File | null) => {
-    if (!file) return;
-
-    if (file.type !== 'application/pdf') {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid File Type',
-        description: 'Please upload a PDF file.',
-      });
-      return;
-    }
-
+  const handlePdfFile = useCallback(async (file: File) => {
     setFileName(file.name);
     setStep('processing');
     updateProcessingState({ message: 'Reading PDF file...' });
@@ -489,7 +684,6 @@ export function usePdfProcessor() {
       try {
         const arrayBuffer = reader.result as ArrayBuffer;
         
-        // Use Web Worker for base64 conversion (progress updates handled in worker)
         const dataUri = await convertToBase64WithWorker(arrayBuffer);
         
         const loadingTask = pdfjsLib.getDocument(dataUri);
@@ -504,25 +698,17 @@ export function usePdfProcessor() {
           setStep('select-page');
           updateProcessingState({ message: '' });
         } else {
-          await processPdf('1');
+          await startProcessing('1');
         }
       } catch (error) {
         console.error('PDF Loading Error:', error);
         const rawError = error instanceof Error ? error.message : 'Could not read the PDF file';
-        const errorDetails = error instanceof Error ? error.stack : '';
-        
         toast({
           variant: 'destructive',
           title: 'PDF Loading Failed',
           description: getUserFriendlyError(rawError),
           duration: 6000,
         });
-        
-        // Log detailed error for debugging
-        if (errorDetails) {
-          console.error('Error details:', errorDetails);
-        }
-        
         handleReset();
       }
     };
@@ -536,7 +722,101 @@ export function usePdfProcessor() {
       });
       handleReset();
     };
-  }, [toast, processPdf, getUserFriendlyError, updateProcessingState, convertToBase64WithWorker]);
+  }, [toast, startProcessing, getUserFriendlyError, updateProcessingState, convertToBase64WithWorker]);
+
+  const handleImageFiles = useCallback(async (files: FileList) => {
+    setFileName(files.length > 1 ? `${files.length} images` : files[0].name);
+    setStep('processing');
+    updateProcessingState({ message: 'Reading image files...' });
+
+    console.log('[Image Upload] Reading files...');
+    const fileArray = Array.from(files);
+    const dataUris: string[] = [];
+
+    try {
+      await Promise.all(fileArray.map(file => {
+        return new Promise<void>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            if (e.target && e.target.result) {
+              dataUris.push(e.target.result as string);
+              resolve();
+            } else {
+              reject(new Error('Failed to read file result.'));
+            }
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }));
+
+      console.log('[Image Upload] Files read, dataUris length:', dataUris.length);
+
+      setImageDataUris(dataUris);
+      setPageCount(dataUris.length);
+
+      if (dataUris.length > 1) {
+        setPageRange(`1-${dataUris.length}`);
+        setStep('select-page');
+        updateProcessingState({ message: '' });
+      } else {
+        console.log('[Image Upload] Starting single image processing...');
+        await startProcessing('1', 'image', dataUris, dataUris.length);
+      }
+    } catch (error) {
+      console.error('Image Loading Error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Image Loading Failed',
+        description: 'Could not read the image files.',
+        duration: 6000,
+      });
+      handleReset();
+    }
+  }, [toast, startProcessing, updateProcessingState]);
+
+  const handleFileSelect = useCallback(async (files: FileList | null) => {
+    if (generationCount !== null && generationCount >= MAX_PDF_GENERATIONS) {
+      toast({
+        variant: 'destructive',
+        title: 'Generation Limit Reached',
+        description: `You have reached the maximum of ${MAX_PDF_GENERATIONS} generations.`,
+      });
+      return;
+    }
+
+    console.log('[File Select] Files:', files);
+    if (!files || files.length === 0) {
+      console.log('[File Select] No files selected.');
+      return;
+    }
+
+    const firstFile = files[0];
+    console.log('[File Select] First file type:', firstFile.type);
+
+    if (firstFile.type === 'application/pdf') {
+      if (files.length > 1) {
+        toast({
+          variant: 'destructive',
+          title: 'Invalid Selection',
+          description: 'Please upload one PDF at a time.',
+        });
+        return;
+      }
+      setFileType('pdf');
+      handlePdfFile(firstFile);
+    } else if (firstFile.type.startsWith('image/')) {
+      setFileType('image');
+      handleImageFiles(files);
+    } else {
+      console.log('[File Select] Invalid file type.');
+      toast({
+        variant: 'destructive',
+        title: 'Invalid File Type',
+        description: 'Please upload a PDF or image files.',
+      });
+    }
+  }, [toast, handlePdfFile, handleImageFiles, generationCount]);
 
   const handleDragEvents = useCallback((isEntering: boolean) => {
     setIsDragging(isEntering);
@@ -548,7 +828,9 @@ export function usePdfProcessor() {
     setEditedText('');
     setEditedMarkdown('');
     setFileName('');
+    setFileType(null);
     setPdfDataUri(null);
+    setImageDataUris([]);
     setPageCount(0);
     setPageRange('1');
     setIsProcessing(false);
@@ -573,14 +855,14 @@ export function usePdfProcessor() {
     setEditedText,
     setEditedMarkdown,
     setPageRange,
-    processPdf,
+    startProcessing,
     handleFileSelect,
     handleDragEvents,
     handleReset,
     handleCancelProcessing,
   }), [
     step, setStep, editedText, editedMarkdown, fileName, isDragging, pageCount, pageRange,
-    processingState, isProcessing, processPdf, handleFileSelect,
+    processingState, isProcessing, startProcessing, handleFileSelect,
     handleDragEvents, handleReset, handleCancelProcessing
   ]);
 }

@@ -43,7 +43,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
             <Header />
-            <main className="h-screen">{children}</main>
+            <main className="min-h-screen">{children}</main>
             <Toaster />
         </ThemeProvider>
         {schema && <StructuredData data={schema} />}

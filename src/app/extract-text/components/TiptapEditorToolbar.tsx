@@ -54,7 +54,7 @@ const ButtonGroup = memo(({ buttons }: { buttons: ToolbarButton[] }) => (
         disabled={btn.disabled}
         aria-label={btn.tooltip}
         title={btn.tooltip}
-        className="h-8 w-8"
+        className="h-9 w-9"
       >
         <btn.icon className="h-4 w-4" />
       </Button>
@@ -327,17 +327,23 @@ export const TiptapEditorToolbar = memo(
 
     return (
       <div className="flex flex-wrap items-center gap-2 py-2">
+         <div className="flex whitespace-normal overflow-x-auto scrollbar-hide gap-2">
         <ButtonGroup buttons={historyButtons} />
         <Separator orientation="vertical" className="h-8" />
         <ButtonGroup buttons={headingButtons} />
-        <Separator orientation="vertical" className="h-8" />
+        </div>
+        <Separator orientation="vertical" className="h-8 hidden md:block" />
+        <div className="flex whitespace-normal overflow-x-auto scrollbar-hide gap-2">
         <ButtonGroup buttons={formattingButtons} />
         <Separator orientation="vertical" className="h-8" />
         <ButtonGroup buttons={blockButtons} />
-        <Separator orientation="vertical" className="h-8" />
+        </div>
+        <Separator orientation="vertical" className="h-8 hidden md:block" />
+        <div className="flex whitespace-normal overflow-x-auto scrollbar-hide gap-2">
         <ButtonGroup buttons={linkButtons} />
         <Separator orientation="vertical" className="h-8" />
         <ButtonGroup buttons={utilityButtons} />
+        </div>
       </div>
     );
   }

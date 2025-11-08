@@ -3,6 +3,16 @@
 import type { Editor } from "@tiptap/react";
 import type { LucideIcon } from "lucide-react";
 import {
+  Table as TableIcon,
+  Rows2,
+  Columns,
+  Trash2,
+  Plus,
+
+} from "lucide-react";
+
+
+import {
   Bold,
   Italic,
   Strikethrough,
@@ -144,7 +154,58 @@ export const TiptapEditorToolbar = memo(
     if (!editor) {
       return null;
     }
-
+    const tableButtons: ToolbarButton[] = [
+      {
+        action: () =>
+          editor
+            .chain()
+            .focus()
+            .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+            .run(),
+        isActive: editor.isActive("table"),
+        icon: TableIcon,
+        tooltip: "Insert Table (3x3)",
+        disabled: !editor.can().chain().focus().insertTable().run(),
+      },
+      {
+        action: () => editor.chain().focus().addRowAfter().run(),
+        isActive: false,
+        icon: Rows2,
+        tooltip: "Add Row After",
+        disabled: !editor.can().chain().focus().addRowAfter().run(),
+      },
+      {
+        action: () => editor.chain().focus().deleteRow().run(),
+        isActive: false,
+        icon: Minus,
+        tooltip: "Delete Row",
+        disabled: !editor.can().chain().focus().deleteRow().run(),
+      },
+      {
+        action: () => editor.chain().focus().addColumnAfter().run(),
+        isActive: false,
+        icon: Columns,
+        tooltip: "Add Column After",
+        disabled: !editor.can().chain().focus().addColumnAfter().run(),
+      },
+      
+      {
+        action: () => editor.chain().focus().deleteColumn().run(),
+        isActive: false,
+        icon: Minus,
+        tooltip: "Delete Column",
+        disabled: !editor.can().chain().focus().deleteColumn().run(),
+      },
+      {
+        action: () => editor.chain().focus().deleteTable().run(),
+        isActive: false,
+        icon: Trash2,
+        tooltip: "Delete Table",
+        disabled: !editor.isActive("table"),
+      },
+    ];
+    
+    
     const formattingButtons: ToolbarButton[] = [
       {
         action: () => editor.chain().focus().toggleBold().run(),
@@ -339,11 +400,16 @@ export const TiptapEditorToolbar = memo(
         <ButtonGroup buttons={blockButtons} />
         </div>
         <Separator orientation="vertical" className="h-8 hidden lg:block" />
-        <div className="flex whitespace-normal overflow-x-auto scrollbar-hide gap-2 px-4 md:px-0 sm:px-0">
+        <div className="flex whitespace-normal overflow-x-auto scrollbar-hide gap-2 px-4 md:px-0 sm:px-0 pr-0">
         <ButtonGroup buttons={linkButtons} />
         <Separator orientation="vertical" className="h-8" />
         <ButtonGroup buttons={utilityButtons} />
         </div>
+        
+<div className="flex whitespace-normal overflow-x-auto scrollbar-hide gap-2 px-0 sm:px-0">
+  <ButtonGroup buttons={tableButtons} />
+</div>
+
       </div>
     );
   }

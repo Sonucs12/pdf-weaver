@@ -79,6 +79,22 @@
     @apply bg-background text-foreground;
   }
 }
+@layer base {
+  .ProseMirror .column-resize-handle {
+    @apply cursor-col-resize bg-gray-400/30 absolute right-0 top-0 bottom-0 w-[2px];
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
 .scrollbar-slim::-webkit-scrollbar {
   width: 4px;
   height: 2px;
@@ -119,4 +135,22 @@
 }
 .scrollbar-thin::-webkit-scrollbar-track {
   background: transparent;
+}
+
+
+
+
+/* The resizer handle created by tiptap tables */
+
+
+/* Optional: show a visual line while resizing */
+.ProseMirror.resize-cursor {
+  cursor: col-resize;
+}
+
+.tableWrapper {
+overflow: hidden !important;
+}
+.ProseMirror.table {
+  overflow-x: auto;
 }

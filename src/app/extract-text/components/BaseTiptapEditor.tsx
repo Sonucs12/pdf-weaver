@@ -58,13 +58,27 @@ export function BaseTiptapEditor({
       HTMLAttributes: { class: "rounded-md max-w-full mx-auto" },
     }),
   
-    // 🧩 Table extensions
     Table.configure({
       resizable: true,
       HTMLAttributes: {
-        class: "border-collapse w-full text-sm",
+        class: "border-collapse w-64 overflow-auto text-sm border border-gray-500",
+      },
+      
+    }),
+    TableCell.configure({
+      HTMLAttributes: {
+        class:
+          "border border-gray-300 dark:border-gray-700 min-w-[80px] max-w-[500px] p-2 align-top",
       },
     }),
+    TableHeader.configure({
+      HTMLAttributes: {
+        class:
+          "border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 font-semibold text-left p-2",
+      },
+    }),
+    
+    
     TableRow,
     TableHeader,
     TableCell,
@@ -112,7 +126,7 @@ export function BaseTiptapEditor({
           <TiptapEditorToolbar editor={editor} />
         </div>
       )}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-8 py-4">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 md:px-8 py-4">
         <EditorContent editor={editor} />
       </div>
     </div>

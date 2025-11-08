@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { Editor as TiptapEditor } from "@tiptap/react";
 import { useRouter } from "next/navigation";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 import { Button } from "@/components/ui/button";
 import { SaveButton } from "@/app/extract-text/create-new/components/SaveButton";
 import { ExportMenu } from "@/app/extract-text/create-new/components/ExportMenu";
@@ -36,6 +37,7 @@ interface EditorToolbarProps {
   markdown: string;
   editedText: string;
   hasChanged: boolean;
+  projectTitle?: string;
   onStartFromScratch: () => void;
   onSave: () => void;
 }
@@ -48,6 +50,7 @@ const EditorToolbar = ({
   markdown,
   editedText,
   hasChanged,
+  projectTitle,
   onStartFromScratch,
   onSave,
 }: EditorToolbarProps) => {
@@ -89,6 +92,7 @@ const EditorToolbar = ({
           editedMarkdown={markdown}
           fileName={fileName}
           isProcessing={false}
+          projectTitle={projectTitle}
         />
       </div>
     </div>
@@ -102,7 +106,17 @@ export function Editor({
   id,
 }: EditorProps) {
   const router = useRouter();
+  const [savedItems] = useLocalStorage<any[]>('saved-extracts', []);
   const baselineMarkdownRef = useRef<string>(isEditMode ? initialContent || "" : "");
+  
+  // Get project title if editing a saved item
+  const projectTitle = useMemo(() => {
+    if (id && isEditMode) {
+      const savedItem = savedItems.find((i) => i.title === id);
+      return savedItem?.title;
+    }
+    return undefined;
+  }, [id, isEditMode, savedItems]);
 
   const [forceCreateMode, setForceCreateMode] = useState(false);
   const [fileName, setFileName] = useState(propFileName);
@@ -162,6 +176,7 @@ export function Editor({
         markdown={markdown}
         editedText={editedText}
         hasChanged={hasChanged}
+        projectTitle={projectTitle}
         onStartFromScratch={handleStartFromScratch}
         onSave={handleSave}
       />

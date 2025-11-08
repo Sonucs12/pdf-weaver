@@ -14,12 +14,30 @@ interface ExportMenuProps {
   editedMarkdown: string;
   fileName: string;
   isProcessing: boolean;
+  projectTitle?: string;
 }
 
-export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing }: ExportMenuProps) {
+export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing, projectTitle }: ExportMenuProps) {
   const { toast, dismiss } = useToast();
   const { convertAndDownload, copyToClipboard, isConverting } = useHtmlToWord();
   const { generatePdf, isGenerating: isGeneratingPdf, phase, error, clearError } = usePdfGenerator();
+
+  // Get the best available name for the file: projectTitle > fileName > "pdfwrite"
+  // Also sanitize the filename to remove invalid characters
+  const getFileName = () => {
+    let name = '';
+    if (projectTitle && projectTitle.trim()) {
+      name = projectTitle.trim();
+    } else if (fileName && fileName.trim() && fileName !== 'untitled') {
+      name = fileName.replace(/\.pdf$/i, '').trim();
+    } else {
+      name = 'pdfwrite';
+    }
+    
+    // Sanitize filename: remove invalid characters for file systems
+    // Replace invalid characters with underscore
+    return name.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').trim() || 'pdfwrite';
+  };
 
   const toastIdRef = useRef<string | undefined>();
 
@@ -62,7 +80,7 @@ export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing 
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${fileName.replace(/\.pdf$/i, '')}.${format}`;
+    a.download = `${getFileName()}.${format}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -93,8 +111,7 @@ export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing 
       icon: <Download className="h-4 w-4" />,
       onClick: async () => {
         try {
-          const base = fileName.replace(/\.pdf$/i, '');
-          await convertAndDownload(editedText, base);
+          await convertAndDownload(editedText, getFileName());
         } catch (e) {
           toast({ variant: 'destructive', title: 'DOCX download failed' });
         }
@@ -112,7 +129,7 @@ export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing 
       onClick: async () => {
         try {
           await generatePdf(editedMarkdown, {
-            filename: `${fileName.replace(/\.pdf$/i, '')}.pdf`,
+            filename: `${getFileName()}.pdf`,
           });
           toast({ title: 'PDF Downloaded!' });
         } catch (e) {

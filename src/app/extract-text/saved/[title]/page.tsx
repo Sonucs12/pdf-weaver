@@ -87,7 +87,7 @@ export default function EditSavedPage() {
             <Button onClick={handleUpdate} disabled={!hasChanged} loading={isUpdating}>
               Update
             </Button>
-            <ExportMenu editedText={editedText} editedMarkdown={item.editedMarkdown} fileName={item.fileName} isProcessing={false} />
+            <ExportMenu editedText={editedText} editedMarkdown={item.editedMarkdown} fileName={item.fileName} isProcessing={false} projectTitle={item.title} />
            
           </div>
         </div>

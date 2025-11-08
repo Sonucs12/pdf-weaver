@@ -48,7 +48,7 @@ const faqItems = [
 export default function WhatIsThisPage() {
   return (
     <div className="container mx-auto p-4 md:p-8">
-      <div className="flex flex-col items-center justify-center mb-12">
+      <div className="flex flex-col items-center justify-center mb-12 h-80">
         <div className="flex items-center gap-3 mb-6">
           <Logo className="h-12 w-12 text-primary" />
           <h1 className="text-4xl font-headline font-bold text-foreground">{siteConfig.name}</h1>
@@ -65,43 +65,43 @@ export default function WhatIsThisPage() {
         <section className="mb-12">
           <h2 className="text-3xl font-bold mb-6 text-center">Real Benefits: Why Use PDFWriter?</h2>
           <div className="space-y-6">
-            <div className="p-4 bg-muted rounded-lg">
+            <div className=" rounded-lg">
               <h3 className="text-xl font-semibold mb-2">Transform Scanned Documents into Editable Text</h3>
               <p className="text-muted-foreground">
                 Convert scanned PDFs, handwritten notes, and image files into fully editable text. No more retyping documents - let AI do the heavy lifting while you focus on refining the content.
               </p>
             </div>
-            <div className="p-4 bg-muted rounded-lg">
+            <div className="">
               <h3 className="text-xl font-semibold mb-2">Smart Document Structure Recognition</h3>
               <p className="text-muted-foreground">
                 The AI automatically identifies and preserves document structure including headings, paragraphs, lists, and tables. Your formatted content is ready to edit immediately, saving hours of manual formatting work.
               </p>
             </div>
-            <div className="p-4 bg-muted rounded-lg">
+            <div className="">
               <h3 className="text-xl font-semibold mb-2">Combine Multiple Documents with Merge Feature</h3>
               <p className="text-muted-foreground">
                 Extract text from different pages or documents and merge them into a single project. Perfect for compiling reports from multiple sources, combining chapters, or building comprehensive documents from various PDFs.
               </p>
             </div>
-            <div className="p-4 bg-muted rounded-lg">
+            <div className="">
               <h3 className="text-xl font-semibold mb-2">Professional Export Options</h3>
               <p className="text-muted-foreground">
                 Export your work in multiple formats (HTML, Markdown, DOCX, PDF) to use in any application. Whether you need it for web publishing, documentation, or professional documents, we've got you covered.
               </p>
             </div>
-            <div className="p-4 bg-muted rounded-lg">
+            <div className="">
               <h3 className="text-xl font-semibold mb-2">Work Offline with Local Storage</h3>
               <p className="text-muted-foreground">
                 All your saved projects are stored locally on your device. Work without constant internet connection, and rest assured that your data stays private and secure on your own device.
               </p>
             </div>
-            <div className="p-4 bg-muted rounded-lg">
+            <div className="">
               <h3 className="text-xl font-semibold mb-2">Rich Text Editing Experience</h3>
               <p className="text-muted-foreground">
                 A powerful WYSIWYG editor with tables, formatting options, links, and more. Edit your extracted content just like you would in a word processor, with all the tools you need at your fingertips.
               </p>
             </div>
-            <div className="p-4 bg-muted rounded-lg">
+            <div className="">
               <h3 className="text-xl font-semibold mb-2">Perfect for Academic and Professional Use</h3>
               <p className="text-muted-foreground">
                 Ideal for students digitizing notes, researchers compiling sources, professionals converting documents, content creators repurposing materials, and anyone who needs to extract and edit text from PDFs or images.
@@ -111,7 +111,7 @@ export default function WhatIsThisPage() {
         </section>
 
         <section className="mb-12">
-          <h2 className="text-3xl font-bold mb-6 text-center">Your Security and Privacy</h2>
+          <h2 className="text-3xl font-bold text-center">Your Security and Privacy</h2>
           <p className="text-muted-foreground text-center mb-8">
             We take your security and privacy seriously. Here's how we protect your data:
           </p>

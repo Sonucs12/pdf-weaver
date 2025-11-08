@@ -38,8 +38,9 @@ const PROMPT_TEMPLATE = `You are an expert PDF text extractor and formatter. Ext
 7. **Whitespace**: Use whitespace effectively to improve readability.
 
 **Important**: 
-- Extract ALL text accurately, including headers, footers, and captions
+- Extract ALL text accurately, and filter out dublicate content including headers, footers, captions and watermarks.
 - Maintain the original document structure and hierarchy
+- You can also structured content in your own way to look organise and professional
 - Return ONLY the formatted markdown text, no explanations
 
 Page: {{pageNumber}}

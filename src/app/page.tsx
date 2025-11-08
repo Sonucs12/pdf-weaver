@@ -20,14 +20,15 @@ export default function LandingPage() {
       <section className="py-20 md:py-32 text-center bg-background flex-grow flex items-center justify-center">
         <div className="container mx-auto px-4 max-w-4xl">
           <h2 className="text-4xl md:text-6xl font-headline font-bold mb-4">
-            Unlock Your PDFs. Instantly.
+            Edit Your PDFs. Instantly.
           </h2>
-          <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            {siteConfig.description} Stop re-typing and start weaving your PDF content into editable, structured markdown with the power of AI.
+          <h3 className='text-primary mb-3 font-semibold text-lg'>Do you have a Scanned image PDFs? </h3>
+          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+            {siteConfig.description} Stop re-typing and start with PDFWrite to make your PDF content into editable, structured markdown with the power of AI.
           </p>
           <Button asChild size="lg">
             <Link href="/extract-text">
-              Get Started for Free <ArrowRight className="ml-2" />
+              Get Started for Free <ArrowRight />
             </Link>
           </Button>
         </div>
@@ -111,13 +112,13 @@ export default function LandingPage() {
       {/* Final CTA */}
       <section className="py-20 md:py-32">
         <div className="container mx-auto px-4 text-center max-w-3xl">
-          <h2 className="text-3xl md:text-5xl font-headline font-bold mb-4">Ready to Weave?</h2>
+          <h2 className="text-3xl md:text-5xl font-headline font-bold mb-4">Ready to Write?</h2>
           <p className="text-lg text-muted-foreground mb-8">
             Transform your first PDF into structured, usable markdown in less than a minute. No sign-up required.
           </p>
           <Button asChild size="lg">
             <Link href="/extract-text">
-              Try PDFWrite Now <ArrowRight className="ml-2" />
+              Try PDFWrite Now <ArrowRight />
             </Link>
           </Button>
         </div>

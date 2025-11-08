@@ -1,9 +1,12 @@
+
 'use client';
 
-import { useRef, type ChangeEvent, type DragEvent } from 'react';
+import { type ChangeEvent, type DragEvent } from 'react';
 import { Upload } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { isFileSizeAllowed, MAX_FILE_SIZE_MB } from '@/lib/security';
+import { useToast } from '@/hooks/use-toast';
 
 interface UploadStepProps {
   isDragging: boolean;
@@ -24,8 +27,23 @@ export function UploadStep({
   onFileSelect,
   fileInputRef,
 }: UploadStepProps) {
+  const { toast } = useToast();
+
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onFileSelect(e.target.files);
+    const files = e.target.files;
+    if (files) {
+      for (const file of Array.from(files)) {
+        if (!isFileSizeAllowed(file.size)) {
+          toast({
+            variant: 'destructive',
+            title: 'File too large',
+            description: `The file "${file.name}" is too large. The maximum file size is ${MAX_FILE_SIZE_MB}MB.`,
+          });
+          return;
+        }
+      }
+    }
+    onFileSelect(files);
   };
 
   return (
@@ -65,4 +83,5 @@ export function UploadStep({
     </div>
   );
 }
+
 

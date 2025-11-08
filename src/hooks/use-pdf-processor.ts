@@ -9,7 +9,7 @@ import { useGenerationTracker } from '@/hooks/use-generation-tracker';
 import { MAX_PAGES_ALLOWED, MAX_PDF_GENERATIONS } from '@/lib/security';
 import { parsePageRange } from '@/lib/utils/pdf-utils';
 import type { Step } from '@/app/extract-text/create-new/components/types';
-
+import { isFileSizeAllowed, MAX_FILE_SIZE_MB } from '@/lib/security';
 import { markdownToHtml } from '@/hooks/use-markdown-to-html';
 
 if (typeof window !== 'undefined') {
@@ -775,6 +775,7 @@ export function usePdfProcessor() {
     }
   }, [toast, startProcessing, updateProcessingState]);
 
+
   const handleFileSelect = useCallback(async (files: FileList | null) => {
     if (generationCount !== null && generationCount >= MAX_PDF_GENERATIONS) {
       toast({
@@ -789,6 +790,17 @@ export function usePdfProcessor() {
     if (!files || files.length === 0) {
       console.log('[File Select] No files selected.');
       return;
+    }
+
+    for (const file of Array.from(files)) {
+      if (!isFileSizeAllowed(file.size)) {
+        toast({
+          variant: 'destructive',
+          title: 'File too large',
+          description: `The file "${file.name}" is too large. The maximum file size is ${MAX_FILE_SIZE_MB}MB.`,
+        });
+        return;
+      }
     }
 
     const firstFile = files[0];
@@ -817,6 +829,7 @@ export function usePdfProcessor() {
       });
     }
   }, [toast, handlePdfFile, handleImageFiles, generationCount]);
+
 
   const handleDragEvents = useCallback((isEntering: boolean) => {
     setIsDragging(isEntering);

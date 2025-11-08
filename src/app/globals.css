@@ -148,10 +148,26 @@
   cursor: col-resize;
 }
 
+/* Table wrapper - contains table overflow */
 .tableWrapper {
-overflow:scroll !important;
-
-}
-.ProseMirror.table {
+  max-width: 100% !important;
+  width: 100% !important;
   overflow-x: auto !important;
+  overflow-y: visible !important;
+  display: block !important;
+  margin: 1rem 0 !important;
+}
+
+/* Table inside wrapper - allows resizing but constrained by wrapper */
+.tableWrapper table {
+  display: table !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  table-layout: auto !important;
+}
+
+/* Ensure ProseMirror doesn't overflow */
+.ProseMirror {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
 }

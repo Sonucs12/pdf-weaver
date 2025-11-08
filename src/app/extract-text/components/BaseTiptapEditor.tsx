@@ -61,7 +61,7 @@ export function BaseTiptapEditor({
     Table.configure({
       resizable: true,
       HTMLAttributes: {
-        class: "border-collapse w-64 overflow-auto text-sm border border-gray-500",
+        class: "border-collapse text-sm border border-gray-800",
       },
       
     }),

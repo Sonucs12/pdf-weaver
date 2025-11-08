@@ -48,7 +48,7 @@ export function UploadStep({
 
   return (
     <div
-      className="w-full  text-center shadow-lg transition-all duration-300"
+      className="w-full  text-center transition-all duration-300"
       onDragEnter={onDragEnter}
       onDragLeave={onDragLeave}
       onDragOver={onDragOver}

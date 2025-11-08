@@ -1,3 +1,4 @@
+
 'use client';
 
 import { DropDownMenu, DropdownMenuItem } from '@/components/ui/dropdown-menu';
@@ -5,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Download, Copy, FileDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useHtmlToWord } from '@/hooks/use-html-to-word';
+import { usePdfGenerator } from '@/hooks/use-pdfgenertor';
+import { useEffect, useRef } from 'react';
 
 interface ExportMenuProps {
   editedText: string;
@@ -14,8 +17,44 @@ interface ExportMenuProps {
 }
 
 export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing }: ExportMenuProps) {
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
   const { convertAndDownload, copyToClipboard, isConverting } = useHtmlToWord();
+  const { generatePdf, isGenerating: isGeneratingPdf, phase, error, clearError } = usePdfGenerator();
+
+  const toastIdRef = useRef<string | undefined>();
+
+  useEffect(() => {
+    if (phase === 'waking') {
+      toastIdRef.current = toast({
+        title: 'Waking server...',
+        description: 'Preparing the PDF generation service.',
+        duration: 999999, // Keep toast open indefinitely
+      }).id;
+    } else if (phase === 'generating') {
+      if (toastIdRef.current) {
+        dismiss(toastIdRef.current);
+      }
+      toastIdRef.current = toast({
+        title: 'Generating PDF...',
+        description: 'Your PDF is being created.',
+        duration: 999999, // Keep toast open indefinitely
+      }).id;
+    } else if (phase === 'idle' && toastIdRef.current) {
+      dismiss(toastIdRef.current);
+      toastIdRef.current = undefined;
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    if (error) {
+      if (toastIdRef.current) {
+        dismiss(toastIdRef.current);
+        toastIdRef.current = undefined;
+      }
+      toast({ variant: 'destructive', title: 'PDF Generation Failed', description: error });
+      clearError();
+    }
+  }, [error]);
 
   const handleDownload = (format: 'html' | 'md') => {
     const content = format === 'md' ? editedMarkdown : editedText;
@@ -63,6 +102,26 @@ export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing 
       disabled: isProcessing || isConverting,
     },
     {
+      label:
+        phase === 'waking'
+          ? 'Waking server...'
+          : phase === 'generating'
+          ? 'Generating PDF...'
+          : 'Download as PDF',
+      icon: <Download className="h-4 w-4" />,
+      onClick: async () => {
+        try {
+          await generatePdf(editedMarkdown, {
+            filename: `${fileName.replace(/\.pdf$/i, '')}.pdf`,
+          });
+          toast({ title: 'PDF Downloaded!' });
+        } catch (e) {
+          // Error is already handled by the useEffect
+        }
+      },
+      disabled: isProcessing || isGeneratingPdf,
+    },
+    {
       label: 'Copy as HTML',
       icon: <Copy className="h-4 w-4" />,
       onClick: () => handleCopy('html'),
@@ -74,21 +133,7 @@ export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing 
       onClick: () => handleCopy('md'),
       disabled: isProcessing,
     },
-  
-    {
-      label: 'Copy as DOCX',
-      icon: <Copy className="h-4 w-4" />,
-      onClick: async () => {
-        try {
-          await copyToClipboard(editedText, fileName.replace(/\.pdf$/i, ''));
-          toast({ title: 'DOCX copied to clipboard!' });
-        } catch (e) {
-          toast({ variant: 'destructive', title: 'Copy failed', description: 'Your browser may not allow copying files to the clipboard.' });
-        }
-      },
-      disabled: isProcessing || isConverting,
-    },
-  ];
+    ];
 
   return (
     <DropDownMenu
@@ -102,3 +147,4 @@ export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing 
     />
   );
 }
+

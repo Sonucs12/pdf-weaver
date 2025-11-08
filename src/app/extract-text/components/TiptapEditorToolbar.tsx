@@ -2,15 +2,7 @@
 
 import type { Editor } from "@tiptap/react";
 import type { LucideIcon } from "lucide-react";
-import {
-  Table as TableIcon,
-  Rows2,
-  Columns,
-  Trash2,
-  Plus,
-
-} from "lucide-react";
-
+import { Table as TableIcon, Rows2, Columns, Trash2, Plus } from "lucide-react";
 
 import {
   Bold,
@@ -188,7 +180,7 @@ export const TiptapEditorToolbar = memo(
         tooltip: "Add Column After",
         disabled: !editor.can().chain().focus().addColumnAfter().run(),
       },
-      
+
       {
         action: () => editor.chain().focus().deleteColumn().run(),
         isActive: false,
@@ -204,8 +196,7 @@ export const TiptapEditorToolbar = memo(
         disabled: !editor.isActive("table"),
       },
     ];
-    
-    
+
     const formattingButtons: ToolbarButton[] = [
       {
         action: () => editor.chain().focus().toggleBold().run(),
@@ -318,6 +309,13 @@ export const TiptapEditorToolbar = memo(
         tooltip: "Ordered List",
         disabled: false,
       },
+      {
+        action: () => editor.chain().focus().setHorizontalRule().run(),
+        isActive: false,
+        icon: Minus,
+        tooltip: "Horizontal Rule",
+        disabled: false,
+      },
     ];
     const linkButtons: ToolbarButton[] = [
       {
@@ -341,16 +339,6 @@ export const TiptapEditorToolbar = memo(
         tooltip: "Insert Image",
         disabled: false,
       },
-    ];
-    const utilityButtons: ToolbarButton[] = [
-      {
-        action: () => editor.chain().focus().setHorizontalRule().run(),
-        isActive: false,
-        icon: Minus,
-        tooltip: "Horizontal Rule",
-        disabled: false,
-      },
-      
     ];
 
     const historyButtons: ToolbarButton[] = [
@@ -388,28 +376,23 @@ export const TiptapEditorToolbar = memo(
 
     return (
       <div className="flex flex-wrap items-center gap-2 py-2">
-         <div className="flex whitespace-normal overflow-x-auto scrollbar-hide gap-2 px-4 md:px-0 sm:px-0">
-        <ButtonGroup buttons={historyButtons} />
-        <Separator orientation="vertical" className="h-8" />
-        <ButtonGroup buttons={headingButtons} />
+        <div className="flex whitespace-normal overflow-x-auto scrollbar-hide gap-2 px-4 md:px-0 sm:px-0">
+          <ButtonGroup buttons={historyButtons} />
+          <Separator orientation="vertical" className="h-8" />
+          <ButtonGroup buttons={headingButtons} />
         </div>
         <Separator orientation="vertical" className="h-8 hidden lg:block" />
         <div className="flex whitespace-normal overflow-x-auto scrollbar-hide gap-2 px-4 md:px-0 sm:px-0">
-        <ButtonGroup buttons={formattingButtons} />
-        <Separator orientation="vertical" className="h-8" />
-        <ButtonGroup buttons={blockButtons} />
+          <ButtonGroup buttons={formattingButtons} />
+          <Separator orientation="vertical" className="h-8" />
+          <ButtonGroup buttons={blockButtons} />
         </div>
         <Separator orientation="vertical" className="h-8 hidden lg:block" />
-        <div className="flex whitespace-normal overflow-x-auto scrollbar-hide gap-2 px-4 md:px-0 sm:px-0 pr-0">
-        <ButtonGroup buttons={linkButtons} />
-        <Separator orientation="vertical" className="h-8" />
-        <ButtonGroup buttons={utilityButtons} />
+        <div className="flex  whitespace-normal overflow-x-auto scrollbar-hide gap-2 px-4 md:px-0 sm:px-0 pr-0">
+          <ButtonGroup buttons={linkButtons} />
+          <Separator orientation="vertical" className="h-8" />
+          <ButtonGroup buttons={tableButtons} />
         </div>
-        
-<div className="flex whitespace-normal overflow-x-auto scrollbar-hide gap-2 px-0 sm:px-0">
-  <ButtonGroup buttons={tableButtons} />
-</div>
-
       </div>
     );
   }

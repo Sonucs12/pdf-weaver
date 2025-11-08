@@ -388,7 +388,7 @@ export const TiptapEditorToolbar = memo(
           <ButtonGroup buttons={blockButtons} />
         </div>
         <Separator orientation="vertical" className="h-8 hidden lg:block" />
-        <div className="flex  whitespace-normal overflow-x-auto scrollbar-hide gap-2 px-4 md:px-0 sm:px-0 pr-0">
+        <div className="flex  whitespace-normal overflow-x-auto scrollbar-hide gap-2 px-4 md:px-0 sm:px-0">
           <ButtonGroup buttons={linkButtons} />
           <Separator orientation="vertical" className="h-8" />
           <ButtonGroup buttons={tableButtons} />

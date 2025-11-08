@@ -9,8 +9,8 @@ import ScrollContainer from "@/components/ui/ScrollContainer";
 export default function ClientEditorPage() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
-  const [drafts] = useLocalStorage<any[]>("pdf-write-drafts", []);
-  const [savedItems] = useLocalStorage<any[]>("saved-extracts", []);
+  const [draftsStorage] = useLocalStorage<Record<string, any>>("pdf-write-drafts", {});
+  const [savedItemsStorage] = useLocalStorage<Record<string, any>>("saved-extracts", {});
   const [initialContent, setInitialContent] = useState<string>("");
   const [fileName, setFileName] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
@@ -19,9 +19,11 @@ export default function ClientEditorPage() {
 
   useEffect(() => {
     if (id) {
-      const itemToEdit =
-        drafts.find((d) => d.id === id) ||
-        savedItems.find((i) => i.title === id);
+      // Try to find in drafts first, then saved items - direct object access
+      const draft = draftsStorage[id];
+      const savedItem = savedItemsStorage[id] || Object.values(savedItemsStorage).find((item: any) => item.title === id);
+      
+      const itemToEdit = draft || savedItem;
 
       if (itemToEdit) {
         setInitialContent(
@@ -33,7 +35,7 @@ export default function ClientEditorPage() {
       }
     }
     setIsLoading(false);
-  }, [id, drafts, savedItems]);
+  }, [id, draftsStorage, savedItemsStorage]);
 
   if (isLoading) {
     return (

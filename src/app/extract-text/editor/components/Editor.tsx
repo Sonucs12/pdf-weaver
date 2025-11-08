@@ -106,17 +106,17 @@ export function Editor({
   id,
 }: EditorProps) {
   const router = useRouter();
-  const [savedItems] = useLocalStorage<any[]>('saved-extracts', []);
+  const [savedItemsStorage] = useLocalStorage<Record<string, any>>('saved-extracts', {});
   const baselineMarkdownRef = useRef<string>(isEditMode ? initialContent || "" : "");
   
   // Get project title if editing a saved item
   const projectTitle = useMemo(() => {
     if (id && isEditMode) {
-      const savedItem = savedItems.find((i) => i.title === id);
+      const savedItem = savedItemsStorage[id] || Object.values(savedItemsStorage).find((item: any) => item.title === id);
       return savedItem?.title;
     }
     return undefined;
-  }, [id, isEditMode, savedItems]);
+  }, [id, isEditMode, savedItemsStorage]);
 
   const [forceCreateMode, setForceCreateMode] = useState(false);
   const [fileName, setFileName] = useState(propFileName);

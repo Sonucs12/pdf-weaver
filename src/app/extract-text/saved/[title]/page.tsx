@@ -13,6 +13,7 @@ import { MarkdownPreviewDialog } from '@/app/extract-text/components/MarkdownPre
 import { useToast } from '@/hooks/use-toast';
 
 interface SavedItem {
+  id: string;
   title: string;
   fileName: string;
   editedText: string;
@@ -25,7 +26,7 @@ export default function EditSavedPage() {
   const router = useRouter();
   const params = useParams();
   const { title } = params;
-  const [savedItems, setSavedItems] = useLocalStorage<SavedItem[]>('saved-extracts', []);
+  const [savedItems, setSavedItems] = useLocalStorage<Record<string, SavedItem>>('saved-extracts', {});
   const [item, setItem] = useState<SavedItem | null>(null);
   const [editedText, setEditedText] = useState('');
   const [editedMarkdown, setEditedMarkdown] = useState('');
@@ -35,7 +36,7 @@ export default function EditSavedPage() {
 
   useEffect(() => {
     const decodedTitle = decodeURIComponent(title as string);
-    const foundItem = savedItems.find(i => i.title === decodedTitle);
+    const foundItem = Object.values(savedItems).find(item => item.title === decodedTitle);
     if (foundItem) {
       setItem(foundItem);
       setEditedMarkdown(foundItem.editedMarkdown || '');
@@ -57,9 +58,12 @@ export default function EditSavedPage() {
   const handleUpdate = () => {
     if (item && hasChanged) {
       setIsUpdating(true);
-      const updatedItem = { ...item, editedText, editedMarkdown, updatedAt: new Date().toISOString() };
-      const updatedItems = savedItems.map(i => (i.title === item.title ? updatedItem : i));
-      setSavedItems(updatedItems);
+      const updatedItem: SavedItem = { ...item, editedText, editedMarkdown, updatedAt: new Date().toISOString() };
+      // Update directly using object spread
+      setSavedItems({
+        ...savedItems,
+        [item.id]: updatedItem
+      });
       setIsUpdating(false);
       router.push('/extract-text/saved');
     } else {

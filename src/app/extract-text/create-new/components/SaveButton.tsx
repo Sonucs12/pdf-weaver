@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { Button } from '@/components/ui/button';
 import { TitleDialog } from './TitleDialog';
@@ -18,6 +18,7 @@ interface SaveButtonProps {
 }
 
 interface SavedItem {
+  id: string;
   title: string;
   fileName: string;
   editedText: string;
@@ -55,11 +56,14 @@ export function SaveButton({
   isDisabled = false,
   id
 }: SaveButtonProps) {
-  const [savedItems, setSavedItems] = useLocalStorage<SavedItem[]>('saved-extracts', []);
+  const [savedItems, setSavedItems] = useLocalStorage<Record<string, SavedItem>>('saved-extracts', {});
   const [isSaved, setIsSaved] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { toast } = useToast();
+
+  // Convert to array only for display/mapping
+  const savedItemsArray = Object.values(savedItems);
 
   const isContentEmpty = !editedText.trim() && !editedMarkdown.trim();
 
@@ -77,11 +81,25 @@ export function SaveButton({
       return;
     }
   
-    const updatedItems = savedItems.map(item => 
-      item.title === id ? { ...item, editedText, editedMarkdown, updatedAt: new Date().toISOString() } : item
-    );
-  
-    setSavedItems(updatedItems);
+    if (!id) return;
+    
+    // Get item by ID directly using dot operator
+    const existingItem = savedItems[id];
+    
+    if (existingItem) {
+      const updatedItem: SavedItem = {
+        ...existingItem,
+        editedText,
+        editedMarkdown,
+        updatedAt: new Date().toISOString()
+      };
+      // Update directly using object spread
+      setSavedItems({
+        ...savedItems,
+        [id]: updatedItem
+      });
+    }
+    
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 2000);
     onSave();
@@ -94,25 +112,38 @@ export function SaveButton({
       return;
     }
 
-    const existingIndex = savedItems.findIndex(item => item.title === title);
+    // Find existing item by title
+    const existingItem = Object.values(savedItems).find(item => item.title === title);
 
-    if (existingIndex > -1) {
-      const updatedItems = [...savedItems];
-      const existingItem = updatedItems[existingIndex];
-      existingItem.editedText += `\n\n${editedText}`;
-      existingItem.editedMarkdown += `\n\n${editedMarkdown}`;
-      existingItem.updatedAt = new Date().toISOString();
-      updatedItems[existingIndex] = existingItem;
-      setSavedItems(updatedItems);
+    if (existingItem) {
+      // Merge into existing project
+      const updatedItem: SavedItem = {
+        ...existingItem,
+        editedText: existingItem.editedText + `\n\n${editedText}`,
+        editedMarkdown: existingItem.editedMarkdown + `\n\n${editedMarkdown}`,
+        updatedAt: new Date().toISOString()
+      };
+      // Update directly using object spread
+      setSavedItems({
+        ...savedItems,
+        [existingItem.id]: updatedItem
+      });
     } else {
+      // Create new project with unique ID
+      const newId = crypto.randomUUID();
       const newItem: SavedItem = { 
+        id: newId,
         title, 
         fileName, 
         editedText, 
         editedMarkdown, 
         createdAt: new Date().toISOString() 
       };
-      setSavedItems([...savedItems, newItem]);
+      // Add directly using object spread
+      setSavedItems({
+        ...savedItems,
+        [newId]: newItem
+      });
     }
     
     setIsSaved(true);
@@ -173,15 +204,15 @@ export function SaveButton({
               Create New Project
             </Button>
 
-            {savedItems.length > 0 && (
+            {savedItemsArray.length > 0 && (
               <div className="flex flex-col gap-3">
                 <h3 className="text-sm text-center text-muted-foreground px-1">
                   Merge into existing project
                 </h3>
                 <div className="flex flex-col">
-                  {savedItems.map((item) => (
+                  {savedItemsArray.map((item) => (
                     <Button
-                      key={item.title}
+                      key={item.id}
                       variant="ghost"
                       className="w-full justify-start h-9"
                       onClick={() => handleMergeIntoProject(item.title)}
@@ -200,7 +231,7 @@ export function SaveButton({
         open={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         onSave={handleSave}
-        savedItems={savedItems}
+        savedItems={savedItemsArray}
       />
     </>
   );

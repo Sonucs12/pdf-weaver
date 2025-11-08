@@ -13,18 +13,22 @@ interface Draft {
 }
 
 export function useAutoSaveDraft() {
-  const [drafts, setDrafts] = useLocalStorage<Draft[]>('pdf-write-drafts', []);
+  const [drafts, setDrafts] = useLocalStorage<Record<string, Draft>>('pdf-write-drafts', {});
   const { toast } = useToast();
+
+  // Convert to array only for display/mapping
+  const draftsArray = Object.values(drafts);
 
   const saveDraft = (editedMarkdown: string, fileName: string) => {
     if (!editedMarkdown.trim()) {
       return;
     }
 
+    const id = crypto.randomUUID();
     const title = `Draft - ${fileName} - ${new Date().toLocaleString()}`;
 
     const newDraft: Draft = {
-      id: crypto.randomUUID(),
+      id,
       title,
       fileName,
       editedMarkdown,
@@ -32,7 +36,11 @@ export function useAutoSaveDraft() {
       preview: editedMarkdown.substring(0, 100),
     };
 
-    setDrafts([...drafts, newDraft]);
+    // Add directly using object spread
+    setDrafts({
+      ...drafts,
+      [id]: newDraft
+    });
 
     toast({
       title: 'Draft saved',
@@ -40,5 +48,5 @@ export function useAutoSaveDraft() {
     });
   };
 
-  return { saveDraft };
+  return { saveDraft, drafts, draftsArray, setDrafts };
 }

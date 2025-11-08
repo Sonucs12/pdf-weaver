@@ -7,6 +7,7 @@ import { Save } from 'lucide-react';
 import { SearchInput } from '@/components/ui/search-input';
 
 interface SavedItem {
+  id: string;
   title: string;
   fileName: string;
   editedText: string;
@@ -16,30 +17,33 @@ interface SavedItem {
 }
 
 export default function ClientSavedPage() {
-  const [savedItems, setSavedItems] = useLocalStorage<SavedItem[]>('saved-extracts', []);
+  const [savedItems, setSavedItems] = useLocalStorage<Record<string, SavedItem>>('saved-extracts', {});
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Convert to array for display/mapping
+  const savedItemsArray = Object.values(savedItems);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const handleDelete = (title: string) => {
-    const updatedItems = savedItems.filter(item => item.title !== title);
-    setSavedItems(updatedItems);
+  const handleDelete = (id: string) => {
+    const { [id]: _, ...rest } = savedItems;
+    setSavedItems(rest);
   };
 
   const filteredItems = useMemo(() => {
     if (!searchQuery) {
-      return savedItems;
+      return savedItemsArray;
     }
     const lowerCaseQuery = searchQuery.toLowerCase();
-    return savedItems.filter(
+    return savedItemsArray.filter(
       item =>
         item.title.toLowerCase().includes(lowerCaseQuery) ||
         item.fileName.toLowerCase().includes(lowerCaseQuery)
     );
-  }, [savedItems, searchQuery]);
+  }, [savedItemsArray, searchQuery]);
 
   if (!mounted) {
     return null; 
@@ -67,7 +71,8 @@ export default function ClientSavedPage() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredItems.map((item) => (
               <SavedExtractCard
-                key={item.title}
+                key={item.id}
+                id={item.id}
                 title={item.title}
                 fileName={item.fileName}
                 createdAt={item.createdAt}

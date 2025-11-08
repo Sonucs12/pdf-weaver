@@ -7,19 +7,20 @@ import { Trash2 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { EditButton } from '../../components/EditButton';
 interface SavedExtractCardProps {
+  id: string;
   title: string;
   fileName: string;
-  onDelete: (title: string) => void;
+  onDelete: (id: string) => void;
   createdAt?: string;
   updatedAt?: string;
 }
 
-export function SavedExtractCard({ title, fileName, onDelete, createdAt, updatedAt }: SavedExtractCardProps) {
+export function SavedExtractCard({ id, title, fileName, onDelete, createdAt, updatedAt }: SavedExtractCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDeleteClick = async () => {
     setIsDeleting(true);
-    await onDelete(title);
+    await onDelete(id);
     setIsDeleting(false);
   };
 
@@ -34,7 +35,7 @@ export function SavedExtractCard({ title, fileName, onDelete, createdAt, updated
         {!updatedAt && createdAt && <p className="text-xs text-muted-foreground">Created at {formatDate(createdAt, 'PP')}</p>}
       </CardContent>
       <CardFooter className="flex mt-auto justify-end items-end gap-2">
-        <EditButton id={title} title={title}/>
+        <EditButton id={id} title={title}/>
         <Button variant="destructive" size={"icon"} onClick={handleDeleteClick} loading={isDeleting}>
           <Trash2 className="h-4 w-4" />
          

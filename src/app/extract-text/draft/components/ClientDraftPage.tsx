@@ -1,6 +1,6 @@
 "use client"
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useLocalStorage } from '@/hooks/use-local-storage';
+import { useAutoSaveDraft } from '@/hooks/use-auto-save-draft';
 import { DraftCard } from './DraftCard';
 interface Draft {
   id: string;
@@ -12,9 +12,11 @@ interface Draft {
 }
 
 export default function ClientDraftPage() {
-  const [drafts, setDrafts] = useLocalStorage<Draft[]>('pdf-write-drafts', []);
+  const { drafts, draftsArray, setDrafts } = useAutoSaveDraft();
+  
   const handleDelete = (id: string) => {
-    setDrafts(drafts.filter(draft => draft.id !== id));
+    const { [id]: _, ...rest } = drafts;
+    setDrafts(rest);
   };
 
   return (
@@ -27,7 +29,7 @@ export default function ClientDraftPage() {
           <p className="text-muted-foreground text-sm">Your unsaved work in progress</p>
         </div>
 
-        {drafts.length === 0 ? (
+        {draftsArray.length === 0 ? (
           <Card>
             <CardHeader>
               <CardTitle>No Drafts</CardTitle>
@@ -38,7 +40,7 @@ export default function ClientDraftPage() {
           </Card>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 min-w-md">
-            {drafts.map((draft) => (
+            {draftsArray.map((draft) => (
               <DraftCard key={draft.id} draft={draft} onDelete={handleDelete} />
             ))}
           </div>

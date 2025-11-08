@@ -2,7 +2,7 @@ export const siteConfig = {
   name: 'PDFWrite',
   description: 'Convert any PDF into structured, editable text.',
   url: 'https://pdfwrite.vercel.app',
-  defaultImage: 'https://pdfwrite.vercel.app/favicon.ico',
+  defaultImage: 'https://pdfwrite.vercel.app/favicon.svg',
   twitterHandle: '@pdfwrite',
 };
 

@@ -120,13 +120,13 @@ export function BaseTiptapEditor({
   }, [editor, markdown]);
 
   return (
-    <div className="flex flex-col">
+    <div>
       {editor && (
         <div className="sticky top-[4rem] z-20 bg-background border-b py-2 px-0 sm:px-6 md:px-8">
           <TiptapEditorToolbar editor={editor} />
         </div>
       )}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 md:px-8 py-4">
+      <div className=" min-w-0 px-4 sm:px-6 md:px-8 py-4">
         <EditorContent editor={editor} />
       </div>
     </div>

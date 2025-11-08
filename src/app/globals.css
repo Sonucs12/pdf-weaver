@@ -149,8 +149,9 @@
 }
 
 .tableWrapper {
-overflow: hidden !important;
+overflow:scroll !important;
+
 }
 .ProseMirror.table {
-  overflow-x: auto;
+  overflow-x: auto !important;
 }

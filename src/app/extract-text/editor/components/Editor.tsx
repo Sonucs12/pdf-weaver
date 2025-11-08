@@ -61,7 +61,7 @@ const EditorToolbar = ({
       <div>
         {effectiveEditMode && (
           <span className="text-sm font-medium text-foreground px-4 sm:px-6 md:px-8">
-            {fileName}
+            {projectTitle || fileName}
           </span>
         )}
       </div>

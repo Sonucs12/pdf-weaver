@@ -70,7 +70,7 @@ export function useIndexedDB<T>(storeName: string) {
   );
 
   const add = useCallback(
-    (item: T & { id: any }) => {
+    (item: T) => {
       // Using `put` is safer than `add` as it will update if the key already exists.
       return performTransaction('readwrite', (store) => store.put(item));
     },

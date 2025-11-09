@@ -17,48 +17,39 @@ interface GenerationTrackerHook {
 }
 
 export function useGenerationTracker(): GenerationTrackerHook {
-  const { db, error } = useIndexedDB();
+  const { db, get, add, error } = useIndexedDB<{ key: string, value: GenerationInfo }>('settings');
   const [generationCount, setGenerationCount] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const getGenerationInfo = useCallback(async (): Promise<GenerationInfo | null> => {
-    if (!db) return null;
-    const transaction = db.transaction(['settings'], 'readonly');
-    const store = transaction.objectStore('settings');
-    const request = store.get(COUNT_KEY);
-
-    return new Promise((resolve, reject) => {
-      request.onsuccess = () => {
-        resolve(request.result?.value || null);
-      };
-      request.onerror = () => {
-        reject(request.error);
-      };
-    });
-  }, [db]);
+    if (!get) return null;
+    const result = await get(COUNT_KEY);
+    return result?.value || null;
+  }, [get]);
 
   const incrementGenerationCount = useCallback(async () => {
-    if (!db) return;
+    if (!add || !getGenerationInfo) return;
 
     const now = Date.now();
     const oneDay = 24 * 60 * 60 * 1000;
     const generationInfo = await getGenerationInfo();
 
     let newCount = 1;
+    let newTimestamp = now;
+
     if (generationInfo && now - generationInfo.timestamp < oneDay) {
       newCount = generationInfo.count + 1;
+      newTimestamp = generationInfo.timestamp; // Keep the original timestamp for the 24h period
     }
 
     const newGenerationInfo: GenerationInfo = {
       count: newCount,
-      timestamp: generationInfo && now - generationInfo.timestamp < oneDay ? generationInfo.timestamp : now,
+      timestamp: newTimestamp,
     };
 
-    const transaction = db.transaction(['settings'], 'readwrite');
-    const store = transaction.objectStore('settings');
-    store.put({ key: COUNT_KEY, value: newGenerationInfo });
+    await add({ key: COUNT_KEY, value: newGenerationInfo });
     setGenerationCount(newCount);
-  }, [db, getGenerationInfo]);
+  }, [add, getGenerationInfo]);
 
   useEffect(() => {
     if (db) {
@@ -73,6 +64,7 @@ export function useGenerationTracker(): GenerationTrackerHook {
         })
         .catch(err => {
           console.error("Error fetching generation count:", err);
+          setGenerationCount(0);
         })
         .finally(() => {
           setIsLoading(false);
@@ -82,8 +74,9 @@ export function useGenerationTracker(): GenerationTrackerHook {
 
   useEffect(() => {
     if (error) {
-      console.error("IndexedDB error:", error);
+      console.error("IndexedDB error in generation tracker:", error);
       setIsLoading(false);
+      setGenerationCount(0);
     }
   }, [error]);
 

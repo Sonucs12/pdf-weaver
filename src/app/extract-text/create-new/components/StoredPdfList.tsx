@@ -18,7 +18,7 @@ interface StoredPdfListProps {
 }
 
 export function StoredPdfList({ onSelectPdf }: StoredPdfListProps) {
-  const { getAll, remove } = useIndexedDB<StoredPdf>('uploadedPdfs');
+  const { db, getAll, remove } = useIndexedDB<StoredPdf>('uploadedPdfs');
   const [storedPdfs, setStoredPdfs] = useState<StoredPdf[]>([]);
   const { toast } = useToast();
 
@@ -27,7 +27,6 @@ export function StoredPdfList({ onSelectPdf }: StoredPdfListProps) {
       try {
         const pdfs = (await getAll()) as StoredPdf[];
         if (pdfs) {
-          // Sort by most recently uploaded
           pdfs.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
           setStoredPdfs(pdfs);
         }
@@ -40,11 +39,14 @@ export function StoredPdfList({ onSelectPdf }: StoredPdfListProps) {
         });
       }
     };
-    fetchPdfs();
-  }, [getAll, toast]);
+    
+    if (db) {
+      fetchPdfs();
+    }
+  }, [db, getAll, toast]);
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
-    e.stopPropagation(); // Prevent the badge's onClick from firing
+    e.stopPropagation();
     try {
       await remove(id);
       setStoredPdfs(prevPdfs => prevPdfs.filter(pdf => pdf.id !== id));
@@ -63,24 +65,24 @@ export function StoredPdfList({ onSelectPdf }: StoredPdfListProps) {
   };
 
   if (storedPdfs.length === 0) {
-    return null; // Don't render anything if there are no saved PDFs
+    return null;
   }
 
   return (
     <div className="mt-8">
-      <h3 className="text-lg font-medium text-center mb-4">Or select a recent PDF</h3>
+      <h3 className=" font-medium text-center mb-4">Or select a recent PDF</h3>
       <div className="flex flex-wrap gap-3 justify-center">
         {storedPdfs.map(pdf => (
           <Badge
             key={pdf.id}
             variant="outline"
-            className="cursor-pointer hover:bg-accent text-base p-2 pr-3"
+            className="cursor-pointer hover:bg-accent text-xs p-2 pr-3 transition-all duration-300"
             onClick={() => onSelectPdf(pdf)}
           >
             <File className="h-4 w-4 mr-2" />
             <span className="truncate max-w-[200px]" title={pdf.name}>{pdf.name}</span>
             <div 
-              className="ml-2 p-1 rounded-full hover:bg-destructive/20"
+              className="ml-2 p-1 rounded-full hover:bg-destructive transition-all duration-300"
               onClick={(e) => handleDelete(e, pdf.id)}
               title="Remove from list"
             >

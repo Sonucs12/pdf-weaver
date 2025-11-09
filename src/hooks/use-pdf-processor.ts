@@ -71,7 +71,6 @@ export function usePdfProcessor() {
         renderWorkerRef.current = new Worker(new URL('../workers/renderWorker.js', import.meta.url));
         imageWorkerRef.current = new Worker(new URL('../workers/imageWorker.js', import.meta.url));
 
-        // Helpful error logs in case worker script fails to load (e.g., CSP/CDN issues)
         base64WorkerRef.current.addEventListener('error', (err) => {
           console.warn('Base64 worker error:', err);
         });
@@ -102,6 +101,23 @@ export function usePdfProcessor() {
         console.warn('Web Workers not available, falling back to main thread');
       }
     }
+  }, []);
+
+  // DECLARE handleReset FIRST (before it's used in other callbacks)
+  const handleReset = useCallback(() => {
+    cancelRef.current = false;
+    setStep('upload');
+    setEditedText('');
+    setEditedMarkdown('');
+    setFileName('');
+    setFileType(null);
+    setPdfDataUri(null);
+    setImageDataUris([]);
+    setPageCount(0);
+    setPageRange('1');
+    setIsProcessing(false);
+    setProcessingState({ currentImage: null, currentPage: null, message: '' });
+    if (fileInputRef.current) fileInputRef.current.value = '';
   }, []);
 
   const getUserFriendlyError = useCallback((error: string): string => {
@@ -169,61 +185,6 @@ export function usePdfProcessor() {
     setStep(hasContent ? 'edit' : 'select-page');
   }, [getUserFriendlyError, resetProcessing, toast, fileName, saveDraft]);
 
-  // New: Convert pages to images using Worker
-  const convertChunkToImagesWithWorker = useCallback(async (
-    dataUri: string,
-    pageNumbers: number[]
-  ): Promise<string[]> => {
-    return new Promise((resolve, reject) => {
-      if (!renderWorkerRef.current) {
-        console.log('[PDFWrite] Render: falling back to main thread (no worker)');
-        // Fallback to main thread rendering
-        return convertChunkToImagesMainThread(dataUri, pageNumbers)
-          .then(resolve)
-          .catch(reject);
-      }
-
-      console.log('[PDFWrite] Render: using worker');
-      const handleMessage = (e: MessageEvent) => {
-        const { type, images, error, pageNum, preview } = e.data;
-        
-        if (type === 'PROGRESS') {
-          updateProcessingState({ 
-            currentImage: preview,
-            currentPage: pageNum
-          });
-        } else if (type === 'SUCCESS') {
-          renderWorkerRef.current?.removeEventListener('message', handleMessage);
-          renderWorkerRef.current?.removeEventListener('error', handleErrorEvent);
-          console.log('[PDFWrite] Render worker: success');
-          resolve(images);
-        } else if (type === 'ERROR') {
-          renderWorkerRef.current?.removeEventListener('message', handleMessage);
-          renderWorkerRef.current?.removeEventListener('error', handleErrorEvent);
-          // Fallback to main thread on worker-reported error
-          console.warn('[PDFWrite] Render worker: reported error, falling back to main thread:', error);
-          convertChunkToImagesMainThread(dataUri, pageNumbers).then(resolve).catch(reject);
-        }
-      };
-
-      const handleErrorEvent = () => {
-        renderWorkerRef.current?.removeEventListener('message', handleMessage);
-        renderWorkerRef.current?.removeEventListener('error', handleErrorEvent);
-        // Fallback to main thread on worker load/runtime error
-        console.warn('[PDFWrite] Render worker: runtime/load error, falling back to main thread');
-        convertChunkToImagesMainThread(dataUri, pageNumbers).then(resolve).catch(reject);
-      };
-
-      renderWorkerRef.current.addEventListener('message', handleMessage);
-      renderWorkerRef.current.addEventListener('error', handleErrorEvent);
-      renderWorkerRef.current.postMessage({
-        type: 'RENDER_PAGES',
-        data: { pdfDataUri: dataUri, pageNumbers }
-      });
-    });
-  }, [updateProcessingState]);
-
-  // Fallback: Main thread rendering (original method)
   const convertChunkToImagesMainThread = useCallback(async (
     dataUri: string,
     pageNumbers: number[]
@@ -256,6 +217,99 @@ export function usePdfProcessor() {
     }
 
     return images;
+  }, [updateProcessingState]);
+
+  const convertChunkToImagesWithWorker = useCallback(async (
+    dataUri: string,
+    pageNumbers: number[]
+  ): Promise<string[]> => {
+    return new Promise((resolve, reject) => {
+      if (!renderWorkerRef.current) {
+        console.log('[PDFWrite] Render: falling back to main thread (no worker)');
+        return convertChunkToImagesMainThread(dataUri, pageNumbers)
+          .then(resolve)
+          .catch(reject);
+      }
+
+      console.log('[PDFWrite] Render: using worker');
+      const handleMessage = (e: MessageEvent) => {
+        const { type, images, error, pageNum, preview } = e.data;
+        
+        if (type === 'PROGRESS') {
+          updateProcessingState({ 
+            currentImage: preview,
+            currentPage: pageNum
+          });
+        } else if (type === 'SUCCESS') {
+          renderWorkerRef.current?.removeEventListener('message', handleMessage);
+          renderWorkerRef.current?.removeEventListener('error', handleErrorEvent);
+          console.log('[PDFWrite] Render worker: success');
+          resolve(images);
+        } else if (type === 'ERROR') {
+          renderWorkerRef.current?.removeEventListener('message', handleMessage);
+          renderWorkerRef.current?.removeEventListener('error', handleErrorEvent);
+          console.warn('[PDFWrite] Render worker: reported error, falling back to main thread:', error);
+          convertChunkToImagesMainThread(dataUri, pageNumbers).then(resolve).catch(reject);
+        }
+      };
+
+      const handleErrorEvent = () => {
+        renderWorkerRef.current?.removeEventListener('message', handleMessage);
+        renderWorkerRef.current?.removeEventListener('error', handleErrorEvent);
+        console.warn('[PDFWrite] Render worker: runtime/load error, falling back to main thread');
+        convertChunkToImagesMainThread(dataUri, pageNumbers).then(resolve).catch(reject);
+      };
+
+      renderWorkerRef.current.addEventListener('message', handleMessage);
+      renderWorkerRef.current.addEventListener('error', handleErrorEvent);
+      renderWorkerRef.current.postMessage({
+        type: 'RENDER_PAGES',
+        data: { pdfDataUri: dataUri, pageNumbers }
+      });
+    });
+  }, [updateProcessingState, convertChunkToImagesMainThread]);
+
+  const convertToBase64WithWorker = useCallback((arrayBuffer: ArrayBuffer): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      if (!base64WorkerRef.current) {
+        console.log('[PDFWrite] Base64: falling back to main thread (no worker)');
+        try {
+          const uint8Array = new Uint8Array(arrayBuffer);
+          let binary = '';
+          for (let i = 0; i < uint8Array.byteLength; i++) {
+            binary += String.fromCharCode(uint8Array[i]);
+          }
+          const dataUri = `data:application/pdf;base64,${btoa(binary)}`;
+          resolve(dataUri);
+        } catch (error) {
+          reject(error);
+        }
+        return;
+      }
+
+      console.log('[PDFWrite] Base64: using worker');
+      const handleMessage = (e: MessageEvent) => {
+        const { type, dataUri, error, progress } = e.data;
+        
+        if (type === 'PROGRESS') {
+          updateProcessingState({ message: `Preparing PDF... ${progress}%` });
+        } else if (type === 'SUCCESS') {
+          base64WorkerRef.current?.removeEventListener('message', handleMessage);
+          console.log('[PDFWrite] Base64 worker: success');
+          resolve(dataUri);
+        } else if (type === 'ERROR') {
+          base64WorkerRef.current?.removeEventListener('message', handleMessage);
+          console.warn('[PDFWrite] Base64 worker: reported error');
+          reject(new Error(error));
+        }
+      };
+
+      base64WorkerRef.current.addEventListener('message', handleMessage);
+      base64WorkerRef.current.postMessage({
+        type: 'CONVERT_TO_BASE64',
+        data: { arrayBuffer }
+      });
+    });
   }, [updateProcessingState]);
 
   const processPdfPages = useCallback(async (rangeToProcess?: string) => {
@@ -418,7 +472,7 @@ export function usePdfProcessor() {
       });
       handleReset();
     }
-  }, [pdfDataUri, pageCount, convertChunkToImagesWithWorker, editedText, toast, getUserFriendlyError, handleProcessingError, resetProcessing, updateProcessingState]);
+  }, [pdfDataUri, pageCount, convertChunkToImagesWithWorker, editedText, toast, getUserFriendlyError, handleProcessingError, resetProcessing, updateProcessingState, incrementGenerationCount, handleReset]);
 
   const processImages = useCallback(async (rangeToProcess?: string, images?: string[], count?: number) => {
     console.log('[Processing Images] Starting...');
@@ -486,7 +540,6 @@ export function usePdfProcessor() {
         const chunkImages = await Promise.all(chunkImageUris.map(uri => {
           return new Promise<string>((resolve, reject) => {
             if (!imageWorkerRef.current) {
-              // No fallback for image compression, just resolve the original image
               resolve(uri.split(',')[1]);
               return;
             }
@@ -613,7 +666,7 @@ export function usePdfProcessor() {
       });
       handleReset();
     }
-  }, [imageDataUris, pageCount, editedText, toast, getUserFriendlyError, handleProcessingError, resetProcessing, updateProcessingState]);
+  }, [imageDataUris, pageCount, editedText, toast, getUserFriendlyError, handleProcessingError, resetProcessing, updateProcessingState, incrementGenerationCount, generationCount, handleReset]);
 
   const startProcessing = useCallback(async (rangeToProcess?: string, fileTypeOverride?: 'pdf' | 'image', images?: string[], count?: number) => {
     const type = fileTypeOverride || fileType;
@@ -630,51 +683,6 @@ export function usePdfProcessor() {
     updateProcessingState({ message: 'Cancelling processing...' });
   }, [updateProcessingState]);
 
-  // Convert ArrayBuffer to Base64 using Web Worker
-  const convertToBase64WithWorker = useCallback((arrayBuffer: ArrayBuffer): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      if (!base64WorkerRef.current) {
-        console.log('[PDFWrite] Base64: falling back to main thread (no worker)');
-        // Fallback to main thread if worker not available
-        try {
-          const uint8Array = new Uint8Array(arrayBuffer);
-          let binary = '';
-          for (let i = 0; i < uint8Array.byteLength; i++) {
-            binary += String.fromCharCode(uint8Array[i]);
-          }
-          const dataUri = `data:application/pdf;base64,${btoa(binary)}`;
-          resolve(dataUri);
-        } catch (error) {
-          reject(error);
-        }
-        return;
-      }
-
-      console.log('[PDFWrite] Base64: using worker');
-      const handleMessage = (e: MessageEvent) => {
-        const { type, dataUri, error, progress } = e.data;
-        
-        if (type === 'PROGRESS') {
-          updateProcessingState({ message: `Preparing PDF... ${progress}%` });
-        } else if (type === 'SUCCESS') {
-          base64WorkerRef.current?.removeEventListener('message', handleMessage);
-          console.log('[PDFWrite] Base64 worker: success');
-          resolve(dataUri);
-        } else if (type === 'ERROR') {
-          base64WorkerRef.current?.removeEventListener('message', handleMessage);
-          console.warn('[PDFWrite] Base64 worker: reported error');
-          reject(new Error(error));
-        }
-      };
-
-      base64WorkerRef.current.addEventListener('message', handleMessage);
-      base64WorkerRef.current.postMessage({
-        type: 'CONVERT_TO_BASE64',
-        data: { arrayBuffer }
-      });
-    });
-  }, [updateProcessingState]);
-
   const handlePdfFile = useCallback(async (file: File) => {
     try {
       const newPdf: StoredPdf = {
@@ -686,7 +694,6 @@ export function usePdfProcessor() {
       await addPdfToDb(newPdf);
     } catch (error) {
       console.warn("Could not save PDF to IndexedDB", error);
-      // Non-blocking error
     }
 
     setFileName(file.name);
@@ -841,8 +848,7 @@ export function usePdfProcessor() {
       });
       handleReset();
     }
-  }, [toast, startProcessing, updateProcessingState]);
-
+  }, [toast, startProcessing, updateProcessingState, handleReset]);
 
   const handleFileSelect = useCallback(async (files: FileList | null) => {
     if (generationCount !== null && generationCount >= MAX_PDF_GENERATIONS) {
@@ -898,25 +904,8 @@ export function usePdfProcessor() {
     }
   }, [toast, handlePdfFile, handleImageFiles, generationCount]);
 
-
   const handleDragEvents = useCallback((isEntering: boolean) => {
     setIsDragging(isEntering);
-  }, []);
-
-  const handleReset = useCallback(() => {
-    cancelRef.current = false;
-    setStep('upload');
-    setEditedText('');
-    setEditedMarkdown('');
-    setFileName('');
-    setFileType(null);
-    setPdfDataUri(null);
-    setImageDataUris([]);
-    setPageCount(0);
-    setPageRange('1');
-    setIsProcessing(false);
-    setProcessingState({ currentImage: null, currentPage: null, message: '' });
-    if (fileInputRef.current) fileInputRef.current.value = '';
   }, []);
 
   return useMemo(() => ({

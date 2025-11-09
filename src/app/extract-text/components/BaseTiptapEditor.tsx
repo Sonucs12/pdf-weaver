@@ -13,7 +13,7 @@ import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
-
+import TextAlign from '@tiptap/extension-text-align'
 
 interface BaseTiptapEditorProps {
   markdown: string;
@@ -77,7 +77,11 @@ export function BaseTiptapEditor({
           "border border-gray-400 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 font-semibold text-left p-2",
       },
     }),
-    
+    TextAlign.configure({
+      types: ['heading', 'paragraph'], // which nodes support alignment
+      alignments: ['left', 'center', 'right', 'justify'], // optional
+      defaultAlignment: 'left',
+    }),
     
     TableRow,
     TableHeader,

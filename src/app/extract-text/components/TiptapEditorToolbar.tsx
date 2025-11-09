@@ -5,6 +5,7 @@ import type { LucideIcon } from "lucide-react";
 import { Table as TableIcon, Rows2, Columns, Trash2, Plus } from "lucide-react";
 
 import {
+  AlignLeft, AlignCenter, AlignRight, AlignJustify,
   Bold,
   Italic,
   Strikethrough,
@@ -196,6 +197,35 @@ export const TiptapEditorToolbar = memo(
         disabled: !editor.isActive("table"),
       },
     ];
+    const alignmentButtons: ToolbarButton[] = [
+      {
+        action: () => editor.chain().focus().setTextAlign('left').run(),
+        isActive: editor.isActive({ textAlign: 'left' }),
+        icon: AlignLeft,
+        tooltip: 'Align Left',
+        disabled: !editor.can().chain().focus().setTextAlign('left').run(),
+      },
+      {
+        action: () => editor.chain().focus().setTextAlign('center').run(),
+        isActive: editor.isActive({ textAlign: 'center' }),
+        icon: AlignCenter,
+        tooltip: 'Align Center',
+        disabled: !editor.can().chain().focus().setTextAlign('center').run(),
+      },
+      {
+        action: () => editor.chain().focus().setTextAlign('right').run(),
+        isActive: editor.isActive({ textAlign: 'right' }),
+        icon: AlignRight,
+        tooltip: 'Align Right',
+        disabled: !editor.can().chain().focus().setTextAlign('right').run(),
+      },
+      {
+        action: () => editor.chain().focus().setTextAlign('justify').run(),
+        isActive: editor.isActive({ textAlign: 'justify' }),
+        icon: AlignJustify,
+        tooltip: 'Justify',
+        disabled: !editor.can().chain().focus().setTextAlign('justify').run(),
+      },];
 
     const formattingButtons: ToolbarButton[] = [
       {
@@ -375,25 +405,40 @@ export const TiptapEditorToolbar = memo(
     ];
 
     return (
-      <div className="flex flex-wrap items-center gap-2 py-2">
-        <div className="flex whitespace-normal overflow-x-auto scrollbar-hide gap-2 px-4 md:px-0 sm:px-0">
-          <ButtonGroup buttons={historyButtons} />
-          <Separator orientation="vertical" className="h-8" />
-          <ButtonGroup buttons={headingButtons} />
+      <div className=" bg-background sticky top-0 z-10 py-1">
+      <div className="flex flex-col gap-2 ">
+        <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center gap-1 shrink-0 px-4 md:px-0 pr-0">
+            <ButtonGroup buttons={historyButtons} />
+          </div>
+          <Separator orientation="vertical" className="h-8 mx-1" />
+          <div className="flex items-center gap-1 shrink-0">
+            <ButtonGroup buttons={headingButtons} />
+          </div>
+          <Separator orientation="vertical" className="h-8 mx-1" />
+          <div className="flex items-center gap-1 shrink-0">
+            <ButtonGroup buttons={formattingButtons} />
+          </div>
+          <Separator orientation="vertical" className="h-8 mx-1" />
+          <div className="flex items-center gap-1 shrink-0 px-4 md:px-0 pl-0">
+            <ButtonGroup buttons={alignmentButtons} />
+          </div>
         </div>
-        <Separator orientation="vertical" className="h-8 hidden lg:block" />
-        <div className="flex whitespace-normal overflow-x-auto scrollbar-hide gap-2 px-4 md:px-0 sm:px-0">
-          <ButtonGroup buttons={formattingButtons} />
-          <Separator orientation="vertical" className="h-8" />
-          <ButtonGroup buttons={blockButtons} />
-        </div>
-        <Separator orientation="vertical" className="h-8 hidden lg:block" />
-        <div className="flex  whitespace-normal overflow-x-auto scrollbar-hide gap-2 px-4 md:px-0 sm:px-0">
-          <ButtonGroup buttons={linkButtons} />
-          <Separator orientation="vertical" className="h-8" />
-          <ButtonGroup buttons={tableButtons} />
+        <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center gap-1 shrink-0 px-4 md:px-0 pr-0">
+            <ButtonGroup buttons={blockButtons} />
+          </div>
+          <Separator orientation="vertical" className="h-8 mx-1" />
+          <div className="flex items-center gap-1 shrink-0">
+            <ButtonGroup buttons={linkButtons} />
+          </div>
+          <Separator orientation="vertical" className="h-8 mx-1" />
+          <div className="flex items-center gap-1 shrink-0 px-4 md:px-0 pl-0">
+            <ButtonGroup buttons={tableButtons} />
+          </div>
         </div>
       </div>
+    </div>
     );
   }
 );

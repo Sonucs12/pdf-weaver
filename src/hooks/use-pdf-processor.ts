@@ -751,14 +751,13 @@ export function usePdfProcessor() {
   }, [toast, startProcessing, getUserFriendlyError, updateProcessingState, convertToBase64WithWorker, addPdfToDb, handleReset]);
 
   const handleCachedFileSelect = useCallback((pdf: StoredPdf) => {
-    toast({ title: 'Loading PDF from cache...' });
     setFileName(pdf.name);
     setPageCount(pdf.pageCount);
     setPdfDataUri(pdf.pdfDataUri);
     setPageRange(`1-${pdf.pageCount}`);
     setFileType('pdf');
     setStep('select-page');
-  }, [toast, setFileName, setPageCount, setPdfDataUri, setPageRange, setFileType, setStep]);
+  }, [setFileName, setPageCount, setPdfDataUri, setPageRange, setFileType, setStep]);
 
   const handleImageFiles = useCallback(async (files: FileList) => {
     setFileName(files.length > 1 ? `${files.length} images` : files[0].name);

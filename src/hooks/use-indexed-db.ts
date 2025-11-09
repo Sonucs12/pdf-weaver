@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const DB_NAME = 'PDFwriteDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 export function useIndexedDB<T>(storeName: string) {
   const [db, setDb] = useState<IDBDatabase | null>(null);

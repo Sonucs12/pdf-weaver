@@ -55,22 +55,42 @@ function getHealthEndpointFromApi(apiEndpoint: string): string {
 
 export async function pingPdfServer(
   apiEndpoint: string,
-  timeoutMs = 60000
-): Promise<void> {
+  retries = 5,
+  delay = 2000,
+  timeoutMs = 15000
+): Promise<boolean> {
   const healthUrl = getHealthEndpointFromApi(apiEndpoint);
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    await fetch(healthUrl, { method: "GET", signal: controller.signal });
-  } catch (e: any) {
-    if (e?.name === "AbortError") {
-      console.warn("PDF health ping timed out", healthUrl);
-    } else {
-      console.warn("PDF health ping failed", e);
+
+  for (let i = 0; i < retries; i++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const response = await fetch(healthUrl, {
+        method: "GET",
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+      if (response.ok) {
+        console.log("PDF server is healthy.");
+        return true;
+      }
+    } catch (e: any) {
+      clearTimeout(timeout);
+      if (e?.name === "AbortError") {
+        console.warn(`PDF health ping attempt ${i + 1} timed out.`);
+      } else {
+        console.warn(`PDF health ping attempt ${i + 1} failed:`, e.message);
+      }
     }
-  } finally {
-    clearTimeout(timeout);
+
+    if (i < retries - 1) {
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
   }
+
+  console.error("PDF server is unresponsive after multiple attempts.");
+  return false;
 }
 
 export const convertMarkdownToHtml = (

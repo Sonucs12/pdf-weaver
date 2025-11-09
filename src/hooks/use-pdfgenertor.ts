@@ -7,7 +7,6 @@ import {
   pingPdfServer,
 } from "../lib/pdfGenerator";
 
-
 interface PdfGeneratorState {
   isGenerating: boolean;
   error: string | null;
@@ -38,60 +37,47 @@ export const usePdfGenerator = (): UsePdfGeneratorReturn => {
   });
 
   const generatePdf = useCallback(
-    async (
-      markdownContent: string,
-      options?: PdfGenerationOptions
-    ): Promise<void> => {
-      const validation = validateMarkdownContent(markdownContent);
-      if (!validation.isValid) {
-        setState((prev) => ({
-          ...prev,
-          error: validation.error || "Invalid content",
-          isValidContent: false,
-          isGenerating: false,
-          phase: "idle",
-        }));
-        return;
-      }
-
-      const cfg = resolvePdfOptions(options);
-
-      // Phase: Waking server
+    async (markdownContent: string, options: PdfGenerationOptions = {}) => {
       setState((prev) => ({
         ...prev,
         isGenerating: true,
         error: null,
-        isValidContent: true,
         phase: "waking",
       }));
-      await pingPdfServer(cfg.apiEndpoint).catch(() => {});
 
-      // Phase: Generating PDF
-      setState((prev) => ({ ...prev, phase: "generating" }));
+      const config = resolvePdfOptions(options);
 
       try {
-        await generateAndDownloadPdf(markdownContent, options);
+        const isServerReady = await pingPdfServer(config.apiEndpoint);
 
-        setState((prev) => ({
-          ...prev,
-          isGenerating: false,
-          phase: "idle",
-        }));
-
-        try {
-         
-        } catch (trackErr) {
-          console.warn("PDF generation tracking failed", trackErr);
+        if (!isServerReady) {
+          throw new Error(
+            "PDF server is not responding. Please try again later."
+          );
         }
-      } catch (err) {
-        console.error("Error generating PDF:", err);
+
+        setState((prev) => ({
+          ...prev,
+          phase: "generating",
+        }));
+
+        await generateAndDownloadPdf(markdownContent, config);
+
         setState((prev) => ({
           ...prev,
           isGenerating: false,
           phase: "idle",
-          error: err instanceof Error ? err.message : "Failed to generate PDF",
         }));
-        throw err instanceof Error ? err : new Error("Failed to generate PDF");
+      } catch (e: any) {
+        console.error("PDF generation failed:", e);
+        const errorMessage =
+          e.message || "An unknown error occurred during PDF generation.";
+        setState((prev) => ({
+          ...prev,
+          isGenerating: false,
+          error: errorMessage,
+          phase: "idle",
+        }));
       }
     },
     []

@@ -750,57 +750,15 @@ export function usePdfProcessor() {
     };
   }, [toast, startProcessing, getUserFriendlyError, updateProcessingState, convertToBase64WithWorker, addPdfToDb, handleReset]);
 
-  const handleCachedFileSelect = useCallback(async (file: File) => {
-    setFileName(file.name);
-    setStep('processing');
-    updateProcessingState({ message: 'Reading saved PDF file...' });
-
-    const reader = new FileReader();
-    reader.readAsArrayBuffer(file);
-    
-    reader.onload = async () => {
-      try {
-        const arrayBuffer = reader.result as ArrayBuffer;
-        
-        const dataUri = await convertToBase64WithWorker(arrayBuffer);
-        
-        const loadingTask = pdfjsLib.getDocument(dataUri);
-        const pdf = await loadingTask.promise;
-        const count = pdf.numPages;
-        
-        setPageCount(count);
-        setPdfDataUri(dataUri);
-
-        if (count > 1) {
-          setPageRange(`1-${count}`);
-          setStep('select-page');
-          updateProcessingState({ message: '' });
-        } else {
-          await startProcessing('1');
-        }
-      } catch (error) {
-        console.error('PDF Loading Error:', error);
-        const rawError = error instanceof Error ? error.message : 'Could not read the PDF file';
-        toast({
-          variant: 'destructive',
-          title: 'PDF Loading Failed',
-          description: getUserFriendlyError(rawError),
-          duration: 6000,
-        });
-        handleReset();
-      }
-    };
-    
-    reader.onerror = () => {
-      console.error('FileReader error:', reader.error);
-      toast({
-        variant: 'destructive',
-        title: 'File Read Error',
-        description: 'Failed to read the file. The file may be corrupted or too large.',
-      });
-      handleReset();
-    };
-  }, [toast, startProcessing, getUserFriendlyError, updateProcessingState, convertToBase64WithWorker, handleReset]);
+  const handleCachedFileSelect = useCallback((pdf: StoredPdf) => {
+    toast({ title: 'Loading PDF from cache...' });
+    setFileName(pdf.name);
+    setPageCount(pdf.pageCount);
+    setPdfDataUri(pdf.pdfDataUri);
+    setPageRange(`1-${pdf.pageCount}`);
+    setFileType('pdf');
+    setStep('select-page');
+  }, [toast, setFileName, setPageCount, setPdfDataUri, setPageRange, setFileType, setStep]);
 
   const handleImageFiles = useCallback(async (files: FileList) => {
     setFileName(files.length > 1 ? `${files.length} images` : files[0].name);

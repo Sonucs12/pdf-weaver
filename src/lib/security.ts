@@ -1,6 +1,6 @@
 export const MAX_PAGES_ALLOWED = 6;
 export const MAX_PDF_GENERATIONS = 15;
-export const MAX_FILE_SIZE_MB = 30;
+export const MAX_FILE_SIZE_MB = 50;
 export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 export function canSelectMorePages(selectedPages: number): boolean {

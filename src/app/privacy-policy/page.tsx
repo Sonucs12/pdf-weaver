@@ -15,7 +15,7 @@ export default function PrivacyPolicyPage() {
         <h1 className="text-4xl font-bold mb-4">Privacy Policy</h1>
       </div>
 
-      <div className="max-w-4xl mx-auto shadow-lg">
+      <div className="max-w-4xl mx-auto">
         <h2 className="text-2xl font-bold mb-4">Information We Collect</h2>
         <div className="prose dark:prose-invert max-w-none">
           <p>

@@ -5,7 +5,7 @@ import { StructuredData } from "@/components/StructuredData";
 
 export const {metadata,schema} = generateMetadata({
   title: "Editor",
-  description: "Editor for PDFWriter, allows you to edit your markdown, pdf, images, scanned documents and handwritten notes.",
+  description: "Editor for PDFWrite, allows you to edit your markdown, pdf, images, scanned documents and handwritten notes.",
   path: "/editor",
   keywords:["editor", "editor online", "editor for free", "editor for mac", "editor for windows", "editor for linux", "editor for android", "editor for ios"],
   faq: [
@@ -13,9 +13,9 @@ export const {metadata,schema} = generateMetadata({
     {question:"can i edit my documents?", answer: "Yes, you can edit your documents in the editor."},
   ],
   breadcrumbs: [
-    { name: "Home", url: "/" },
-    { name: "Extract Text", url: "/extract-text" },
-    { name: "Editor", url: "/extract-text/editor" },
+    { name: "Home", url: "https://pdfwrite.vercel.app" },
+    { name: "Extract Text", url: "https://pdfwrite.vercel.app/extract-text" },
+    { name: "Editor", url: "https://pdfwrite.vercel.app/extract-text/editor" },
   ],
 })
 

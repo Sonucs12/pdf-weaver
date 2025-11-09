@@ -10,8 +10,9 @@ export const {metadata,schema} = generateMetadata({
     { question: "What is Saved?", answer: "Saved is a feature that allows you to save your documents for later." },
   ],
   breadcrumbs: [
-    { name: "Home", url: "/" },
-    { name: "Saved", url: "/saved" },
+    { name: "Home", url: "https://pdfwrite.vercel.app" },
+    { name: "Extract Text", url: "https://pdfwrite.vercel.app/extract-text" },
+    { name: "Saved", url: "https://pdfwrite.vercel.app/extract-text/saved" },
   ],
 })
 export default function SavedPage() {

@@ -58,8 +58,8 @@ export const { metadata, schema } = generateMetadata({
     },
   ],
   breadcrumbs: [
-    { name: "Home", url: "/" },
-    { name: "Extract Text", url: "/extract-text" },
+    { name: "Home", url: "https://pdfwrite.vercel.app" },
+    { name: "Extract Text", url: "https://pdfwrite.vercel.app/extract-text" },
   ],
 });
 export default function ExtractTextLandingPage() {

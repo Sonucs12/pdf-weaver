@@ -19,8 +19,8 @@ export const { metadata, schema } = generateMetadata({
     { question: "How does merging into an existing project work?", answer: "When you click 'Save', you can choose to merge your current content into an existing project. Your current content will be appended to the end of the selected project, separated by a blank line. This is perfect for combining multiple document extractions into one master document." },
   ],
   breadcrumbs: [
-    { name: "Home", url: "/" },
-    { name: "What is PDFWriter?", url: "/what-is-this" },
+    { name: "Home", url: "https://pdfwrite.vercel.app" },
+    { name: "What is PDFWriter?", url: "https://pdfwrite.vercel.app/what-is-this" },
   ],
 });
 

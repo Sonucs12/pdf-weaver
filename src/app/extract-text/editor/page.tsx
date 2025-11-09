@@ -5,15 +5,17 @@ import { StructuredData } from "@/components/StructuredData";
 
 export const {metadata,schema} = generateMetadata({
   title: "Editor",
-  description: "Editor",
+  description: "Editor for PDFWriter, allows you to edit your markdown, pdf, images, scanned documents and handwritten notes.",
   path: "/editor",
   keywords:["editor", "editor online", "editor for free", "editor for mac", "editor for windows", "editor for linux", "editor for android", "editor for ios"],
   faq: [
     { question: "What is Editor?", answer: "Editor is a tool that allows you to edit your documents." },
+    {question:"can i edit my documents?", answer: "Yes, you can edit your documents in the editor."},
   ],
   breadcrumbs: [
     { name: "Home", url: "/" },
-    { name: "Editor", url: "/editor" },
+    { name: "Extract Text", url: "/extract-text" },
+    { name: "Editor", url: "/extract-text/editor" },
   ],
 })
 

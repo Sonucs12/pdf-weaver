@@ -19,7 +19,7 @@ export default function PrivacyPolicyPage() {
         <h2 className="text-2xl font-bold mb-4">Information We Collect</h2>
         <div className="prose dark:prose-invert max-w-none">
           <p>
-            We collect information that you provide to us directly, such as when you create an account, upload a file, or communicate with us. This may include your name, email address, and the content of your files.
+            We collect information that you provide to us directly, such as when you create an account, or communicate with us. This may include your name, email address.
           </p>
           <h2>How We Use Your Information</h2>
           <p>

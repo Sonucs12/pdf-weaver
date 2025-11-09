@@ -3,12 +3,27 @@ import { Faq } from "@/components/ui/faq";
 import { Logo } from "@/components/icons";
 import { siteConfig } from "@/lib/metadata";
 import { MAX_FILE_SIZE_MB, MAX_PAGES_ALLOWED, MAX_PDF_GENERATIONS } from "@/lib/security";
-const { metadata } = generateMetadata({
+import { StructuredData } from "@/components/StructuredData";
+export const { metadata, schema } = generateMetadata({
   title: "What is PDFWriter?",
   description: "A detailed explanation of PDFWriter's features, security, and how to use it.",
   path: "/what-is-this",
+  keywords: ["what is pdfwriter", "pdfwriter features", "pdfwriter security", "pdfwriter how to use", "pdfwriter limits", "pdfwriter restrictions", "pdfwriter faq"],
+  faq: [
+    { question: "What is the maximum file size for uploads?", answer: `The maximum file size is ${MAX_FILE_SIZE_MB}MB per file.` },
+    { question: "How many pages can I process at once?", answer: `You can process up to ${MAX_PAGES_ALLOWED} pages per upload. For example, you can select pages 1-${MAX_PAGES_ALLOWED}, or any range up to ${MAX_PAGES_ALLOWED} pages like 3-7 or just a single page like 5.` },
+    { question: "Is there a limit on how many times I can generate content?", answer: `Yes, you can generate content up to ${MAX_PDF_GENERATIONS} times. This limit helps ensure fair usage for all users.` },
+    { question: "Where is my data stored?", answer: "Your saved projects are stored on your device in your browser's local storage. Your uploaded files are deleted from our servers immediately after processing." },
+    { question: "Can I upload image files instead of PDFs?", answer: "Yes! You can upload multiple image files (JPG, PNG, etc.) at once. The app will process all images you select." },
+    { question: "What happens if I close the browser while editing?", answer: "If you close the browser without clicking the 'Back' button, your work will not be saved as a draft. To ensure your work is saved, either click 'Back' to create a draft, or use the 'Save' button to create a permanent saved project before closing." },
+    { question: "How does merging into an existing project work?", answer: "When you click 'Save', you can choose to merge your current content into an existing project. Your current content will be appended to the end of the selected project, separated by a blank line. This is perfect for combining multiple document extractions into one master document." },
+  ],
+  breadcrumbs: [
+    { name: "Home", url: "/" },
+    { name: "What is PDFWriter?", url: "/what-is-this" },
+  ],
 });
-export { metadata };
+
 
 const faqItems = [
   {
@@ -47,6 +62,7 @@ const faqItems = [
 
 export default function WhatIsThisPage() {
   return (
+    <>  
     <div className="container mx-auto p-4 md:p-8">
       <div className="flex flex-col items-center justify-center mb-12 h-80">
         <div className="flex items-center gap-3 mb-6">
@@ -54,7 +70,6 @@ export default function WhatIsThisPage() {
           <h1 className="text-4xl font-headline font-bold text-foreground">{siteConfig.name}</h1>
         </div>
         <div className="text-center">
-          <h2 className="text-3xl font-bold mb-4">What is {siteConfig.name}?</h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             Your smart assistant for transforming static PDFs—including scanned documents and handwritten notes—into editable, high-quality content.
           </p>
@@ -441,5 +456,7 @@ export default function WhatIsThisPage() {
         </section>
       </div>
     </div>
+    <StructuredData data={schema} />
+    </>
   );
 }

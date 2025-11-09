@@ -9,7 +9,8 @@ import { useToast } from '@/hooks/use-toast';
 export interface StoredPdf {
   id: string;
   name: string;
-  file: File;
+  pageCount: number;
+  pdfDataUri: string;
   uploadedAt: Date;
 }
 
@@ -27,7 +28,6 @@ export function StoredPdfList({ onSelectPdf }: StoredPdfListProps) {
       try {
         const pdfs = (await getAll()) as StoredPdf[];
         if (pdfs && pdfs.length > 0) {
-          // Sort by most recently uploaded
           pdfs.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
           setStoredPdfs(pdfs);
         }
@@ -75,13 +75,13 @@ export function StoredPdfList({ onSelectPdf }: StoredPdfListProps) {
           <Badge
             key={pdf.id}
             variant="outline"
-            className="cursor-pointer hover:bg-accent text-xs p-2 pr-3 transition-all duration-300"
+            className="cursor-pointer hover:bg-accent p-2 pr-3 font-thin"
             onClick={() => onSelectPdf(pdf)}
           >
             <File className="h-4 w-4 mr-2" />
             <span className="truncate max-w-[200px]" title={pdf.name}>{pdf.name}</span>
             <div 
-              className="ml-2 p-1 rounded-full hover:bg-destructive transition-all duration-300"
+              className="ml-2 p-1 rounded-full hover:bg-destructive"
               onClick={(e) => handleDelete(e, pdf.id)}
               title="Remove from list"
             >

@@ -40,9 +40,7 @@ export default function ClientCreateNewPage() {
   } = usePdfProcessor();
 
   const onSelectCachedPdf = (pdf: StoredPdf) => {
-    if (pdf.file) {
-      handleCachedFileSelect(pdf.file);
-    }
+    handleCachedFileSelect(pdf);
   };
 
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {

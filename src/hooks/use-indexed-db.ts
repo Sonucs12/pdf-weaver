@@ -67,7 +67,7 @@ export function useIndexedDB<T>(storeName: string) {
 
   const get = useCallback(
     (key: IDBValidKey) => {
-      if (!db) return Promise.reject(new Error('Database not available.'));
+      if (!db) return Promise.resolve(null); // Return null if DB not ready
       return performTransaction('readonly', (store) => store.get(key));
     },
     [db, performTransaction]

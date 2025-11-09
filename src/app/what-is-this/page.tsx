@@ -2,7 +2,7 @@ import { generateMetadata } from "@/lib/metadata";
 import { Faq } from "@/components/ui/faq";
 import { Logo } from "@/components/icons";
 import { siteConfig } from "@/lib/metadata";
-
+import { MAX_FILE_SIZE_MB, MAX_PAGES_ALLOWED, MAX_PDF_GENERATIONS } from "@/lib/security";
 const { metadata } = generateMetadata({
   title: "What is PDFWriter?",
   description: "A detailed explanation of PDFWriter's features, security, and how to use it.",
@@ -13,15 +13,15 @@ export { metadata };
 const faqItems = [
   {
     question: "What is the maximum file size for uploads?",
-    answer: "The maximum file size is 15MB per file.",
+    answer: `The maximum file size is ${MAX_FILE_SIZE_MB}MB per file.`,
   },
   {
     question: "How many pages can I process at once?",
-    answer: "You can process up to 5 pages per upload. For example, you can select pages 1-5, or any range up to 5 pages like 3-7 or just a single page like 5.",
+    answer: `You can process up to ${MAX_PAGES_ALLOWED} pages per upload. For example, you can select pages 1-${MAX_PAGES_ALLOWED}, or any range up to ${MAX_PAGES_ALLOWED} pages like 3-7 or just a single page like 5.`,
   },
   {
     question: "Is there a limit on how many times I can generate content?",
-    answer: "Yes, you can generate content up to 15 times. This limit helps ensure fair usage for all users.",
+    answer: `Yes, you can generate content up to ${MAX_PDF_GENERATIONS} times. This limit helps ensure fair usage for all users.`,
   },
   {
     question: "Where is my data stored?",
@@ -417,19 +417,19 @@ export default function WhatIsThisPage() {
             <div className="p-4 bg-muted rounded-lg">
               <h3 className="text-xl font-semibold mb-2">File Size Limit</h3>
               <p className="text-muted-foreground">
-                Maximum file size: <strong>15MB per file</strong>. If your file is larger, consider splitting it or compressing it first.
+                Maximum file size: <strong>${MAX_FILE_SIZE_MB}MB per file</strong>. If your file is larger, consider splitting it or compressing it first.
               </p>
             </div>
             <div className="p-4 bg-muted rounded-lg">
               <h3 className="text-xl font-semibold mb-2">Page Processing Limit</h3>
               <p className="text-muted-foreground">
-                You can process up to <strong>5 pages at a time</strong> per upload. If you need to process more pages, simply upload the same PDF again and select the next batch of pages.
+                You can process up to <strong>${MAX_PAGES_ALLOWED} pages at a time</strong> per upload. If you need to process more pages, simply upload the same PDF again and select the next batch of pages.
               </p>
             </div>
             <div className="p-4 bg-muted rounded-lg">
               <h3 className="text-xl font-semibold mb-2">Generation Limit</h3>
               <p className="text-muted-foreground">
-                You have <strong>15 generations</strong> available. Each time you upload and process a file (PDF or images), it counts as one generation. This limit helps ensure fair usage for all users.
+                You have <strong>${MAX_PDF_GENERATIONS} generations</strong> available. Each time you upload and process a file (PDF or images), it counts as one generation. This limit helps ensure fair usage for all users.
               </p>
             </div>
           </div>

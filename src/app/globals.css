@@ -58,18 +58,74 @@
   }
 }
 .prose {
-
+  @apply text-foreground max-w-none;
+  h1 {
+    @apply md:text-4xl text-3xl md:font-bold tracking-tight  mt-12 mb-4 text-foreground;
+  }
+  h2 {
+    @apply md:text-3xl text-2xl  font-semibold mt-12 mb-4 text-foreground;
+  }
+  h3 {
+    @apply md:text-2xl text-xl font-semibold mt-8 mb-4 text-foreground;
+  }
+  h4 {
+    @apply md:text-xl text-lg font-semibold mt-6 mb-3 text-foreground;
+  }
+  h5 {
+    @apply md:text-lg text-base font-semibold mt-4 mb-2 text-foreground;
+  }
+  h6 {
+    @apply font-semibold mt-4 mb-2 text-foreground;
+  }
+  p,
+  ul,
+  ol {
+    @apply mb-4 md:text-[17px] text-base text-muted-foreground;
+  }
+  a {
+    @apply text-primary hover:underline break-words;
+  }
   code {
-    @apply bg-muted text-foreground rounded-md px-1.5 py-1 text-sm whitespace-pre-wrap break-words;
+    @apply bg-muted text-muted-foreground rounded-md px-1.5 py-1 text-sm whitespace-pre-wrap break-words;
   }
   pre {
-    @apply bg-muted p-4 rounded-md overflow-x-auto text-foreground whitespace-pre-wrap break-words;
+    @apply bg-muted p-4 rounded-md overflow-x-auto text-muted-foreground whitespace-pre-wrap break-words;
   }
-
+  ul {
+    @apply list-disc pl-5;
+  }
+  ol {
+    @apply list-decimal pl-5;
+  }
+  strong {
+    @apply font-semibold text-foreground;
+  }
+  table {
+    @apply w-full border-collapse border border-border my-6 text-base;
+  }
+  thead {
+    @apply bg-muted;
+  }
+  th {
+    @apply px-4 py-2 text-left font-semibold border-b border-border text-foreground;
+  }
+  td {
+    @apply px-4 py-2 border-b border-border text-muted-foreground;
+  }
+  tr:last-child td {
+    @apply border-b-0;
+  }
+  ol > li::marker {
+    @apply text-lg font-bold text-foreground;
+  }
+  ul > li::marker {
+    @apply text-lg font-bold text-foreground;
+  }
   img {
     @apply rounded-md;
   }
 }
+
 
 @layer base {
   * {
@@ -86,15 +142,7 @@
 }
 
 
-
-
-
-
-
-
-
-
-
+/* Scrollbar */
 .scrollbar-slim::-webkit-scrollbar {
   width: 4px;
   height: 2px;
@@ -137,36 +185,27 @@
   background: transparent;
 }
 
-
-
-
-/* The resizer handle created by tiptap tables */
-
-
-/* Optional: show a visual line while resizing */
 .ProseMirror.resize-cursor {
   cursor: col-resize;
 }
 
-/* Table wrapper - contains table overflow */
 .tableWrapper {
   max-width: 100% !important;
   width: 100% !important;
   overflow-x: auto !important;
   overflow-y: visible !important;
   display: block !important;
-  margin: 1rem 0 !important;
+  margin: 0px !important;
 }
 
-/* Table inside wrapper - allows resizing but constrained by wrapper */
 .tableWrapper table {
   display: table !important;
   width: 100% !important;
   min-width: 100% !important;
   table-layout: auto !important;
+  margin: 0px 0px 1.5rem 0px !important;
 }
 
-/* Ensure ProseMirror doesn't overflow */
 .ProseMirror {
   overflow-x: hidden !important;
   max-width: 100% !important;

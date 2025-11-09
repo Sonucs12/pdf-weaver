@@ -7,6 +7,7 @@ import { CardContent, CardDescription, CardHeader, CardTitle } from '@/component
 import { cn } from '@/lib/utils';
 import { isFileSizeAllowed, MAX_FILE_SIZE_MB } from '@/lib/security';
 import { useToast } from '@/hooks/use-toast';
+import { StoredPdfList, type StoredPdf } from './StoredPdfList';
 
 interface UploadStepProps {
   isDragging: boolean;
@@ -16,6 +17,7 @@ interface UploadStepProps {
   onDrop: (e: DragEvent<HTMLDivElement>) => void;
   onFileSelect: (files: FileList | null) => void;
   fileInputRef: React.RefObject<HTMLInputElement>;
+  onSelectCachedPdf: (pdf: StoredPdf) => void;
 }
 
 export function UploadStep({
@@ -26,6 +28,7 @@ export function UploadStep({
   onDrop,
   onFileSelect,
   fileInputRef,
+  onSelectCachedPdf,
 }: UploadStepProps) {
   const { toast } = useToast();
 
@@ -80,6 +83,7 @@ export function UploadStep({
           />
         </div>
       </CardContent>
+      <StoredPdfList onSelectPdf={onSelectCachedPdf} />
     </div>
   );
 }

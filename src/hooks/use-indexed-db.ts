@@ -1,17 +1,12 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 
 const DB_NAME = 'PDFwriteDB';
-const DB_VERSION = 1;
-const STORE_NAME = 'settings';
+const DB_VERSION = 1; // If you change the schema, you must increment this version.
 
-interface IndexedDBHook {
-  db: IDBDatabase | null;
-  error: DOMException | null;
-}
-
-export function useIndexedDB(): IndexedDBHook {
+export function useIndexedDB<T>(storeName: string) {
   const [db, setDb] = useState<IDBDatabase | null>(null);
   const [error, setError] = useState<DOMException | null>(null);
 
@@ -25,8 +20,13 @@ export function useIndexedDB(): IndexedDBHook {
 
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'key' });
+      // Create settings store if it doesn't exist
+      if (!db.objectStoreNames.contains('settings')) {
+        db.createObjectStore('settings', { keyPath: 'key' });
+      }
+      // Create uploadedPdfs store if it doesn't exist
+      if (!db.objectStoreNames.contains('uploadedPdfs')) {
+        db.createObjectStore('uploadedPdfs', { keyPath: 'id' });
       }
     };
 
@@ -38,12 +38,62 @@ export function useIndexedDB(): IndexedDBHook {
       setError((event.target as IDBOpenDBRequest).error);
     };
 
-    return () => {
-      if (db) {
-        db.close();
-      }
-    };
-  }, []);
+  }, []); // The setup effect should only run once.
 
-  return { db, error };
+  const performTransaction = useCallback(
+    (
+      mode: IDBTransactionMode,
+      action: (store: IDBObjectStore) => IDBRequest
+    ): Promise<any> => {
+      return new Promise((resolve, reject) => {
+        if (!db) {
+          reject(new Error('Database not initialized.'));
+          return;
+        }
+        try {
+          const transaction = db.transaction(storeName, mode);
+          const store = transaction.objectStore(storeName);
+          const request = action(store);
+
+          request.onsuccess = () => {
+            resolve(request.result);
+          };
+          request.onerror = () => {
+            reject(request.error);
+          };
+        } catch (err) {
+          reject(err);
+        }
+      });
+    },
+    [db, storeName]
+  );
+
+  const add = useCallback(
+    (item: T & { id: any }) => {
+      // Using `put` is safer than `add` as it will update if the key already exists.
+      return performTransaction('readwrite', (store) => store.put(item));
+    },
+    [performTransaction]
+  );
+
+  const get = useCallback(
+    (key: IDBValidKey) => {
+      return performTransaction('readonly', (store) => store.get(key));
+    },
+    [performTransaction]
+  );
+
+  const getAll = useCallback(() => {
+    return performTransaction('readonly', (store) => store.getAll());
+  }, [performTransaction]);
+
+  const remove = useCallback(
+    (key: IDBValidKey) => {
+      return performTransaction('readwrite', (store) => store.delete(key));
+    },
+    [performTransaction]
+  );
+
+  return { db, error, add, get, getAll, remove };
 }

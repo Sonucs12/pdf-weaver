@@ -1,3 +1,4 @@
+
 'use client';
 
 import { type DragEvent } from 'react';
@@ -6,6 +7,8 @@ import { UploadStep } from './upload-step';
 import { SelectPageStep } from './select-page-step';
 import { ProcessingStep } from './processing-step';
 import dynamic from 'next/dynamic';
+import type { StoredPdf } from './StoredPdfList';
+
 const EditStep = dynamic(() => import('./edit-step').then(m => m.EditStep), {
   ssr: false,
 });
@@ -33,7 +36,14 @@ export default function ClientCreateNewPage() {
     currentProcessingImage,
     currentProcessingPage,
     handleCancelProcessing,
+    handleCachedFileSelect,
   } = usePdfProcessor();
+
+  const onSelectCachedPdf = (pdf: StoredPdf) => {
+    if (pdf.file) {
+      handleCachedFileSelect(pdf.file);
+    }
+  };
 
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -70,6 +80,7 @@ export default function ClientCreateNewPage() {
             onDrop={handleDrop}
             onFileSelect={handleFileSelect}
             fileInputRef={fileInputRef}
+            onSelectCachedPdf={onSelectCachedPdf}
           /></div>
         );
       case 'select-page':
@@ -87,13 +98,6 @@ export default function ClientCreateNewPage() {
         return (
           <div className="space-y-6 px-4 sm:px-6 md:px-8">
             <ProcessingStep progressMessage={progressMessage} />
-            {/* {currentProcessingImage && (
-              <LiveImagePreview 
-                currentImage={currentProcessingImage}
-                currentPage={currentProcessingPage}
-                progressMessage={progressMessage}
-              />
-            )} */}
           </div>
         );
       case 'edit':
@@ -118,20 +122,8 @@ export default function ClientCreateNewPage() {
       <div className="w-full max-w-7xl">
         {renderContent()}
       </div>
-      
-      {/* Sticky Live Preview at bottom during edit step processing
-      {isProcessing && step === 'edit' && currentProcessingImage && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-background border-t border-border shadow-lg">
-          <div className="max-w-6xl mx-auto">
-            <LiveImagePreview 
-              currentImage={currentProcessingImage}
-              currentPage={currentProcessingPage}
-              progressMessage={progressMessage}
-            />
-          </div>
-        </div>
-      )} */}
     </div>
   );
 }
+
 

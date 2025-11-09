@@ -11,6 +11,8 @@ import { parsePageRange } from '@/lib/utils/pdf-utils';
 import type { Step } from '@/app/extract-text/create-new/components/types';
 import { isFileSizeAllowed, MAX_FILE_SIZE_MB } from '@/lib/security';
 import { markdownToHtml } from '@/hooks/use-markdown-to-html';
+import { useIndexedDB } from '@/hooks/use-indexed-db';
+import type { StoredPdf } from '@/app/extract-text/create-new/components/StoredPdfList';
 
 if (typeof window !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
@@ -59,6 +61,7 @@ export function usePdfProcessor() {
   const { toast } = useToast();
   const { saveDraft } = useAutoSaveDraft();
   const { generationCount, incrementGenerationCount, isLoading: isGenerationCountLoading } = useGenerationTracker();
+  const { add: addPdfToDb } = useIndexedDB<StoredPdf>('uploadedPdfs');
 
   // Initialize Web Workers
   useEffect(() => {
@@ -673,6 +676,19 @@ export function usePdfProcessor() {
   }, [updateProcessingState]);
 
   const handlePdfFile = useCallback(async (file: File) => {
+    try {
+      const newPdf: StoredPdf = {
+        id: crypto.randomUUID(),
+        name: file.name,
+        file: file,
+        uploadedAt: new Date(),
+      };
+      await addPdfToDb(newPdf);
+    } catch (error) {
+      console.warn("Could not save PDF to IndexedDB", error);
+      // Non-blocking error
+    }
+
     setFileName(file.name);
     setStep('processing');
     updateProcessingState({ message: 'Reading PDF file...' });
@@ -722,7 +738,59 @@ export function usePdfProcessor() {
       });
       handleReset();
     };
-  }, [toast, startProcessing, getUserFriendlyError, updateProcessingState, convertToBase64WithWorker]);
+  }, [toast, startProcessing, getUserFriendlyError, updateProcessingState, convertToBase64WithWorker, addPdfToDb, handleReset]);
+
+  const handleCachedFileSelect = useCallback(async (file: File) => {
+    setFileName(file.name);
+    setStep('processing');
+    updateProcessingState({ message: 'Reading saved PDF file...' });
+
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(file);
+    
+    reader.onload = async () => {
+      try {
+        const arrayBuffer = reader.result as ArrayBuffer;
+        
+        const dataUri = await convertToBase64WithWorker(arrayBuffer);
+        
+        const loadingTask = pdfjsLib.getDocument(dataUri);
+        const pdf = await loadingTask.promise;
+        const count = pdf.numPages;
+        
+        setPageCount(count);
+        setPdfDataUri(dataUri);
+
+        if (count > 1) {
+          setPageRange(`1-${count}`);
+          setStep('select-page');
+          updateProcessingState({ message: '' });
+        } else {
+          await startProcessing('1');
+        }
+      } catch (error) {
+        console.error('PDF Loading Error:', error);
+        const rawError = error instanceof Error ? error.message : 'Could not read the PDF file';
+        toast({
+          variant: 'destructive',
+          title: 'PDF Loading Failed',
+          description: getUserFriendlyError(rawError),
+          duration: 6000,
+        });
+        handleReset();
+      }
+    };
+    
+    reader.onerror = () => {
+      console.error('FileReader error:', reader.error);
+      toast({
+        variant: 'destructive',
+        title: 'File Read Error',
+        description: 'Failed to read the file. The file may be corrupted or too large.',
+      });
+      handleReset();
+    };
+  }, [toast, startProcessing, getUserFriendlyError, updateProcessingState, convertToBase64WithWorker, handleReset]);
 
   const handleImageFiles = useCallback(async (files: FileList) => {
     setFileName(files.length > 1 ? `${files.length} images` : files[0].name);
@@ -873,9 +941,10 @@ export function usePdfProcessor() {
     handleDragEvents,
     handleReset,
     handleCancelProcessing,
+    handleCachedFileSelect,
   }), [
     step, setStep, editedText, editedMarkdown, fileName, isDragging, pageCount, pageRange,
     processingState, isProcessing, startProcessing, handleFileSelect,
-    handleDragEvents, handleReset, handleCancelProcessing
+    handleDragEvents, handleReset, handleCancelProcessing, handleCachedFileSelect
   ]);
 }

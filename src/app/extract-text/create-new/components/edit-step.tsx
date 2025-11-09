@@ -86,7 +86,8 @@ export function EditStep({
         </div>
       </div>
       {isProcessing && (
-        <div className="mb-4 py-3 px-4 sm:px-6 md:px-8 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center justify-between gap-3">
+        <div className="px-4 sm:px-6 md:px-8">
+        <div className="mb-4 py-3 px-4 sm:px-6 md:px-8 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2">
             <Loader2 className="h-5 w-5 animate-spin text-blue-600 dark:text-blue-400" />
             <p className="text-sm text-blue-900 dark:text-blue-100">
@@ -94,6 +95,7 @@ export function EditStep({
             </p>
           </div>
           <CancelButton onCancel={onCancel} isProcessing={isProcessing}/>
+        </div>
         </div>
       )}
       <div className="flex-grow mt-2">

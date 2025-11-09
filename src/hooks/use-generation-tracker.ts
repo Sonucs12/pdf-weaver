@@ -17,12 +17,12 @@ interface GenerationTrackerHook {
 }
 
 export function useGenerationTracker(): GenerationTrackerHook {
-  const { db, get, add, error } = useIndexedDB<{ key: string, value: GenerationInfo }>('settings');
+  const { get, add, error } = useIndexedDB<{ key: string, value: GenerationInfo }>('settings');
   const [generationCount, setGenerationCount] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const getGenerationInfo = useCallback(async (): Promise<GenerationInfo | null> => {
-    if (!get) return null;
+    // The `get` function from the hook is now guarded and will reject if the DB is not ready.
     const result = await get(COUNT_KEY);
     return result?.value || null;
   }, [get]);
@@ -52,25 +52,24 @@ export function useGenerationTracker(): GenerationTrackerHook {
   }, [add, getGenerationInfo]);
 
   useEffect(() => {
-    if (db) {
-      setIsLoading(true);
-      getGenerationInfo()
-        .then(info => {
-          if (info && Date.now() - info.timestamp < 24 * 60 * 60 * 1000) {
-            setGenerationCount(info.count);
-          } else {
-            setGenerationCount(0);
-          }
-        })
-        .catch(err => {
-          console.error("Error fetching generation count:", err);
+    // The `get` function's availability implies the DB is ready or will be handled by the hook.
+    setIsLoading(true);
+    getGenerationInfo()
+      .then(info => {
+        if (info && Date.now() - info.timestamp < 24 * 60 * 60 * 1000) {
+          setGenerationCount(info.count);
+        } else {
           setGenerationCount(0);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    }
-  }, [db, getGenerationInfo]);
+        }
+      })
+      .catch(err => {
+        console.error("Error fetching generation count:", err);
+        setGenerationCount(0);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [getGenerationInfo]);
 
   useEffect(() => {
     if (error) {

@@ -18,7 +18,7 @@ interface StoredPdfListProps {
 }
 
 export function StoredPdfList({ onSelectPdf }: StoredPdfListProps) {
-  const { db, getAll, remove } = useIndexedDB<StoredPdf>('uploadedPdfs');
+  const { getAll, remove } = useIndexedDB<StoredPdf>('uploadedPdfs');
   const [storedPdfs, setStoredPdfs] = useState<StoredPdf[]>([]);
   const { toast } = useToast();
 
@@ -26,7 +26,8 @@ export function StoredPdfList({ onSelectPdf }: StoredPdfListProps) {
     const fetchPdfs = async () => {
       try {
         const pdfs = (await getAll()) as StoredPdf[];
-        if (pdfs) {
+        if (pdfs && pdfs.length > 0) {
+          // Sort by most recently uploaded
           pdfs.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
           setStoredPdfs(pdfs);
         }
@@ -40,10 +41,8 @@ export function StoredPdfList({ onSelectPdf }: StoredPdfListProps) {
       }
     };
     
-    if (db) {
-      fetchPdfs();
-    }
-  }, [db, getAll, toast]);
+    fetchPdfs();
+  }, [getAll, toast]);
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();

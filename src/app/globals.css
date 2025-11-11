@@ -210,3 +210,11 @@
   overflow-x: hidden !important;
   max-width: 100% !important;
 }
+.ProseMirror ol {
+  list-style-position: outside; /* keeps numbers fully visible */
+              /* optional – adjust for alignment */
+}
+.ProseMirror ol {
+  list-style-position: outside;
+  padding-left: 2.5rem;
+}

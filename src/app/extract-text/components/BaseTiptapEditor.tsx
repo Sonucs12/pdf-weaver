@@ -14,7 +14,7 @@ import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import TextAlign from '@tiptap/extension-text-align'
-
+import { OrderedListWithStart } from "@/extensions/OrderedListWithStart";
 interface BaseTiptapEditorProps {
   markdown: string;
   onChange: (markdown: string) => void;
@@ -37,8 +37,9 @@ export function BaseTiptapEditor({
       heading: { levels: [1, 2, 3, 4, 5, 6] },
       codeBlock: false,
       link: false,
+      orderedList: false,
     }),
-  
+    OrderedListWithStart,
     Link.configure({
       openOnClick: false,
       HTMLAttributes: { class: "text-blue-500 underline" },

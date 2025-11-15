@@ -1,30 +1,35 @@
-
 'use client';
 
 import { DropDownMenu, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Download, Copy, FileDown } from 'lucide-react';
+import { Download, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useHtmlToWord } from '@/hooks/use-html-to-word';
 import { usePdfGenerator } from '@/hooks/use-pdfgenertor';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 
 interface ExportMenuProps {
-  editedText: string;
-  editedMarkdown: string;
+  content: {
+    editedText: string;
+    editedMarkdown: string;
+  };
   fileName: string;
   isProcessing: boolean;
   projectTitle?: string;
 }
 
-export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing, projectTitle }: ExportMenuProps) {
+export function ExportMenu({ 
+  content: { editedText, editedMarkdown },
+  fileName, 
+  isProcessing, 
+  projectTitle 
+}: ExportMenuProps) {
   const { toast, dismiss } = useToast();
-  const { convertAndDownload, copyToClipboard, isConverting } = useHtmlToWord();
+  const { convertAndDownload, isConverting } = useHtmlToWord();
   const { generatePdf, isGenerating: isGeneratingPdf, phase, error, clearError } = usePdfGenerator();
+  const toastIdRef = useRef<string | undefined>();
 
-  // Get the best available name for the file: projectTitle > fileName > "pdfwrite"
-  // Also sanitize the filename to remove invalid characters
-  const getFileName = () => {
+  const getFileName = useCallback(() => {
     let name = '';
     if (projectTitle && projectTitle.trim()) {
       name = projectTitle.trim();
@@ -34,19 +39,15 @@ export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing,
       name = 'pdfwrite';
     }
     
-    // Sanitize filename: remove invalid characters for file systems
-    // Replace invalid characters with underscore
     return name.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').trim() || 'pdfwrite';
-  };
-
-  const toastIdRef = useRef<string | undefined>();
+  }, [projectTitle, fileName]);
 
   useEffect(() => {
     if (phase === 'waking') {
       toastIdRef.current = toast({
         title: 'Waking server...',
         description: 'Preparing the PDF generation service.',
-        duration: 999999, // Keep toast open indefinitely
+        duration: 999999,
       }).id;
     } else if (phase === 'generating') {
       if (toastIdRef.current) {
@@ -55,7 +56,7 @@ export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing,
       toastIdRef.current = toast({
         title: 'Generating PDF...',
         description: 'Your PDF is being created.',
-        duration: 999999, // Keep toast open indefinitely
+        duration: 999999,
       }).id;
     } else if (phase === 'idle' && toastIdRef.current) {
       dismiss(toastIdRef.current);
@@ -74,7 +75,7 @@ export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing,
     }
   }, [error]);
 
-  const handleDownload = (format: 'html' | 'md') => {
+  const handleDownload = useCallback((format: 'html' | 'md') => {
     const content = format === 'md' ? editedMarkdown : editedText;
     const blob = new Blob([content], { type: format === 'md' ? 'text/markdown' : 'text/html' });
     const url = URL.createObjectURL(blob);
@@ -85,13 +86,38 @@ export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing,
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  };
+  }, [editedMarkdown, editedText, getFileName]);
 
-  const handleCopy = (format: 'html' | 'md') => {
+  const handleCopy = useCallback((format: 'html' | 'md') => {
     const content = format === 'md' ? editedMarkdown : editedText;
     navigator.clipboard.writeText(content);
     toast({ title: 'Copied to clipboard!' });
-  };
+  }, [editedMarkdown, editedText, toast]);
+
+  const handleDocxDownload = useCallback(async () => {
+    try {
+      await convertAndDownload(editedText, getFileName());
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'DOCX download failed' });
+    }
+  }, [editedText, getFileName, convertAndDownload, toast]);
+
+const handlePdfDownload = useCallback(async () => {
+  try {
+    await generatePdf(editedMarkdown, {
+      filename: `${getFileName()}.pdf`,
+    });
+    
+    if (toastIdRef.current) {
+      dismiss(toastIdRef.current);
+      toastIdRef.current = undefined;
+    }
+    
+    toast({ title: 'PDF Downloaded Successfully!' });
+  } catch (e) {
+
+  }
+}, [editedMarkdown, getFileName, generatePdf, toast, dismiss]);
 
   const menuItems: DropdownMenuItem[] = [
     {
@@ -109,13 +135,7 @@ export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing,
     {
       label: 'Download as DOCX',
       icon: <Download className="h-4 w-4" />,
-      onClick: async () => {
-        try {
-          await convertAndDownload(editedText, getFileName());
-        } catch (e) {
-          toast({ variant: 'destructive', title: 'DOCX download failed' });
-        }
-      },
+      onClick: handleDocxDownload,
       disabled: isProcessing || isConverting,
     },
     {
@@ -126,16 +146,7 @@ export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing,
           ? 'Generating PDF...'
           : 'Download as PDF',
       icon: <Download className="h-4 w-4" />,
-      onClick: async () => {
-        try {
-          await generatePdf(editedMarkdown, {
-            filename: `${getFileName()}.pdf`,
-          });
-          toast({ title: 'PDF Downloaded!' });
-        } catch (e) {
-          // Error is already handled by the useEffect
-        }
-      },
+      onClick: handlePdfDownload,
       disabled: isProcessing || isGeneratingPdf,
     },
     {
@@ -150,7 +161,7 @@ export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing,
       onClick: () => handleCopy('md'),
       disabled: isProcessing,
     },
-    ];
+  ];
 
   return (
     <DropDownMenu
@@ -164,4 +175,3 @@ export function ExportMenu({ editedText, editedMarkdown, fileName, isProcessing,
     />
   );
 }
-

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { FileText, Loader2 } from "lucide-react";
+import { useState,} from "react";
+import {  Loader2 } from "lucide-react";
 import { BackButton } from "@/components/ui/BackButton";
 import { Button } from "@/components/ui/button";
 import { useAutoSaveDraft } from "@/hooks/use-auto-save-draft";
@@ -9,31 +9,34 @@ import { WyngEditor } from "@/app/extract-text/components/WyngEditor";
 import { MarkdownPreviewDialog } from "@/app/extract-text/components/MarkdownPreviewDialog";
 import { CancelButton } from "./CancelButton";
 import { ExportMenu } from "./ExportMenu";
-
 import { SaveButton } from "./SaveButton";
 
 interface EditStepProps {
-  fileName: string;
-  editedMarkdown: string;
-  editedText: string;
-  onTextChange: (text: string) => void;
-  onReset: () => void;
-  onBack: () => void;
-  isProcessing?: boolean;
-  progressMessage?: string;
-  onCancel: () => void;
+  fileInfo: {
+    fileName: string;
+    pageRange: string;
+  };
+  content: {
+    editedMarkdown: string;
+    editedText: string;
+  };
+  processingState: {
+    isProcessing: boolean;
+    progressMessage: string;
+  };
+  handlers: {
+    onTextChange: (text: string) => void;
+    onReset: () => void;
+    onBack: () => void;
+    onCancel: () => void;
+  };
 }
 
 export function EditStep({
-  fileName,
-  editedText,
-  editedMarkdown,
-  onTextChange,
-  onReset,
-  onBack,
-  isProcessing = false,
-  progressMessage,
-  onCancel,
+  fileInfo: { fileName, pageRange },
+  content: { editedMarkdown, editedText },
+  processingState: { isProcessing = false, progressMessage = "" },
+  handlers: { onTextChange, onReset, onBack, onCancel },
 }: EditStepProps) {
   const { saveDraft } = useAutoSaveDraft();
   const [isDirty, setIsDirty] = useState(true);
@@ -53,12 +56,12 @@ export function EditStep({
     }
     onBack();
   };
+
   return (
     <div className="w-full flex flex-col">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
         <div className="flex items-center gap-2 text-sm px-4 sm:px-6 md:px-8">
-          <BackButton onClick={handleBackClick} disabled={isProcessing} />{" "}
-         
+          <BackButton onClick={handleBackClick} disabled={isProcessing} />
           <span className="font-medium line-clamp-1">{fileName}</span>
         </div>
         <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide px-4 sm:px-6 md:px-8">
@@ -72,14 +75,12 @@ export function EditStep({
             size="lg"
           />
           <SaveButton
-            fileName={fileName}
-            editedText={editedText}
-            editedMarkdown={editedMarkdown}
+            fileInfo={{ fileName, pageRange }}
+            content={{ editedText, editedMarkdown }}
             onSave={handleSave}
           />
           <ExportMenu
-            editedText={editedText}
-            editedMarkdown={editedMarkdown}
+            content={{ editedText, editedMarkdown }}
             fileName={fileName}
             isProcessing={isProcessing}
           />
@@ -87,15 +88,15 @@ export function EditStep({
       </div>
       {isProcessing && (
         <div className="px-4 sm:px-6 md:px-8">
-        <div className="mb-4 py-3 px-4 sm:px-6 md:px-8 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-2">
-            <Loader2 className="h-5 w-5 animate-spin text-blue-600 dark:text-blue-400" />
-            <p className="text-sm text-blue-900 dark:text-blue-100">
-              {progressMessage || "Processing pages..."}
-            </p>
+          <div className="mb-4 py-3 px-4 sm:px-6 md:px-8 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-5 w-5 animate-spin text-blue-600 dark:text-blue-400" />
+              <p className="text-sm text-blue-900 dark:text-blue-100">
+                {progressMessage || "Processing pages..."}
+              </p>
+            </div>
+            <CancelButton onCancel={onCancel} isProcessing={isProcessing} />
           </div>
-          <CancelButton onCancel={onCancel} isProcessing={isProcessing}/>
-        </div>
         </div>
       )}
       <div className="flex-grow mt-2">

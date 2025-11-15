@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState} from 'react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { Button } from '@/components/ui/button';
 import { TitleDialog } from './TitleDialog';
@@ -8,10 +8,14 @@ import BottomSheetContainer from '@/components/ui/BottomSheetContainer';
 import { useToast } from '@/hooks/use-toast';
 
 interface SaveButtonProps {
-  fileName: string;
-  editedText: string;
-  editedMarkdown: string;
-  pageRange: string;
+  fileInfo: {
+    fileName: string;
+    pageRange: string;
+  };
+  content: {
+    editedText: string;
+    editedMarkdown: string;
+  };
   onSave: () => void;
   isEditMode?: boolean;
   isDisabled?: boolean;
@@ -50,10 +54,8 @@ export const createNewProject = (
 };
 
 export function SaveButton({ 
-  fileName, 
-  editedText, 
-  editedMarkdown, 
-  pageRange,
+  fileInfo: { fileName, pageRange },
+  content: { editedText, editedMarkdown },
   onSave, 
   isEditMode = false, 
   isDisabled = false,
@@ -85,8 +87,6 @@ export function SaveButton({
     }
   
     if (!id) return;
-    
-    // Get item by ID directly using dot operator
     const existingItem = savedItems[id];
     
     if (existingItem) {
@@ -97,7 +97,7 @@ export function SaveButton({
         pageRange,
         updatedAt: new Date().toISOString()
       };
-      // Update directly using object spread
+      // update directly using object spread
       setSavedItems({
         ...savedItems,
         [id]: updatedItem
@@ -120,11 +120,11 @@ export function SaveButton({
     const existingItem = Object.values(savedItems).find(item => item.title === title);
 
     if (existingItem) {
-      // Merge into existing project
       const updatedItem: SavedItem = {
         ...existingItem,
         editedText: existingItem.editedText + `\n\n${editedText}`,
         editedMarkdown: existingItem.editedMarkdown + `\n\n${editedMarkdown}`,
+        pageRange: pageRange,
         updatedAt: new Date().toISOString()
       };
       // Update directly using object spread
@@ -133,7 +133,7 @@ export function SaveButton({
         [existingItem.id]: updatedItem
       });
     } else {
-      // Create new project with unique ID
+      // create new project with unique ID
       const newId = crypto.randomUUID();
       const newItem: SavedItem = { 
         id: newId,
@@ -144,7 +144,7 @@ export function SaveButton({
         editedMarkdown, 
         createdAt: new Date().toISOString() 
       };
-      // Add directly using object spread
+      // add directly using object spread
       setSavedItems({
         ...savedItems,
         [newId]: newItem

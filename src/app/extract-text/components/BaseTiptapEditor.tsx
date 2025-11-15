@@ -152,6 +152,4 @@ export function BaseTiptapEditor({
       </div>
     </div>
   );
-  
-  
 }

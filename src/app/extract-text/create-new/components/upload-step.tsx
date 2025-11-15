@@ -1,4 +1,3 @@
-
 'use client';
 
 import { type ChangeEvent, type DragEvent } from 'react';
@@ -11,23 +10,22 @@ import { StoredPdfList, type StoredPdf } from './StoredPdfList';
 
 interface UploadStepProps {
   isDragging: boolean;
-  onDragEnter: (e: DragEvent<HTMLDivElement>) => void;
-  onDragLeave: (e: DragEvent<HTMLDivElement>) => void;
-  onDragOver: (e: DragEvent<HTMLDivElement>) => void;
-  onDrop: (e: DragEvent<HTMLDivElement>) => void;
-  onFileSelect: (files: FileList | null) => void;
   fileInputRef: React.RefObject<HTMLInputElement>;
+  dragHandlers: {
+    onDragEnter: (e: DragEvent<HTMLDivElement>) => void;
+    onDragLeave: (e: DragEvent<HTMLDivElement>) => void;
+    onDragOver: (e: DragEvent<HTMLDivElement>) => void;
+    onDrop: (e: DragEvent<HTMLDivElement>) => void;
+  };
+  onFileSelect: (files: FileList | null) => void;
   onSelectCachedPdf: (pdf: StoredPdf) => void;
 }
 
 export function UploadStep({
   isDragging,
-  onDragEnter,
-  onDragLeave,
-  onDragOver,
-  onDrop,
-  onFileSelect,
   fileInputRef,
+  dragHandlers,
+  onFileSelect,
   onSelectCachedPdf,
 }: UploadStepProps) {
   const { toast } = useToast();
@@ -51,11 +49,11 @@ export function UploadStep({
 
   return (
     <div
-      className="w-full  text-center transition-all duration-300"
-      onDragEnter={onDragEnter}
-      onDragLeave={onDragLeave}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
+      className="w-full text-center transition-all duration-300"
+      onDragEnter={dragHandlers.onDragEnter}
+      onDragLeave={dragHandlers.onDragLeave}
+      onDragOver={dragHandlers.onDragOver}
+      onDrop={dragHandlers.onDrop}
     >
       <CardHeader>
         <CardTitle className="font-headline text-3xl">Upload Your PDF or Images</CardTitle>
@@ -69,7 +67,12 @@ export function UploadStep({
             isDragging ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"
           )}
         >
-          <Upload className={cn("h-12 w-12 mb-4 transition-transform duration-300", isDragging ? 'scale-110 text-primary' : 'text-muted-foreground')} />
+          <Upload 
+            className={cn(
+              "h-12 w-12 mb-4 transition-transform duration-300", 
+              isDragging ? 'scale-110 text-primary' : 'text-muted-foreground'
+            )} 
+          />
           <p className="text-muted-foreground">
             {isDragging ? 'Drop it like it\'s hot!' : 'Click or drag PDF or image files here'}
           </p>
@@ -87,5 +90,3 @@ export function UploadStep({
     </div>
   );
 }
-
-

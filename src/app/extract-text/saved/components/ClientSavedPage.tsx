@@ -12,6 +12,7 @@ interface SavedItem {
   fileName: string;
   editedText: string;
   editedMarkdown: string;
+  pageRange: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -21,7 +22,6 @@ export default function ClientSavedPage() {
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Convert to array for display/mapping
   const savedItemsArray = Object.values(savedItems);
 
   useEffect(() => {
@@ -61,7 +61,6 @@ export default function ClientSavedPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             onSearch={setSearchQuery}
             onClear={() => setSearchQuery('')}
-           
           />
         </div>
 
@@ -72,11 +71,7 @@ export default function ClientSavedPage() {
             {filteredItems.map((item) => (
               <SavedExtractCard
                 key={item.id}
-                id={item.id}
-                title={item.title}
-                fileName={item.fileName}
-                createdAt={item.createdAt}
-                updatedAt={item.updatedAt}
+                item={item}
                 onDelete={handleDelete}
               />
             ))}

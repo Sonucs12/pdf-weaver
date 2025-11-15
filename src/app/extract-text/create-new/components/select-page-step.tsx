@@ -7,15 +7,16 @@ import { Button } from '@/components/ui/button';
 import { parsePageRange } from '@/lib/utils/pdf-utils';
 
 interface SelectPageStepProps {
-  pageCount: number;
-  pageRange: string;
+  pageData: {
+    pageCount: number;
+    pageRange: string;
+  };
   onPageRangeChange: (range: string) => void;
   onProcess: () => void;
 }
 
 export function SelectPageStep({
-  pageCount,
-  pageRange,
+  pageData: { pageCount, pageRange },
   onPageRangeChange,
   onProcess,
 }: SelectPageStepProps) {
@@ -47,4 +48,3 @@ export function SelectPageStep({
     </Card>
   );
 }
-

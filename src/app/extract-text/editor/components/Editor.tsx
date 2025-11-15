@@ -33,9 +33,14 @@ interface EditorToolbarProps {
   id?: string;
   isEditMode: boolean;
   forceCreateMode: boolean;
-  fileName: string;
-  markdown: string;
-  editedText: string;
+  fileInfo: {
+    fileName: string;
+    pageRange: string;
+  };
+  content: {
+    markdown: string;
+    editedText: string;
+  };
   hasChanged: boolean;
   projectTitle?: string;
   onStartFromScratch: () => void;
@@ -46,9 +51,8 @@ const EditorToolbar = ({
   id,
   isEditMode,
   forceCreateMode,
-  fileName,
-  markdown,
-  editedText,
+  fileInfo,
+  content,
   hasChanged,
   projectTitle,
   onStartFromScratch,
@@ -61,7 +65,7 @@ const EditorToolbar = ({
       <div>
         {effectiveEditMode && (
           <span className="text-sm font-medium text-foreground px-4 sm:px-6 md:px-8">
-            {projectTitle || fileName}
+            {projectTitle || fileInfo.fileName}
           </span>
         )}
       </div>
@@ -73,24 +77,28 @@ const EditorToolbar = ({
           </Button>
         )}
         <MarkdownPreviewDialog
-          markdown={markdown}
+          markdown={content.markdown}
           title="Preview Content"
           triggerLabel="Preview"
           size="lg"
         />
         <SaveButton
           id={id}
-          fileName={fileName}
-          editedText={editedText}
-          editedMarkdown={markdown}
+          fileInfo={fileInfo}
+          content={{
+            editedText: content.editedText,
+            editedMarkdown: content.markdown,
+          }}
           onSave={onSave}
           isEditMode={effectiveEditMode}
           isDisabled={effectiveEditMode ? !hasChanged : false}
         />
         <ExportMenu
-          editedText={editedText}
-          editedMarkdown={markdown}
-          fileName={fileName}
+          content={{
+            editedText: content.editedText,
+            editedMarkdown: content.markdown,
+          }}
+          fileName={fileInfo.fileName}
           isProcessing={false}
           projectTitle={projectTitle}
         />
@@ -109,7 +117,6 @@ export function Editor({
   const [savedItemsStorage] = useLocalStorage<Record<string, any>>('saved-extracts', {});
   const baselineMarkdownRef = useRef<string>(isEditMode ? initialContent || "" : "");
   
-  // Get project title if editing a saved item
   const projectTitle = useMemo(() => {
     if (id && isEditMode) {
       const savedItem = savedItemsStorage[id] || Object.values(savedItemsStorage).find((item: any) => item.title === id);
@@ -172,9 +179,14 @@ export function Editor({
         id={id}
         isEditMode={isEditMode}
         forceCreateMode={forceCreateMode}
-        fileName={fileName}
-        markdown={markdown}
-        editedText={editedText}
+        fileInfo={{
+          fileName,
+          pageRange: "",
+        }}
+        content={{
+          markdown,
+          editedText,
+        }}
         hasChanged={hasChanged}
         projectTitle={projectTitle}
         onStartFromScratch={handleStartFromScratch}

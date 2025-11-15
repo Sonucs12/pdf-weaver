@@ -7,13 +7,12 @@ import { SelectPageStep } from './select-page-step';
 import { ProcessingStep } from './processing-step';
 import dynamic from 'next/dynamic';
 import type { StoredPdf } from './StoredPdfList';
-import { motion, AnimatePresence } from 'framer-motion'; // Import framer-motion
+import { motion, AnimatePresence } from 'framer-motion';
 
 const EditStep = dynamic(() => import('./edit-step').then(m => m.EditStep), {
   ssr: false,
 });
 
-// Define animation variants
 const stepVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
@@ -74,6 +73,54 @@ export default function ClientCreateNewPage() {
     }
   };
 
+  //  props into objects
+  const uploadStepProps = {
+    isDragging,
+    fileInputRef,
+    dragHandlers: {
+      onDragEnter: handleDragEnter,
+      onDragLeave: handleDragLeave,
+      onDragOver: handleDragOver,
+      onDrop: handleDrop,
+    },
+    onFileSelect: handleFileSelect,
+    onSelectCachedPdf,
+  };
+
+  const selectPageStepProps = {
+    pageData: {
+      pageCount,
+      pageRange,
+    },
+    onPageRangeChange: setPageRange,
+    onProcess: () => startProcessing(pageRange),
+  };
+
+  const processingStepProps = {
+    progressMessage,
+  };
+
+  const editStepProps = {
+    fileInfo: {
+      fileName,
+      pageRange,
+    },
+    content: {
+      editedMarkdown,
+      editedText,
+    },
+    processingState: {
+      isProcessing,
+      progressMessage,
+    },
+    handlers: {
+      onTextChange: setEditedMarkdown,
+      onReset: handleReset,
+      onBack: () => setStep('select-page'),
+      onCancel: handleCancelProcessing,
+    },
+  };
+
   const renderContent = () => {
     switch (step) {
       case 'upload':
@@ -86,16 +133,7 @@ export default function ClientCreateNewPage() {
             exit="exit"
             className='px-4 sm:px-6 md:px-8'
           >
-            <UploadStep
-              isDragging={isDragging}
-              onDragEnter={handleDragEnter}
-              onDragLeave={handleDragLeave}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              onFileSelect={handleFileSelect}
-              fileInputRef={fileInputRef}
-              onSelectCachedPdf={onSelectCachedPdf}
-            />
+            <UploadStep {...uploadStepProps} />
           </motion.div>
         );
       case 'select-page':
@@ -108,12 +146,7 @@ export default function ClientCreateNewPage() {
             exit="exit"
             className='px-4 sm:px-6 md:px-8'
           >
-            <SelectPageStep
-              pageCount={pageCount}
-              pageRange={pageRange}
-              onPageRangeChange={setPageRange}
-              onProcess={() => startProcessing(pageRange)}
-            />
+            <SelectPageStep {...selectPageStepProps} />
           </motion.div>
         );
       case 'processing':
@@ -126,7 +159,7 @@ export default function ClientCreateNewPage() {
             exit="exit"
             className="space-y-6 px-4 sm:px-6 md:px-8"
           >
-            <ProcessingStep progressMessage={progressMessage} />
+            <ProcessingStep {...processingStepProps} />
           </motion.div>
         );
       case 'edit':
@@ -138,17 +171,7 @@ export default function ClientCreateNewPage() {
             animate="visible"
             exit="exit"
           >
-            <EditStep
-              fileName={fileName}
-              editedMarkdown={editedMarkdown}
-              editedText={editedText}
-              onTextChange={setEditedMarkdown}
-              onReset={handleReset}
-              onBack={() => setStep('select-page')}
-              isProcessing={isProcessing}
-              progressMessage={progressMessage}
-              onCancel={handleCancelProcessing}
-            />
+            <EditStep {...editStepProps} />
           </motion.div>
         );
     }

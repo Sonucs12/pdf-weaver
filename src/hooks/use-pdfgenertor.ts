@@ -19,7 +19,6 @@ interface UsePdfGeneratorReturn {
   error: string | null;
   isValidContent: boolean;
   phase: "idle" | "waking" | "generating";
-
   generatePdf: (
     markdownContent: string,
     options?: PdfGenerationOptions
@@ -48,14 +47,16 @@ export const usePdfGenerator = (): UsePdfGeneratorReturn => {
       const config = resolvePdfOptions(options);
 
       try {
+        console.log("Step 1: Waking PDF server...");
         const isServerReady = await pingPdfServer(config.apiEndpoint);
 
         if (!isServerReady) {
           throw new Error(
-            "PDF server is not responding. Please try again later."
+            "PDF server failed to wake up. Please try again in a few moments."
           );
         }
 
+        console.log("Step 2: Server is ready, generating PDF...");
         setState((prev) => ({
           ...prev,
           phase: "generating",
@@ -63,21 +64,26 @@ export const usePdfGenerator = (): UsePdfGeneratorReturn => {
 
         await generateAndDownloadPdf(markdownContent, config);
 
-        setState((prev) => ({
-          ...prev,
+        console.log("Step 3: PDF generation completed successfully");
+        setState({
           isGenerating: false,
+          error: null,
+          isValidContent: true,
           phase: "idle",
-        }));
+        });
       } catch (e: any) {
         console.error("PDF generation failed:", e);
         const errorMessage =
           e.message || "An unknown error occurred during PDF generation.";
-        setState((prev) => ({
-          ...prev,
+        
+        setState({
           isGenerating: false,
           error: errorMessage,
+          isValidContent: false,
           phase: "idle",
-        }));
+        });
+        
+        throw new Error(errorMessage);
       }
     },
     []

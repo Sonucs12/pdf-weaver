@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useRef } from "react";
 import { useEditor, EditorContent, Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -15,6 +14,13 @@ import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import TextAlign from '@tiptap/extension-text-align'
 import { OrderedListWithStart } from "@/extensions/OrderedListWithStart";
+import Typography from '@tiptap/extension-typography';
+import Underline from '@tiptap/extension-underline';
+import Highlight from '@tiptap/extension-highlight';
+import Color from '@tiptap/extension-color';
+import { TextStyle } from '@tiptap/extension-text-style';
+
+
 interface BaseTiptapEditorProps {
   markdown: string;
   onChange: (markdown: string) => void;
@@ -79,11 +85,18 @@ export function BaseTiptapEditor({
       },
     }),
     TextAlign.configure({
-      types: ['heading', 'paragraph'], // which nodes support alignment
-      alignments: ['left', 'center', 'right', 'justify'], // optional
+      types: ['heading', 'paragraph'],
+      alignments: ['left', 'center', 'right', 'justify'],
       defaultAlignment: 'left',
     }),
-    
+   Typography.configure({
+  copyright: false
+}),
+
+  Underline,
+    Highlight,
+    TextStyle,
+    Color,
     TableRow,
     TableHeader,
     TableCell,
@@ -101,6 +114,9 @@ export function BaseTiptapEditor({
       onChange(editor.storage.markdown.getMarkdown());
     },
     editorProps: {
+      transformPastedHTML(html) {
+      return html;
+    },
       attributes: {
         class: `prose dark:prose-invert max-w-none focus:outline-none prose-pre:whitespace-pre prose-pre:tab-size-[4] ${
           className || ""

@@ -11,6 +11,7 @@ interface SaveButtonProps {
   fileName: string;
   editedText: string;
   editedMarkdown: string;
+  pageRange: string;
   onSave: () => void;
   isEditMode?: boolean;
   isDisabled?: boolean;
@@ -23,6 +24,7 @@ interface SavedItem {
   fileName: string;
   editedText: string;
   editedMarkdown: string;
+  pageRange: string;
   createdAt: string;
   updatedAt?: string;
 }
@@ -51,6 +53,7 @@ export function SaveButton({
   fileName, 
   editedText, 
   editedMarkdown, 
+  pageRange,
   onSave, 
   isEditMode = false, 
   isDisabled = false,
@@ -91,6 +94,7 @@ export function SaveButton({
         ...existingItem,
         editedText,
         editedMarkdown,
+        pageRange,
         updatedAt: new Date().toISOString()
       };
       // Update directly using object spread
@@ -135,6 +139,7 @@ export function SaveButton({
         id: newId,
         title, 
         fileName, 
+        pageRange,
         editedText, 
         editedMarkdown, 
         createdAt: new Date().toISOString() 

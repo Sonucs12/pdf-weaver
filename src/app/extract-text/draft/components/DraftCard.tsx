@@ -1,5 +1,4 @@
 "use client"
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trash2 } from 'lucide-react';
@@ -19,19 +18,12 @@ interface Draft {
 interface DraftCardProps {
   draft: Draft;
   onDelete: (id: string) => void;
+  isDeleting?: boolean;
 }
 
-export function DraftCard({ draft, onDelete }: DraftCardProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const handleDeleteClick = async () => {
-    setIsDeleting(true);
-    await onDelete(draft.id);
-    setIsDeleting(false);
-  };
-
+export function DraftCard({ draft, onDelete, isDeleting = false }: DraftCardProps) {
   const handleSaveSuccess = () => {
-    onDelete(draft.id); // Remove from drafts after saving
+    onDelete(draft.id);
   };
 
   return (
@@ -47,12 +39,22 @@ export function DraftCard({ draft, onDelete }: DraftCardProps) {
       <CardFooter className="flex mt-auto justify-end items-end gap-2">
         <EditButton id={draft.id} title={draft.title} />
         <SaveButton
-          fileName={draft.fileName}
-          editedText={draft.editedMarkdown}
-          editedMarkdown={draft.editedMarkdown}
+          fileInfo={{
+            fileName: draft.fileName,
+            pageRange: '',
+          }}
+          content={{
+            editedText: draft.editedMarkdown,
+            editedMarkdown: draft.editedMarkdown,
+          }}
           onSave={handleSaveSuccess}
         />
-        <Button variant="destructive" size={"icon"} onClick={handleDeleteClick} disabled={isDeleting}>
+        <Button 
+          variant="destructive" 
+          size="icon" 
+          onClick={() => onDelete(draft.id)} 
+          disabled={isDeleting}
+        >
           <Trash2 className="h-4 w-4" />
         </Button>
       </CardFooter>

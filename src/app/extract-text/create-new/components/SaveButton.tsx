@@ -97,7 +97,6 @@ export function SaveButton({
         pageRange,
         updatedAt: new Date().toISOString()
       };
-      // update directly using object spread
       setSavedItems({
         ...savedItems,
         [id]: updatedItem

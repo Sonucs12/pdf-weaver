@@ -130,7 +130,7 @@ export const convertMarkdownToHtml = (
   
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Noto Color Emoji', 'Segoe UI Emoji', 'Apple Color Emoji'; 
-    line-height: 1.8;
+    line-height: 1.5;
     color: #1f2937;
     padding: 60px 80px;
     max-width: none;
@@ -146,7 +146,7 @@ export const convertMarkdownToHtml = (
   }
   
   h1 { 
-    font-size: 2em;
+    font-size: 2.1em;
     border-bottom: 2px solid #3b82f6;
     padding-bottom: 8px;
     font-weight: 700;

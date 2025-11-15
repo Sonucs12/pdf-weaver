@@ -211,8 +211,7 @@
   max-width: 100% !important;
 }
 .ProseMirror ol {
-  list-style-position: outside; /* keeps numbers fully visible */
-              /* optional – adjust for alignment */
+  list-style-position: outside;
 }
 .ProseMirror ol {
   list-style-position: outside;

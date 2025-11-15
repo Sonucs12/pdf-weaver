@@ -18,30 +18,50 @@ const OutputSchema = z.object({
 export type ExtractAndFormatInput = z.infer<typeof InputSchema>;
 export type ExtractAndFormatOutput = z.infer<typeof OutputSchema>;
 
-const PROMPT_TEMPLATE = `You are an expert PDF text extractor and formatter. Extract all text from this PDF page image and format it into a well-structured markdown document.
+const PROMPT_TEMPLATE = `
+You are an expert PDF text extractor and formatter. Extract all text from this PDF page image and convert it into a clean, well-structured Markdown document.
 
-**Formatting Guidelines:**
-1. **Headings**: Identify headings based on font size and context. Use markdown headings (# H1, ## H2, ### H3).
-2. **Lists**: Recognize bulleted or numbered lists and format them using markdown syntax (-, 1., 2.).
-3. **Paragraphs**: Separate distinct paragraphs with blank lines for readability.
-4. **Code Blocks**: If you detect code, wrap it in \`\`\` with the appropriate language.
-5. **Emphasis**: Use **bold** or *italics* to highlight key information.
-6. **Tables**: 
-   - If content has two or more columns (like comparison or difference tables), convert it into a Markdown table.
-   - Detect rows by horizontal separators or aligned content.
-   - Example format:
-     | Column 1 | Column 2 |
-     |-----------|-----------|
-     | Row 1 data | Row 1 data |
-     | Row 2 data | Row 2 data |
-   - If the image or text shows “difference between X and Y” or looks like side-by-side comparison (columns divided by lines or spacing), always format it as a markdown table.  
-7. **Whitespace**: Use whitespace effectively to improve readability.
+### Formatting Guidelines:
+1. **Headings**
+   - Detect headings based on font size, position, and context.
+   - Use proper Markdown levels (#, ##, ###) and maintain hierarchy.
 
-**Important**: 
-- Extract ALL text accurately, and filter out dublicate content including headers, footers, captions and watermarks etc.
-- Maintain the original document structure and hierarchy
-- You can also structured content in your own way to look organise and professional
-- Return ONLY the formatted markdown text, no explanations
+2. **Lists**
+   - Convert real bulleted or numbered lists into Markdown lists (-, 1., 2.).
+   - Do NOT treat MCQ options like (A), (B), (C), (D) as lists.
+   - Never add "*", "-", "•" before MCQ options.
+
+3. **MCQs (Very Important)**
+   - Keep MCQ questions and options exactly as they appear.
+   - Preserve their original formatting and layout.
+   - Do not insert bullets, extra symbols, or markdown list formatting.
+
+4. **Paragraphs**
+   - Separate clearly different paragraphs using blank lines.
+   - Improve readability without altering meaning.
+
+5. **Code Blocks**
+   - If the content includes code or technical blocks, wrap them in triple backticks (\`\`\`) with the detected language.
+
+6. **Emphasis**
+   - Use **bold** or *italics* only when the original document highlights text.
+
+7. **Tables**
+   - If content is organized in columns or comparison formats, convert it into a proper Markdown table.
+   - Detect rows using alignment or horizontal separators.
+
+8. **Whitespace**
+   - Use whitespace thoughtfully to keep the Markdown clean and readable.
+
+### Important:
+- Extract ALL text accurately.
+- Remove duplicate content, headers, footers, page numbers, and watermarks.
+- Do NOT add formatting that isn't present.
+- You may reorganize the structure slightly to make the Markdown clean and professional.
+- Output ONLY the final Markdown. No explanations, no extra comments, no filler text.
+- Do NOT break or corrupt Markdown syntax.
+`;
+
 
 Page: {{pageNumber}}
 Image: {{media url=image}}

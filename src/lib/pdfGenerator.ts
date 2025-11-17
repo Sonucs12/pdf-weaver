@@ -253,7 +253,7 @@ export const convertMarkdownToHtml = (
     overflow-x: auto;
     margin: 20px 0;
     font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-    font-size: 0.88em;
+    font-size: 0.99em;
     line-height: 1.6;
     border: 1px solid #374151;
   }

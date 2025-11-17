@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Navigation } from './navigation';
 import { Sidebar } from '@/components/ui/mobileSidebar';
 import { MobileNavigation } from './mobile-navigation';
+import { FaGithub } from 'react-icons/fa';
 
 export const Header = () => {
   const pathname = usePathname();
@@ -32,6 +33,12 @@ export const Header = () => {
               </Link>
             </Button>
           )}
+          <Button asChild variant="outline" className="hidden lg:flex items-center gap-2">
+            <Link href="https://github.com/Sonucs12/pdf-weaver" target="_blank" rel="noopener noreferrer">
+              <FaGithub />
+              View on Github
+            </Link>
+          </Button>
           <ThemeToggle />
           <div className="md:hidden">
             <Sidebar

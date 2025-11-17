@@ -2,6 +2,7 @@ import { ArrowRight, CheckCircle, FileText, Bot, Edit, Download } from 'lucide-r
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { siteConfig } from '@/lib/metadata';
+import { Footer } from '@/components/layout/footer';
 
 const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => (
   <div className="bg-card p-6 rounded-lg border shadow-sm">
@@ -123,6 +124,7 @@ export default function LandingPage() {
           </Button>
         </div>
       </section>
+      <Footer />
     </>
   );
 }

@@ -32,6 +32,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useCallback, useEffect, useState, memo } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ToolbarButton {
   action: () => void;
@@ -48,20 +54,26 @@ interface TiptapEditorToolbarProps {
 // Memoized button group component to prevent unnecessary re-renders
 const ButtonGroup = memo(({ buttons }: { buttons: ToolbarButton[] }) => (
   <div className="flex gap-1">
-    {buttons.map((btn, index) => (
-      <Button
-        key={index}
-        variant={btn.isActive ? "default" : "outline"}
-        size="icon"
-        onClick={btn.action}
-        disabled={btn.disabled}
-        aria-label={btn.tooltip}
-        title={btn.tooltip}
-        className="h-9 w-9"
-      >
-        <btn.icon className="h-4 w-4" />
-      </Button>
-    ))}
+    <TooltipProvider>
+      {buttons.map((btn, index) => (
+        <Tooltip key={index}>
+          <TooltipTrigger asChild>
+            <Button
+              variant={btn.isActive ? "default" : "outline"}
+              size="icon"
+              onClick={btn.action}
+              disabled={btn.disabled}
+              className="h-9 w-9"
+            >
+              <btn.icon className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{btn.tooltip}</p>
+          </TooltipContent>
+        </Tooltip>
+      ))}
+    </TooltipProvider>
   </div>
 ));
 

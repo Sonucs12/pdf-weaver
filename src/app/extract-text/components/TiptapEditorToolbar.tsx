@@ -38,6 +38,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { LinkDialog } from "./LinkDialog";
 
 interface ToolbarButton {
   action: () => void;
@@ -82,6 +83,9 @@ ButtonGroup.displayName = "ButtonGroup";
 export const TiptapEditorToolbar = memo(
   ({ editor }: TiptapEditorToolbarProps) => {
     const [, forceRerender] = useState(0);
+    const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
+    const [initialLink, setInitialLink] = useState("");
+
     const handleUpdate = useCallback(() => {
       forceRerender((v) => v + 1);
     }, []);
@@ -102,23 +106,25 @@ export const TiptapEditorToolbar = memo(
 
     const handleAddLink = useCallback(() => {
       if (!editor) return;
+      const previousUrl = editor.getAttributes("link").href || "";
+      setInitialLink(previousUrl);
+      setIsLinkDialogOpen(true);
+    }, [editor]);
 
-      const previousUrl = editor.getAttributes("link").href;
-      const url = window.prompt("Enter URL:", previousUrl);
-
-      if (url === null) return;
+    const handleLinkSubmit = useCallback((url: string) => {
+      if (!editor) return;
 
       if (url === "") {
         editor.chain().focus().extendMarkRange("link").unsetLink().run();
-        return;
+      } else {
+        editor
+          .chain()
+          .focus()
+          .extendMarkRange("link")
+          .setLink({ href: url })
+          .run();
       }
-
-      editor
-        .chain()
-        .focus()
-        .extendMarkRange("link")
-        .setLink({ href: url })
-        .run();
+      setIsLinkDialogOpen(false);
     }, [editor]);
 
     const handleRemoveLink = useCallback(() => {
@@ -417,6 +423,7 @@ export const TiptapEditorToolbar = memo(
     ];
 
     return (
+      <>
       <div className=" bg-background sticky top-0 z-10 py-1">
       <div className="flex flex-col gap-2 ">
         <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
@@ -451,6 +458,13 @@ export const TiptapEditorToolbar = memo(
         </div>
       </div>
     </div>
+    <LinkDialog
+        isOpen={isLinkDialogOpen}
+        onClose={() => setIsLinkDialogOpen(false)}
+        onSubmit={handleLinkSubmit}
+        initialUrl={initialLink}
+      />
+      </>
     );
   }
 );

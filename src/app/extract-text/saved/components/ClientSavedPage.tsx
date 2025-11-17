@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { SavedExtractCard } from './SavedExtractCard';
-import { Save } from 'lucide-react';
 import { SearchInput } from '@/components/ui/search-input';
 
 interface SavedItem {

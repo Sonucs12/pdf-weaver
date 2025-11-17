@@ -35,7 +35,7 @@ You are an expert PDF text extractor and formatter. Extract all text from this P
 - Extract ALL text accurately, and filter out dublicate content including headers, footers, captions and watermarks etc. 
 - You can also structured content in your own way to look organise and professional 
 - Return ONLY the formatted markdown text, no explanations
-- Do NOT break or corrupt Markdown syntax. 
+- Use proper and correct Markdown syntax. 
 
 Page: {{pageNumber}}
 Image: {{media url=image}}

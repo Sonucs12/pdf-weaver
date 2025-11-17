@@ -60,7 +60,6 @@ export const usePdfGenerator = (): UsePdfGeneratorReturn => {
       markdownContent: string,
       options: PdfGenerationOptions = {}
     ): Promise<void> => {
-      // Reset and start
       updateState({
         isGenerating: true,
         error: null,
@@ -68,34 +67,33 @@ export const usePdfGenerator = (): UsePdfGeneratorReturn => {
         progress: 0,
       });
 
-      // Create abort controller
       abortControllerRef.current = new AbortController();
 
       try {
-        // Phase 1: Validation
+        // Validation
         setPhase("validating", 10);
         const validation = validateMarkdownContent(markdownContent);
         if (!validation.isValid) {
           throw new Error(validation.error || "Invalid content");
         }
 
-        // Phase 2: Server wake-up
+        // Server wake-up
         setPhase("waking", 20);
         console.log("Waking up PDF server...");
 
-        // Phase 3: Generation
+        // Generation
         setPhase("generating", 50);
         console.log("Generating PDF...");
 
         const service = new PdfGeneratorService(options);
         const blob = await service.generate(markdownContent);
 
-        // Check if cancelled
+        // 
         if (abortControllerRef.current?.signal.aborted) {
           throw new Error("Generation cancelled by user");
         }
 
-        // Phase 4: Downloading
+        //  Downloading
         setPhase("downloading", 90);
         console.log("Downloading PDF...");
 

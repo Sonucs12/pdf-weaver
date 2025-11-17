@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useLocalStorage } from '@/hooks/use-local-storage';
-import { useToast } from '@/hooks/use-toast';
+import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useToast } from "@/hooks/use-toast";
 
 interface Draft {
   id: string;
@@ -13,10 +13,12 @@ interface Draft {
 }
 
 export function useAutoSaveDraft() {
-  const [drafts, setDrafts] = useLocalStorage<Record<string, Draft>>('pdf-write-drafts', {});
+  const [drafts, setDrafts] = useLocalStorage<Record<string, Draft>>(
+    "pdf-write-drafts",
+    {}
+  );
   const { toast } = useToast();
 
-  // Convert to array only for display/mapping
   const draftsArray = Object.values(drafts);
 
   const saveDraft = (editedMarkdown: string, fileName: string) => {
@@ -39,11 +41,11 @@ export function useAutoSaveDraft() {
     // Add directly using object spread
     setDrafts({
       ...drafts,
-      [id]: newDraft
+      [id]: newDraft,
     });
 
     toast({
-      title: 'Draft saved',
+      title: "Draft saved",
       description: `Your draft "${title}" has been saved.`,
     });
   };

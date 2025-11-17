@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 
-const DB_NAME = 'PDFwriteDB';
+const DB_NAME = "PDFwriteDB";
 const DB_VERSION = 2;
 
 export function useIndexedDB<T>(storeName: string) {
@@ -19,11 +19,11 @@ export function useIndexedDB<T>(storeName: string) {
 
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
-      if (!db.objectStoreNames.contains('settings')) {
-        db.createObjectStore('settings', { keyPath: 'key' });
+      if (!db.objectStoreNames.contains("settings")) {
+        db.createObjectStore("settings", { keyPath: "key" });
       }
-      if (!db.objectStoreNames.contains('uploadedPdfs')) {
-        db.createObjectStore('uploadedPdfs', { keyPath: 'id' });
+      if (!db.objectStoreNames.contains("uploadedPdfs")) {
+        db.createObjectStore("uploadedPdfs", { keyPath: "id" });
       }
     };
 
@@ -59,29 +59,29 @@ export function useIndexedDB<T>(storeName: string) {
 
   const add = useCallback(
     (item: T) => {
-      if (!db) return Promise.reject(new Error('Database not available.'));
-      return performTransaction('readwrite', (store) => store.put(item));
+      if (!db) return Promise.reject(new Error("Database not available."));
+      return performTransaction("readwrite", (store) => store.put(item));
     },
     [db, performTransaction]
   );
 
   const get = useCallback(
     (key: IDBValidKey) => {
-      if (!db) return Promise.resolve(null); // Return null if DB not ready
-      return performTransaction('readonly', (store) => store.get(key));
+      if (!db) return Promise.resolve(null);
+      return performTransaction("readonly", (store) => store.get(key));
     },
     [db, performTransaction]
   );
 
   const getAll = useCallback(() => {
-    if (!db) return Promise.resolve([]); // Return empty array if DB not ready, prevents errors on load
-    return performTransaction('readonly', (store) => store.getAll());
+    if (!db) return Promise.resolve([]);
+    return performTransaction("readonly", (store) => store.getAll());
   }, [db, performTransaction]);
 
   const remove = useCallback(
     (key: IDBValidKey) => {
-      if (!db) return Promise.reject(new Error('Database not available.'));
-      return performTransaction('readwrite', (store) => store.delete(key));
+      if (!db) return Promise.reject(new Error("Database not available."));
+      return performTransaction("readwrite", (store) => store.delete(key));
     },
     [db, performTransaction]
   );

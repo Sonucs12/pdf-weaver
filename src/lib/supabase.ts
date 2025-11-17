@@ -1,8 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-/**
- * Creates a Supabase client for client-side usage (browser).
- */
+//Supabase client for client-side usage (browser).
+
 export function createSupabaseClient(): SupabaseClient {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -14,9 +13,8 @@ export function createSupabaseClient(): SupabaseClient {
   return createClient(supabaseUrl, supabaseAnonKey);
 }
 
-/**
- * Creates a Supabase client for server-side usage.
- */
+// Creates a Supabase client for server-side usage.
+
 export function createSupabaseServerClient(): SupabaseClient {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;

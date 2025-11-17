@@ -20,7 +20,7 @@ class PdfConfig {
     this.healthCheckDelay = options.healthCheckDelay || 3000;
     this.healthCheckTimeout = options.healthCheckTimeout || 30000;
     this.generationRetries = options.generationRetries || 3;
-    this.generationTimeout = options.generationTimeout || 90000; // Increased
+    this.generationTimeout = options.generationTimeout || 90000;
   }
 
   private getDefaults() {
@@ -107,7 +107,7 @@ class HealthCheckService {
   }
 }
 
-// HTML Template Generator - Single Responsibility
+// HTML Template Generator
 class HtmlTemplateGenerator {
   static generate(content: string, title: string): string {
     marked.setOptions({ breaks: true, gfm: true });
@@ -186,7 +186,7 @@ img { max-width: 100%; height: auto; margin: 24px 0; border-radius: 8px; }
   }
 }
 
-// PDF API Client - Single Responsibility
+// PDF API Client
 class PdfApiClient {
   constructor(private config: PdfConfig) {}
 
@@ -212,7 +212,6 @@ class PdfApiClient {
           html,
           brandName: "https://pdfwrite.vercel.app",
           options: {
-            // Add options to help Puppeteer stability
             waitForNetworkIdle: true,
             timeout: 60000,
           },
@@ -248,13 +247,13 @@ class PdfApiClient {
         errorMessage = text || errorMessage;
       }
     } catch {
-      // Use default message
+     
     }
     return errorMessage;
   }
 }
 
-// Validator - Single Responsibility
+// Validator 
 class ContentValidator {
   static validate(markdown: string): ValidationResult {
     if (!markdown) {
@@ -267,7 +266,7 @@ class ContentValidator {
   }
 }
 
-// Main PDF Generator Service - Orchestration
+// Main PDF Generator Service
 export class PdfGeneratorService {
   private config: PdfConfig;
   private healthCheck: HealthCheckService;
@@ -280,7 +279,6 @@ export class PdfGeneratorService {
   }
 
   async generate(markdownContent: string): Promise<Blob> {
-    // Validate content
     const validation = ContentValidator.validate(markdownContent);
     if (!validation.isValid) {
       throw new Error(validation.error);
@@ -300,7 +298,6 @@ export class PdfGeneratorService {
       this.config.title
     );
 
-    // Generate PDF with retry logic
     return await this.generateWithRetry(html);
   }
 
@@ -315,7 +312,6 @@ export class PdfGeneratorService {
         console.error(`Attempt ${attempt} failed:`, error.message);
 
         if (attempt < this.config.generationRetries) {
-          // Wait before retry with exponential backoff
           const waitTime = Math.min(3000 * attempt, 10000);
           console.log(`Retrying in ${waitTime}ms...`);
           await new Promise((resolve) => setTimeout(resolve, waitTime));
@@ -363,7 +359,6 @@ interface ValidationResult {
   error?: string;
 }
 
-// Legacy API compatibility
 export const generateAndDownloadPdf = async (
   markdownContent: string,
   options: PdfGenerationOptions = {}

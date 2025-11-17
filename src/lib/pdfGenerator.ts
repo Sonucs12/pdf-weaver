@@ -123,232 +123,245 @@ export const convertMarkdownToHtml = (
  
        <style>
   * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-  
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Noto Color Emoji', 'Segoe UI Emoji', 'Apple Color Emoji'; 
+  line-height: 1.5;
+  color: #1f2937;
+  padding: 60px 80px;
+  max-width: none;
+  font-size: 16px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #1e40af;
+  margin-top: 32px;
+  margin-bottom: 16px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+h1 { 
+  font-size: 2em;
+  border-bottom: 2px solid #3b82f6;
+  padding-bottom: 8px;
+  font-weight: 700;
+  margin-top: 0;
+}
+
+h2 { 
+  font-size: 1.4em;
+  font-weight: 650;
+  padding-bottom: 4px;
+}
+
+h3 { 
+  font-size: 1.3em;
+  font-weight: 600;
+}
+
+h4 { 
+  font-size: 1.2em;
+  font-weight: 600;
+  color: #374151;
+}
+
+h5 { 
+  font-size: 1.05em;
+  font-weight: 600;
+  color: #374151;
+}
+
+h6 { 
+  font-size: 1em;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+p {
+  margin: 12px 0;
+  text-align: justify;
+  color: #374151;
+}
+
+ul, ol {
+  margin: 16px 0;
+  padding-left: 32px;
+}
+
+li {
+  margin: 8px 0;
+  line-height: 1.7;
+  color: #374151;
+}
+
+li::marker {
+  color: #3b82f6;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 24px 0;
+  font-size: 0.9em;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+table, th, td {
+  border: 1px solid #d1d5db;
+}
+
+th, td {
+  padding: 12px 16px;
+  text-align: left;
+}
+
+th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  color: #1f2937;
+  border-bottom: 2px solid #9ca3af;
+}
+
+tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+tr:hover {
+  background-color: #f3f4f6;
+}
+
+code {
+  background-color: #f3f4f6;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.85em;
+  color: #dc2626;
+  border: 1px solid #e5e7eb;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+pre {
+  background-color: #1f2937;
+  color: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+  margin: 20px 0;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.90em;
+  line-height: 1.6;
+  border: 1px solid #374151;
+  white-space: pre-wrap;     
+  word-wrap: break-word;       
+  word-break: break-word;       
+  overflow-wrap: break-word;    
+  max-width: 100%;             
+  overflow-x: auto;       
+}
+
+pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+  border: none;
+  white-space: pre-wrap;       
+  word-wrap: break-word;
+  word-break: break-word;
+  display: block;              
+}
+
+blockquote {
+  border-left: 4px solid #3b82f6;
+  padding-left: 20px;
+  margin: 24px 0;
+  font-style: italic;
+  color: #4b5563;
+  background-color: #f8fafc;
+  padding: 16px 20px;
+  border-radius: 0 8px 8px 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+blockquote p {
+  margin: 8px 0;
+}
+
+strong {
+  font-weight: 600;
+  color: #111827;
+}
+
+em {
+  font-style: italic;
+  color: #4b5563;
+}
+
+a {
+  color: #2563eb;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-bottom-color 0.2s;
+  word-wrap: break-word; 
+}
+
+a:hover {
+  border-bottom-color: #2563eb;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  margin: 24px 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+hr {
+  border: none;
+  border-top: 2px solid #e5e7eb;
+  margin: 32px 0;
+}
+
+@media print {
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Noto Color Emoji', 'Segoe UI Emoji', 'Apple Color Emoji'; 
-    line-height: 1.5;
-    color: #1f2937;
-    padding: 60px 80px;
-    max-width: none;
-    font-size: 16px;
+    padding: 40px;
+    font-size: 12pt;
   }
   
-  h1, h2, h3, h4, h5, h6 {
-    color: #1e40af;
-    margin-top: 32px;
-    margin-bottom: 16px;
-    line-height: 1.3;
-    font-weight: 600;
+  h1 {
+    font-size: 1.8em;
+    page-break-after: avoid;
   }
   
-  h1 { 
-    font-size: 2em;
-    border-bottom: 2px solid #3b82f6;
-    padding-bottom: 8px;
-    font-weight: 700;
-    margin-top: 0;
+  h2 {
+    font-size: 1.5em;
+    page-break-after: avoid;
   }
   
-  h2 { 
-    font-size: 1.4em;
-    font-weight: 650;
-    padding-bottom: 4px;
+  h3, h4, h5, h6 {
+    page-break-after: avoid;
   }
   
-  h3 { 
-    font-size: 1.1em;
-    font-weight: 600;
-  }
-  
-  h4 { 
-    font-size: 1em;
-    font-weight: 600;
-    color: #374151;
-  }
-  
-  h5 { 
-    font-size: 1.05em;
-    font-weight: 600;
-    color: #374151;
-  }
-  
-  h6 { 
-    font-size: 0.95em;
-    font-weight: 600;
-    color: #6b7280;
-  }
-  
-  p {
-    margin: 12px 0;
-    text-align: justify;
-    color: #374151;
-  }
-  
-  ul, ol {
-    margin: 16px 0;
-    padding-left: 32px;
-  }
-  
-  li {
-    margin: 8px 0;
-    line-height: 1.7;
-    color: #374151;
-  }
-  
-  li::marker {
-    color: #3b82f6;
-  }
-  
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    margin: 24px 0;
-    font-size: 0.9em;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  }
-  
-  table, th, td {
-    border: 1px solid #d1d5db;
-  }
-  
-  th, td {
-    padding: 12px 16px;
-    text-align: left;
-  }
-  
-  th {
-    background-color: #f3f4f6;
-    font-weight: 600;
-    color: #1f2937;
-    border-bottom: 2px solid #9ca3af;
-  }
-  
-  tr:nth-child(even) {
-    background-color: #f9fafb;
-  }
-  
-  tr:hover {
-    background-color: #f3f4f6;
-  }
-  
-  code {
-    background-color: #f3f4f6;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-    font-size: 0.88em;
-    color: #dc2626;
-    border: 1px solid #e5e7eb;
-  }
-  
-  pre {
-    background-color: #1f2937;
-    color: #f9fafb;
-    padding: 0px;
-    border-radius: 8px;
-    overflow-x: auto;
-    margin: 20px 0;
-    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-    font-size: 0.99em;
-    line-height: 1.6;
-    border: 1px solid #374151;
-  }
-  
-  pre code {
-    background: none;
-    color: inherit;
-    padding: 0;
-    border: none;
-  }
-  
-  blockquote {
-    border-left: 4px solid #3b82f6;
-    padding-left: 20px;
-    margin: 24px 0;
-    font-style: italic;
-    color: #4b5563;
-    background-color: #f8fafc;
-    padding: 16px 20px;
-    border-radius: 0 8px 8px 0;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  }
-  
-  blockquote p {
-    margin: 8px 0;
-  }
-  
-  strong {
-    font-weight: 600;
-    color: #111827;
-  }
-  
-  em {
-    font-style: italic;
-    color: #4b5563;
+  table, pre, blockquote, img {
+    page-break-inside: avoid;
   }
   
   a {
     color: #2563eb;
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: border-bottom-color 0.2s;
+    text-decoration: underline;
   }
   
-  a:hover {
-    border-bottom-color: #2563eb;
+  pre {
+    border: 1px solid #d1d5db;
+    white-space: pre-wrap; 
   }
-  
-  img {
-    max-width: 100%;
-    height: auto;
-    margin: 24px 0;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  hr {
-    border: none;
-    border-top: 2px solid #e5e7eb;
-    margin: 32px 0;
-  }
-  
-  @media print {
-    body {
-      padding: 40px;
-      font-size: 12pt;
-    }
-    
-    h1 {
-      font-size: 1.8em;
-      page-break-after: avoid;
-    }
-    
-    h2 {
-      font-size: 1.5em;
-      page-break-after: avoid;
-    }
-    
-    h3, h4, h5, h6 {
-      page-break-after: avoid;
-    }
-    
-    table, pre, blockquote, img {
-      page-break-inside: avoid;
-    }
-    
-    a {
-      color: #2563eb;
-      text-decoration: underline;
-    }
-    
-    pre {
-      border: 1px solid #d1d5db;
-    }
-  }
+}
 </style>
          
       </head>
@@ -376,9 +389,12 @@ export const generatePdfFromHtml = async (
       headers: {
         "Content-Type": "application/json",
         Accept: "application/pdf",
-         brandName: 'PDFWrite.vercel.app',
       },
-      body: JSON.stringify({ html }),
+      body: JSON.stringify({ 
+        html,
+        brandName:'https://pdfwrite.vercel.app',
+      
+      }),
       signal: controller.signal,
     });
 

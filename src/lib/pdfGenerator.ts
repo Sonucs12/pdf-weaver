@@ -54,10 +54,16 @@ class HealthCheckService {
 
   async ping(): Promise<boolean> {
     const healthUrl = this.config.getHealthEndpoint();
-    
-    for (let attempt = 1; attempt <= this.config.healthCheckRetries; attempt++) {
-      console.log(`Health check attempt ${attempt}/${this.config.healthCheckRetries}`);
-      
+
+    for (
+      let attempt = 1;
+      attempt <= this.config.healthCheckRetries;
+      attempt++
+    ) {
+      console.log(
+        `Health check attempt ${attempt}/${this.config.healthCheckRetries}`
+      );
+
       try {
         const isHealthy = await this.singlePing(healthUrl);
         if (isHealthy) {
@@ -105,7 +111,7 @@ class HealthCheckService {
 class HtmlTemplateGenerator {
   static generate(content: string, title: string): string {
     marked.setOptions({ breaks: true, gfm: true });
-    
+
     let renderedHtml: string;
     try {
       renderedHtml = marked.parse(content) as string;
@@ -185,8 +191,10 @@ class PdfApiClient {
   constructor(private config: PdfConfig) {}
 
   async generatePdf(html: string, attemptNumber: number = 1): Promise<Blob> {
-    console.log(`PDF generation attempt ${attemptNumber}/${this.config.generationRetries}`);
-    
+    console.log(
+      `PDF generation attempt ${attemptNumber}/${this.config.generationRetries}`
+    );
+
     const controller = new AbortController();
     const timeout = setTimeout(
       () => controller.abort(),

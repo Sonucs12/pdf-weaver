@@ -1,30 +1,33 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import {
-  generateAndDownloadPdf,
-  validateMarkdownContent,
+  PdfGeneratorService,
   PdfGenerationOptions,
-  resolvePdfOptions,
-  pingPdfServer,
+  validateMarkdownContent,
 } from "../lib/pdfGenerator";
+
+type Phase = "idle" | "validating" | "waking" | "generating" | "downloading";
 
 interface PdfGeneratorState {
   isGenerating: boolean;
   error: string | null;
   isValidContent: boolean;
-  phase: "idle" | "waking" | "generating";
+  phase: Phase;
+  progress: number;
 }
 
 interface UsePdfGeneratorReturn {
   isGenerating: boolean;
   error: string | null;
   isValidContent: boolean;
-  phase: "idle" | "waking" | "generating";
+  phase: Phase;
+  progress: number;
   generatePdf: (
     markdownContent: string,
     options?: PdfGenerationOptions
   ) => Promise<void>;
   clearError: () => void;
   validateContent: (markdownContent: string) => boolean;
+  cancelGeneration: () => void;
 }
 
 export const usePdfGenerator = (): UsePdfGeneratorReturn => {
@@ -33,84 +36,148 @@ export const usePdfGenerator = (): UsePdfGeneratorReturn => {
     error: null,
     isValidContent: false,
     phase: "idle",
+    progress: 0,
   });
 
-  const generatePdf = useCallback(
-    async (markdownContent: string, options: PdfGenerationOptions = {}) => {
-      setState((prev) => ({
-        ...prev,
-        isGenerating: true,
-        error: null,
-        phase: "waking",
-      }));
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-      const config = resolvePdfOptions(options);
-
-      try {
-        console.log("Step 1: Waking PDF server...");
-        const isServerReady = await pingPdfServer(config.apiEndpoint);
-
-        if (!isServerReady) {
-          throw new Error(
-            "PDF server failed to wake up. Please try again in a few moments."
-          );
-        }
-
-        console.log("Step 2: Server is ready, generating PDF...");
-        setState((prev) => ({
-          ...prev,
-          phase: "generating",
-        }));
-
-        await generateAndDownloadPdf(markdownContent, config);
-
-        console.log("Step 3: PDF generation completed successfully");
-        setState({
-          isGenerating: false,
-          error: null,
-          isValidContent: true,
-          phase: "idle",
-        });
-      } catch (e: any) {
-        console.error("PDF generation failed:", e);
-        const errorMessage =
-          e.message || "An unknown error occurred during PDF generation.";
-        
-        setState({
-          isGenerating: false,
-          error: errorMessage,
-          isValidContent: false,
-          phase: "idle",
-        });
-        
-        throw new Error(errorMessage);
-      }
+  const updateState = useCallback(
+    (updates: Partial<PdfGeneratorState>) => {
+      setState((prev) => ({ ...prev, ...updates }));
     },
     []
   );
 
+  const setPhase = useCallback(
+    (phase: Phase, progress: number) => {
+      updateState({ phase, progress });
+    },
+    [updateState]
+  );
+
+  const generatePdf = useCallback(
+    async (
+      markdownContent: string,
+      options: PdfGenerationOptions = {}
+    ): Promise<void> => {
+      // Reset and start
+      updateState({
+        isGenerating: true,
+        error: null,
+        phase: "validating",
+        progress: 0,
+      });
+
+      // Create abort controller
+      abortControllerRef.current = new AbortController();
+
+      try {
+        // Phase 1: Validation
+        setPhase("validating", 10);
+        const validation = validateMarkdownContent(markdownContent);
+        if (!validation.isValid) {
+          throw new Error(validation.error || "Invalid content");
+        }
+
+        // Phase 2: Server wake-up
+        setPhase("waking", 20);
+        console.log("Waking up PDF server...");
+
+        // Phase 3: Generation
+        setPhase("generating", 50);
+        console.log("Generating PDF...");
+
+        const service = new PdfGeneratorService(options);
+        const blob = await service.generate(markdownContent);
+
+        // Check if cancelled
+        if (abortControllerRef.current?.signal.aborted) {
+          throw new Error("Generation cancelled by user");
+        }
+
+        // Phase 4: Downloading
+        setPhase("downloading", 90);
+        console.log("Downloading PDF...");
+
+        // Download
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = options.filename || "pdfwrite.pdf";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        // Success
+        updateState({
+          isGenerating: false,
+          error: null,
+          isValidContent: true,
+          phase: "idle",
+          progress: 100,
+        });
+
+        console.log("PDF generation completed successfully");
+      } catch (error: any) {
+        console.error("PDF generation failed:", error);
+
+        const errorMessage =
+          error.message || "An unknown error occurred during PDF generation.";
+
+        updateState({
+          isGenerating: false,
+          error: errorMessage,
+          isValidContent: false,
+          phase: "idle",
+          progress: 0,
+        });
+
+        throw error;
+      } finally {
+        abortControllerRef.current = null;
+      }
+    },
+    [updateState, setPhase]
+  );
+
   const clearError = useCallback(() => {
-    setState((prev) => ({ ...prev, error: null }));
-  }, []);
+    updateState({ error: null });
+  }, [updateState]);
 
-  const validateContent = useCallback((markdownContent: string): boolean => {
-    const validation = validateMarkdownContent(markdownContent);
-    setState((prev) => ({
-      ...prev,
-      isValidContent: validation.isValid,
-      error: validation.isValid ? null : validation.error || null,
-    }));
+  const validateContent = useCallback(
+    (markdownContent: string): boolean => {
+      const validation = validateMarkdownContent(markdownContent);
+      updateState({
+        isValidContent: validation.isValid,
+        error: validation.isValid ? null : validation.error || null,
+      });
+      return validation.isValid;
+    },
+    [updateState]
+  );
 
-    return validation.isValid;
-  }, []);
+  const cancelGeneration = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      updateState({
+        isGenerating: false,
+        error: "Generation cancelled",
+        phase: "idle",
+        progress: 0,
+      });
+    }
+  }, [updateState]);
 
   return {
     isGenerating: state.isGenerating,
     error: state.error,
     isValidContent: state.isValidContent,
     phase: state.phase,
+    progress: state.progress,
     generatePdf,
     clearError,
     validateContent,
+    cancelGeneration,
   };
 };

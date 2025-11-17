@@ -146,7 +146,7 @@ export const convertMarkdownToHtml = (
   }
   
   h1 { 
-    font-size: 2.1em;
+    font-size: 2em;
     border-bottom: 2px solid #3b82f6;
     padding-bottom: 8px;
     font-weight: 700;
@@ -154,19 +154,18 @@ export const convertMarkdownToHtml = (
   }
   
   h2 { 
-    font-size: 1.6em;
+    font-size: 1.4em;
     font-weight: 650;
     padding-bottom: 4px;
-    border-bottom: 1px solid #e5e7eb;
   }
   
   h3 { 
-    font-size: 1.35em;
+    font-size: 1.1em;
     font-weight: 600;
   }
   
   h4 { 
-    font-size: 1.15em;
+    font-size: 1em;
     font-weight: 600;
     color: #374151;
   }
@@ -181,8 +180,6 @@ export const convertMarkdownToHtml = (
     font-size: 0.95em;
     font-weight: 600;
     color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
   }
   
   p {
@@ -379,6 +376,7 @@ export const generatePdfFromHtml = async (
       headers: {
         "Content-Type": "application/json",
         Accept: "application/pdf",
+         brandName: 'PDFWrite.vercel.app',
       },
       body: JSON.stringify({ html }),
       signal: controller.signal,

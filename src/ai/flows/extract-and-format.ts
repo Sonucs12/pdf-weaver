@@ -20,16 +20,7 @@ export type ExtractAndFormatOutput = z.infer<typeof OutputSchema>;
 
 const PROMPT_TEMPLATE = `
 You are an expert PDF text extractor and formatter. Extract all text from this PDF page image and format it into a well-structured markdown document. 
-
-**Formatting Guidelines:** 
-
-1. **Headings**: Identify headings based on font size and context. Use markdown headings (# H1, ## H2, ### H3) and maintain hierarchy. 
-2. **Lists**: Recognize bulleted or numbered lists and format them using markdown syntax (-, 1., 2.). 
-3. **Paragraphs**: Separate distinct paragraphs with blank lines for readability. 
-4. **Code Blocks**: If you detect code, wrap it in \`\`\` with the appropriate language. 
-5. **Emphasis**: Use **bold** or *italics* to highlight key information. 
-6. **Tables**: - If content has two or more columns (like comparison or difference tables), convert it into a Markdown table. - Detect rows by horizontal separators or aligned content. 
-7. **Whitespace**: Use whitespace effectively to improve readability. 
+ 
 
 **Important**: 
 - Extract ALL text accurately, and filter out dublicate content including headers, footers, captions and watermarks etc. 
